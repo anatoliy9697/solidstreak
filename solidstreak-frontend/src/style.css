@@ -1,0 +1,66 @@
+:root {
+  font-family: 'Open Sans', Arial, Helvetica, sans-serif;
+  color: #323132;
+  background-color: #E3DDD3;
+  font-size: 16px;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+h2 {
+  margin-top: 16px;
+  margin-bottom: 16px;
+}
+
+.popup-action-btn {
+  border-radius: 8px;
+  color: #FFF;
+  background-color: #3E5063;
+  cursor: pointer;
+  padding-top: 16px;
+  padding-bottom: 16px;
+  border: none;
+  margin-top: 16px;
+  width: 100%;
+  font-size: 16px;
+}
+.popup-action-btn:active {
+  background-color: #6DC7B8;
+}
+
+.popup-close-btn {
+  background: none;
+  border: none;
+  font-size: 1.5em;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 0.5em;
+  color: #888;
+}
+.popup-close-btn:hover {
+  color: #6DC7B8;
+}
+
+input,
+textarea {
+  font-family: 'Open Sans', Arial, Helvetica, sans-serif;
+  border-radius: 8px;
+  border: 1px solid #323132;
+  font-size: 16px;
+  padding: 8px;
+}
+
+textarea {
+  height: 64.5px;
+  resize: none;
+}
+
+#app {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 1rem;
+}

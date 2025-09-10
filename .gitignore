@@ -1,0 +1,50 @@
+# --- Go build artifacts ---
+solidstreak-backend/bin/
+solidstreak-backend/build/
+*.exe
+*.test
+*.out
+
+# Dependency directories
+solidstreak-backend/vendor/
+
+# Go modules
+solidstreak-backend/go.sum
+
+# --- Backend static ---
+solidstreak-backend/static/
+
+# --- Node.js frontend ---
+solidstreak-frontend/node_modules/
+solidstreak-frontend/dist/
+solidstreak-frontend/dist-ssr/
+
+# --- Logs ---
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# --- Editor directories and files ---
+.vscode/
+!.vscode/extensions.json
+.idea/
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.bak
+*.tmp
+
+# --- Environment files ---
+.env
+.env.*
+*.local
+
+# --- Project notes ---
+notes
