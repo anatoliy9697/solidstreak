@@ -9,7 +9,7 @@ solidstreak-backend/build/
 solidstreak-backend/vendor/
 
 # Go modules
-solidstreak-backend/go.sum
+go.sum
 
 # --- Backend static ---
 solidstreak-backend/static/
