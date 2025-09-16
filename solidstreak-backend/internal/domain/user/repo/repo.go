@@ -3,7 +3,7 @@ package repo
 import (
 	"context"
 
-	usrPkg "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/user"
+	usrPkg "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/user"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 

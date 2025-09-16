@@ -5,7 +5,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	tcPkg "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/tgchat"
+	tcPkg "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/tgchat"
 )
 
 type pgRepo struct {
