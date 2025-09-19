@@ -49,7 +49,7 @@ func (r pgRepo) Create(u *usrPkg.User) error {
 	return err
 }
 
-func (r pgRepo) UpdateByTgId(u *usrPkg.User) error {
+func (r pgRepo) Update(u *usrPkg.User) error {
 	sql := `
 		UPDATE users SET
 			tg_username = $1,
@@ -74,7 +74,7 @@ func (r pgRepo) UpdateByTgId(u *usrPkg.User) error {
 	return err
 }
 
-func (r pgRepo) ByID(id int64) (*usrPkg.User, error) {
+func (r pgRepo) GetByID(id int64) (*usrPkg.User, error) {
 	u := &usrPkg.User{}
 
 	sql := `

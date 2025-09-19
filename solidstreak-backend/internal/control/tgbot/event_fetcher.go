@@ -2,31 +2,33 @@ package tgbot
 
 import (
 	"context"
-	"log/slog"
 
-	tc "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/tgchat/repo"
-	usr "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/user/repo"
+	"github.com/google/uuid"
+
+	"github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/common"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 type EventFetcher struct {
 	TgBotUpdsOffset  int
 	TgBotUpdsTimeout int
-	TgBotAPI         *tgbotapi.BotAPI
-	Logger           *slog.Logger
-	UsrRepo          usr.Repo
-	TcRepo           tc.Repo
+	MaxEventHandlers int
+	Res              common.Resources
 }
 
-func (ef EventFetcher) Run(ctx context.Context, done chan struct{}) {
-	defer func() { done <- struct{}{} }()
+func (ef EventFetcher) Run(ctx context.Context, doneCh chan struct{}) {
+	defer func() { doneCh <- struct{}{} }()
 
-	ef.Logger.Info("event fetcher started")
+	ef.Res.Logger.Info("event fetcher started")
 
 	updConfig := tgbotapi.NewUpdate(ef.TgBotUpdsOffset)
 	updConfig.Timeout = ef.TgBotUpdsTimeout
 
-	upds := ef.TgBotAPI.GetUpdatesChan(updConfig)
+	upds := ef.Res.TgBotAPI.GetUpdatesChan(updConfig)
+
+	handlers := make(map[string]struct{}, ef.MaxEventHandlers)
+	handlerDoneCh := make(chan string, ef.MaxEventHandlers)
+	handlerCode := ""
 
 loop:
 	for {
@@ -36,19 +38,37 @@ loop:
 		case <-ctx.Done():
 			break loop
 
+		// Event handler finished
+		case handlerCode = <-handlerDoneCh:
+			delete(handlers, handlerCode)
+			ef.Res.Logger.Debug("event handler finished", "handlerCode", handlerCode)
+
 		// New update received
 		case upd := <-upds:
-			if upd.Message == nil {
+			// Ignore non-message and non-callback updates
+			if upd.Message == nil && upd.CallbackQuery == nil {
 				continue
 			}
-			ef.Logger.Info("new update received",
-				slog.String("username", upd.Message.From.UserName),
-				slog.Int64("chat_id", upd.Message.Chat.ID),
-				slog.String("message_text", upd.Message.Text),
-			)
-
+			ef.Res.Logger.Info("new update received", "update", upd)
+			if len(handlers) >= ef.MaxEventHandlers {
+				ef.Res.Logger.Warn("max event handlers limit reached, waiting for a handler to finish")
+				handlerCode = <-handlerDoneCh
+				delete(handlers, handlerCode)
+			}
+			handlerCode = uuid.NewString()[:8]
+			handlers[handlerCode] = struct{}{}
+			ef.Res.Logger.Debug("running new event handler", "handlerCode", handlerCode)
+			go EventHandler{
+				Code: handlerCode,
+				Res:  ef.Res,
+			}.Run(handlerDoneCh, &upd)
 		}
 	}
 
-	ef.Logger.Info("event fetcher stopped")
+	for len(handlers) > 0 {
+		handlerCode = <-handlerDoneCh
+		delete(handlers, handlerCode)
+	}
+
+	ef.Res.Logger.Info("event fetcher stopped")
 }

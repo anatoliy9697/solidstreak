@@ -17,14 +17,14 @@ func initPGRepo(c context.Context, p *pgxpool.Pool) *pgRepo {
 	return &pgRepo{c, p}
 }
 
-func (r pgRepo) IsExistsByUserID(userID int64) (bool, error) {
+func (r pgRepo) IsExistsByTgID(tgID int64) (bool, error) {
 	exists := false
 
-	sql := `SELECT EXISTS(SELECT 1 FROM tg_chats WHERE user_id = $1)`
+	sql := `SELECT EXISTS(SELECT 1 FROM tg_chats WHERE tg_id = $1)`
 	err := r.p.QueryRow(
 		r.c,
 		sql,
-		userID,
+		tgID,
 	).Scan(&exists)
 	if err != nil {
 		return false, err
@@ -46,40 +46,20 @@ func (r pgRepo) Create(tc *tcPkg.Chat) error {
 	return err
 }
 
-func (r pgRepo) UpdateByUserID(c *tcPkg.Chat) error {
+func (r pgRepo) Update(c *tcPkg.Chat) error {
 	sql := `
 		UPDATE tg_chats SET
-			tg_id = $1,
+			user_id = $1,
 			created_at = $2
-		WHERE user_id = $3
+		WHERE tg_id = $3
 	`
 	_, err := r.p.Exec(
 		r.c,
 		sql,
-		c.TgID,
-		c.CreatedAt,
 		c.UserID,
+		c.CreatedAt,
+		c.TgID,
 	)
 
 	return err
-}
-
-func (r pgRepo) ByUserID(userID int64) (*tcPkg.Chat, error) {
-	var tc tcPkg.Chat
-
-	sql := `SELECT tg_id, user_id, created_at FROM tg_chats WHERE user_id = $1`
-	err := r.p.QueryRow(
-		r.c,
-		sql,
-		userID,
-	).Scan(
-		&tc.TgID,
-		&tc.UserID,
-		&tc.CreatedAt,
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	return &tc, nil
 }

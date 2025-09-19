@@ -14,6 +14,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/spf13/viper"
 
+	"github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/common"
 	"github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/control/tgbot"
 	tcRepo "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/tgchat/repo"
 	usrRepo "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/user/repo"
@@ -35,7 +36,7 @@ func main() {
 		}
 	}()
 
-	logger.Info("solid Streak initialization...")
+	logger.Info("solid streak initialization...")
 
 	err = godotenv.Load("./pkg/config/.env")
 	if err != nil {
@@ -63,24 +64,27 @@ func main() {
 	}
 	// tgBotAPI.Debug = true
 
-	goroutinesDoneCh := make(chan struct{}, 1)
+	goroutineDoneCh := make(chan struct{}, 1)
 
 	go tgbot.EventFetcher{
 		TgBotUpdsOffset:  viper.GetInt("tg_bot_upds_offset"),
 		TgBotUpdsTimeout: viper.GetInt("tg_bot_upds_timeout"),
-		TgBotAPI:         tgBotAPI,
-		Logger:           logger,
-		UsrRepo:          usrRepo.Init(mainCtx, pgPool),
-		TcRepo:           tcRepo.Init(mainCtx, pgPool),
-	}.Run(mainCtx, goroutinesDoneCh)
+		MaxEventHandlers: viper.GetInt("max_event_handlers"),
+		Res: common.Resources{
+			Logger:   logger,
+			TgBotAPI: tgBotAPI,
+			UsrRepo:  usrRepo.Init(mainCtx, pgPool),
+			TCRepo:   tcRepo.Init(mainCtx, pgPool),
+		},
+	}.Run(mainCtx, goroutineDoneCh)
 
-	logger.Info("solid Streak started")
+	logger.Info("solid streak started")
 
 	// Keeping alive
 	<-mainCtx.Done()
 
 	// Waiting for goroutines to finish
-	<-goroutinesDoneCh
+	<-goroutineDoneCh
 
-	logger.Info("solid Streak stopped")
+	logger.Info("solid streak stopped")
 }

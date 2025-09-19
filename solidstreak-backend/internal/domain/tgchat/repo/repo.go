@@ -8,10 +8,9 @@ import (
 )
 
 type Repo interface {
-	IsExistsByUserID(int64) (bool, error)
+	IsExistsByTgID(int64) (bool, error)
 	Create(*tcPkg.Chat) error
-	UpdateByUserID(*tcPkg.Chat) error
-	ByUserID(int64) (*tcPkg.Chat, error)
+	Update(*tcPkg.Chat) error
 }
 
 func Init(c context.Context, p *pgxpool.Pool) Repo {

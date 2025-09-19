@@ -10,8 +10,8 @@ import (
 type Repo interface {
 	IsExists(*usrPkg.User) (bool, error)
 	Create(*usrPkg.User) error
-	UpdateByTgId(*usrPkg.User) error
-	ByID(int64) (*usrPkg.User, error)
+	Update(*usrPkg.User) error
+	GetByID(int64) (*usrPkg.User, error)
 }
 
 func Init(c context.Context, p *pgxpool.Pool) Repo {
