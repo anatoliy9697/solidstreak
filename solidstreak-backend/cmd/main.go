@@ -16,6 +16,7 @@ import (
 
 	"github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/common"
 	"github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/control/tgbot"
+	"github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/control/web"
 	tcRepo "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/tgchat/repo"
 	usrRepo "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/user/repo"
 )
@@ -64,19 +65,26 @@ func main() {
 	}
 	// tgBotAPI.Debug = true
 
-	goroutineDoneCh := make(chan struct{}, 1)
+	resources := common.Resources{
+		Logger:   logger,
+		TgBotAPI: tgBotAPI,
+		UsrRepo:  usrRepo.Init(mainCtx, pgPool),
+		TCRepo:   tcRepo.Init(mainCtx, pgPool),
+	}
 
+	goroutineDoneCh := make(chan struct{}, 2)
+
+	// Running event fetcher
 	go tgbot.EventFetcher{
 		TgBotUpdsOffset:  viper.GetInt("tg_bot_upds_offset"),
 		TgBotUpdsTimeout: viper.GetInt("tg_bot_upds_timeout"),
 		MaxEventHandlers: viper.GetInt("max_event_handlers"),
-		Res: common.Resources{
-			Logger:   logger,
-			TgBotAPI: tgBotAPI,
-			UsrRepo:  usrRepo.Init(mainCtx, pgPool),
-			TCRepo:   tcRepo.Init(mainCtx, pgPool),
-		},
+		Res:              resources,
 	}.Run(mainCtx, goroutineDoneCh)
+
+	// Running web server
+	webServer := web.Server{Addr: ":8080", Res: resources}
+	go webServer.Run(mainCtx, goroutineDoneCh)
 
 	logger.Info("solid streak started")
 
@@ -84,6 +92,7 @@ func main() {
 	<-mainCtx.Done()
 
 	// Waiting for goroutines to finish
+	<-goroutineDoneCh
 	<-goroutineDoneCh
 
 	logger.Info("solid streak stopped")

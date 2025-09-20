@@ -36,6 +36,7 @@ loop:
 
 		// Event fetcher stopping
 		case <-ctx.Done():
+			ef.Res.Logger.Info("event fetcher shutting down initiated")
 			break loop
 
 		// Event handler finished
@@ -65,6 +66,9 @@ loop:
 		}
 	}
 
+	if len(handlers) > 0 {
+		ef.Res.Logger.Info("waiting for event handlers to finish")
+	}
 	for len(handlers) > 0 {
 		handlerCode = <-handlerDoneCh
 		delete(handlers, handlerCode)
