@@ -17,6 +17,7 @@ import (
 	"github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/common"
 	"github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/control/tgbot"
 	"github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/control/web"
+	hRepo "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/habit/repo"
 	tcRepo "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/tgchat/repo"
 	usrRepo "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/user/repo"
 )
@@ -66,10 +67,11 @@ func main() {
 	// tgBotAPI.Debug = true
 
 	resources := common.Resources{
-		Logger:   logger,
-		TgBotAPI: tgBotAPI,
-		UsrRepo:  usrRepo.Init(mainCtx, pgPool),
-		TCRepo:   tcRepo.Init(mainCtx, pgPool),
+		Logger:    logger,
+		TgBotAPI:  tgBotAPI,
+		UsrRepo:   usrRepo.Init(mainCtx, pgPool),
+		TCRepo:    tcRepo.Init(mainCtx, pgPool),
+		HabitRepo: hRepo.Init(mainCtx, pgPool),
 	}
 
 	goroutineDoneCh := make(chan struct{}, 2)
