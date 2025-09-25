@@ -1,4 +1,4 @@
-package web
+package http
 
 import (
 	"context"
@@ -7,12 +7,15 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/common"
+	"github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/common/resources"
+	"github.com/go-chi/chi/v5"
 )
+
+type ctxKeyRequestID struct{}
 
 type Server struct {
 	Addr string
-	Res  common.Resources
+	Res  resources.Resources
 	s    *http.Server
 }
 
@@ -21,8 +24,14 @@ func (s Server) Run(mainCtx context.Context, doneCh chan struct{}) {
 
 	s.Res.Logger.Info("web server initialization...")
 
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	router := chi.NewRouter()
+
+	router.Use(s.Recovery())
+	router.Use(s.Logger())
+
+	router.Get("/api/v1/habits/{id}", s.getHabit)
+
+	router.HandleFunc("/*", func(w http.ResponseWriter, r *http.Request) {
 		staticPath := filepath.Join("static", r.URL.Path)
 		if info, err := os.Stat(staticPath); err == nil && !info.IsDir() {
 			http.ServeFile(w, r, staticPath)
@@ -31,9 +40,13 @@ func (s Server) Run(mainCtx context.Context, doneCh chan struct{}) {
 		http.ServeFile(w, r, "./static/index.html")
 	})
 
+	router.NotFound(func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "./static/index.html")
+	})
+
 	s.s = &http.Server{
 		Addr:    s.Addr,
-		Handler: mux,
+		Handler: router,
 	}
 
 	s.Res.Logger.Info("web server started on " + s.Addr)

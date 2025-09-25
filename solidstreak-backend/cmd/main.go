@@ -14,9 +14,9 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/spf13/viper"
 
-	"github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/common"
+	"github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/common/resources"
+	"github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/control/http"
 	"github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/control/tgbot"
-	"github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/control/web"
 	hRepo "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/habit/repo"
 	tcRepo "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/tgchat/repo"
 	usrRepo "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/user/repo"
@@ -31,6 +31,7 @@ func main() {
 	}
 
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.Level(viper.GetInt("log_level"))}))
+	// logger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.Level(viper.GetInt("log_level"))}))
 
 	defer func() {
 		if err != nil {
@@ -66,7 +67,7 @@ func main() {
 	}
 	// tgBotAPI.Debug = true
 
-	resources := common.Resources{
+	resources := resources.Resources{
 		Logger:    logger,
 		TgBotAPI:  tgBotAPI,
 		UsrRepo:   usrRepo.Init(mainCtx, pgPool),
@@ -85,7 +86,7 @@ func main() {
 	}.Run(mainCtx, goroutineDoneCh)
 
 	// Running web server
-	webServer := web.Server{Addr: ":8080", Res: resources}
+	webServer := http.Server{Addr: ":8080", Res: resources}
 	go webServer.Run(mainCtx, goroutineDoneCh)
 
 	logger.Info("solid streak started")

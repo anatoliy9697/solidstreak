@@ -2,9 +2,13 @@ package repo
 
 import (
 	"context"
+	"strconv"
 
-	hPkg "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/habit"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+
+	apperrors "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/common/errors"
+	hPkg "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/habit"
 )
 
 type pgRepo struct {
@@ -83,6 +87,9 @@ func (r pgRepo) GetByID(id int64) (*hPkg.Habit, error) {
 		&h.UpdatedAt,
 	)
 	if err != nil {
+		if err == pgx.ErrNoRows {
+			return nil, apperrors.ErrNotFound("there is no habit with id " + strconv.FormatInt(id, 10))
+		}
 		return nil, err
 	}
 

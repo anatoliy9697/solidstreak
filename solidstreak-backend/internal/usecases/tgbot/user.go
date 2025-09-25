@@ -3,7 +3,7 @@ package tgbot
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 
-	"github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/common"
+	"github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/common/resources"
 	usrPkg "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/user"
 )
 
@@ -18,7 +18,7 @@ func mapUserToInner(u *tgbotapi.User) *usrPkg.User {
 	)
 }
 
-func MapUserToInnerAndSave(r common.Resources, outerUsr *tgbotapi.User) (u *usrPkg.User, err error) {
+func MapUserToInnerAndSave(r resources.Resources, outerUsr *tgbotapi.User) (u *usrPkg.User, err error) {
 	u = mapUserToInner(outerUsr)
 
 	userExists := false

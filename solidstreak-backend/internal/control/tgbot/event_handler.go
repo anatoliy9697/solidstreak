@@ -3,7 +3,7 @@ package tgbot
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 
-	"github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/common"
+	"github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/common/resources"
 	tcPkg "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/tgchat"
 	usrPkg "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/user"
 	usecases "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/usecases/tgbot"
@@ -11,7 +11,7 @@ import (
 
 type EventHandler struct {
 	Code string
-	Res  common.Resources
+	Res  resources.Resources
 }
 
 func (eh EventHandler) Run(doneCh chan string, upd *tgbotapi.Update) {
