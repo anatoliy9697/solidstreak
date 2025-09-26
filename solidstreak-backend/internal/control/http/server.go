@@ -30,6 +30,7 @@ func (s Server) Run(mainCtx context.Context, doneCh chan struct{}) {
 	router.Use(s.Logger())
 
 	router.Get("/api/v1/habits/{id}", s.getHabit)
+	router.Post("/api/v1/habits", s.postHabit)
 
 	router.HandleFunc("/*", func(w http.ResponseWriter, r *http.Request) {
 		staticPath := filepath.Join("static", r.URL.Path)
