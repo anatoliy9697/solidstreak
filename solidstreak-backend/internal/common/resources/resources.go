@@ -11,9 +11,10 @@ import (
 )
 
 type Resources struct {
-	Logger    *slog.Logger
-	TgBotAPI  *tgbotapi.BotAPI
-	UsrRepo   usr.Repo
-	TCRepo    tc.Repo
-	HabitRepo h.Repo
+	TgBotAPIToken string
+	Logger        *slog.Logger
+	TgBotAPI      *tgbotapi.BotAPI
+	UsrRepo       usr.Repo
+	TCRepo        tc.Repo
+	HabitRepo     h.Repo
 }

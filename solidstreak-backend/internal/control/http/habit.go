@@ -4,16 +4,17 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 
 	apperrors "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/common/errors"
-	habitPkg "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/habit"
+	hPkg "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/habit"
+	usrPkg "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/user"
 )
 
 type GetHabitResponse struct {
-	Data   *habitPkg.Habit   `json:"data,omitempty"`
-	Errors []apperrors.Error `json:"errors,omitempty"`
+	Data *hPkg.Habit `json:"data"`
 }
 
 type Habit struct {
@@ -21,23 +22,19 @@ type Habit struct {
 	Description string `json:"description,omitempty"`
 }
 
-type PostHabitRequest struct {
+type PostPutHabitRequest struct {
 	Data Habit    `json:"data"`
 	Meta Metadata `json:"meta"`
 }
 
-type PostHabitResponse struct {
-	Data   *habitPkg.Habit   `json:"data,omitempty"`
-	Errors []apperrors.Error `json:"errors,omitempty"`
+type PostPutHabitResponse struct {
+	Data *hPkg.Habit `json:"data"`
 }
 
-func (s Server) getHabit(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
+// TODO: Попробовать избавиться от дублирования кода
 
-	var (
-		err      error
-		response GetHabitResponse
-	)
+func (s Server) getHabit(w http.ResponseWriter, r *http.Request) {
+	var err error
 
 	logger := s.Res.Logger
 
@@ -49,16 +46,7 @@ func (s Server) getHabit(w http.ResponseWriter, r *http.Request) {
 
 	defer func() {
 		if err != nil {
-			apperror, ok := err.(apperrors.Error)
-			if !ok {
-				apperror = apperrors.ErrInternal(err.Error())
-			}
-
-			logger.Error("error while getting habit", "error", err)
-
-			w.WriteHeader(apperror.HTTPCode)
-			response = GetHabitResponse{Errors: []apperrors.Error{apperror}}
-			json.NewEncoder(w).Encode(response)
+			processError(w, logger, err)
 		}
 	}()
 
@@ -68,28 +56,36 @@ func (s Server) getHabit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, err := strconv.ParseInt(idStr, 10, 64)
+	var id int64
+	id, err = strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
 		err = apperrors.ErrBadRequest("invalid habit id")
 		return
 	}
 
-	habit, err := s.Res.HabitRepo.GetByID(id)
-	if err != nil {
+	userTgID, ok := r.Context().Value(ctxKeyUserTgID{}).(int64)
+	if !ok {
+		err = apperrors.ErrUnauthorized("couldn't identify user")
 		return
 	}
 
-	response = GetHabitResponse{Data: habit}
+	var user *usrPkg.User
+	if user, err = s.Res.UsrRepo.GetByTgID(userTgID); err != nil {
+		return
+	}
+
+	var habit *hPkg.Habit
+	if habit, err = s.Res.HabitRepo.GetByIDAndOwnerID(id, user.ID); err != nil {
+		return
+	}
+
+	response := GetHabitResponse{Data: habit}
+
 	json.NewEncoder(w).Encode(response)
 }
 
 func (s Server) postHabit(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-
-	var (
-		err      error
-		response PostHabitResponse
-	)
+	var err error
 
 	logger := s.Res.Logger
 
@@ -101,20 +97,11 @@ func (s Server) postHabit(w http.ResponseWriter, r *http.Request) {
 
 	defer func() {
 		if err != nil {
-			apperror, ok := err.(apperrors.Error)
-			if !ok {
-				apperror = apperrors.ErrInternal(err.Error())
-			}
-
-			logger.Error("error while getting habit", "error", err)
-
-			w.WriteHeader(apperror.HTTPCode)
-			response = PostHabitResponse{Errors: []apperrors.Error{apperror}}
-			json.NewEncoder(w).Encode(response)
+			processError(w, logger, err)
 		}
 	}()
 
-	var req PostHabitRequest
+	var req PostPutHabitRequest
 
 	decoder := json.NewDecoder(r.Body)
 	if err = decoder.Decode(&req); err != nil {
@@ -130,12 +117,109 @@ func (s Server) postHabit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	habit := habitPkg.NewHabit(req.Data.Title, req.Data.Description, req.Meta.UserID)
+	userTgID, ok := r.Context().Value(ctxKeyUserTgID{}).(int64)
+	if !ok {
+		err = apperrors.ErrUnauthorized("couldn't identify user")
+		return
+	}
+
+	var user *usrPkg.User
+	if user, err = s.Res.UsrRepo.GetByTgID(userTgID); err != nil {
+		return
+	}
+
+	if user.ID != req.Meta.UserID {
+		err = apperrors.ErrForbidden("userId in meta does not match the authenticated user")
+		return
+	}
+
+	habit := hPkg.NewHabit(req.Data.Title, req.Data.Description, req.Meta.UserID)
 
 	if err = s.Res.HabitRepo.Create(habit); err != nil {
 		return
 	}
 
-	response = PostHabitResponse{Data: habit}
+	response := PostPutHabitResponse{Data: habit}
+
+	json.NewEncoder(w).Encode(response)
+}
+
+func (s Server) putHabit(w http.ResponseWriter, r *http.Request) {
+	var err error
+
+	logger := s.Res.Logger
+
+	// Adding request ID to request context
+	reqID, _ := r.Context().Value(ctxKeyRequestID{}).(string)
+	if reqID != "" {
+		logger = logger.With("requestId", reqID)
+	}
+
+	defer func() {
+		if err != nil {
+			processError(w, logger, err)
+		}
+	}()
+
+	idStr := chi.URLParam(r, "id")
+	if idStr == "" {
+		err = apperrors.ErrBadRequest("missing habit id")
+		return
+	}
+
+	var id int64
+	id, err = strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		err = apperrors.ErrBadRequest("invalid habit id")
+		return
+	}
+
+	var req PostPutHabitRequest
+
+	decoder := json.NewDecoder(r.Body)
+	if err = decoder.Decode(&req); err != nil {
+		err = apperrors.ErrBadRequest("invalid request payload")
+		return
+	}
+	if req.Data.Title == "" {
+		err = apperrors.ErrBadRequest("habit title is required")
+		return
+	}
+	if req.Meta.UserID == 0 {
+		err = apperrors.ErrBadRequest("userId in meta is required")
+		return
+	}
+
+	userTgID, ok := r.Context().Value(ctxKeyUserTgID{}).(int64)
+	if !ok {
+		err = apperrors.ErrUnauthorized("couldn't identify user")
+		return
+	}
+
+	var user *usrPkg.User
+	if user, err = s.Res.UsrRepo.GetByTgID(userTgID); err != nil {
+		return
+	}
+
+	if user.ID != req.Meta.UserID {
+		err = apperrors.ErrForbidden("userId in meta does not match the authenticated user")
+		return
+	}
+
+	habit, err := s.Res.HabitRepo.GetByIDAndOwnerID(id, req.Meta.UserID)
+	if err != nil {
+		return
+	}
+
+	habit.Title = req.Data.Title
+	habit.Description = req.Data.Description
+	habit.UpdatedAt = time.Now()
+
+	if err = s.Res.HabitRepo.Update(habit); err != nil {
+		return
+	}
+
+	response := PostPutHabitResponse{Data: habit}
+
 	json.NewEncoder(w).Encode(response)
 }

@@ -74,7 +74,7 @@ func (r pgRepo) Update(u *usrPkg.User) error {
 	return err
 }
 
-func (r pgRepo) GetByID(id int64) (*usrPkg.User, error) {
+func (r pgRepo) GetByID(ID int64) (*usrPkg.User, error) {
 	u := &usrPkg.User{}
 
 	sql := `
@@ -84,7 +84,35 @@ func (r pgRepo) GetByID(id int64) (*usrPkg.User, error) {
 	err := r.pool.QueryRow(
 		r.ctx,
 		sql,
-		id,
+		ID,
+	).Scan(
+		&u.ID,
+		&u.TgID,
+		&u.TgUsername,
+		&u.TgFirstName,
+		&u.TgLastName,
+		&u.TgLangCode,
+		&u.TgIsBot,
+		&u.CreatedAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return u, nil
+}
+
+func (r pgRepo) GetByTgID(tgID int64) (*usrPkg.User, error) {
+	u := &usrPkg.User{}
+
+	sql := `
+		SELECT id, tg_id, tg_username, tg_first_name, tg_last_name, tg_lang_code, tg_is_bot, created_at
+		FROM users WHERE tg_id = $1
+	`
+	err := r.pool.QueryRow(
+		r.ctx,
+		sql,
+		tgID,
 	).Scan(
 		&u.ID,
 		&u.TgID,

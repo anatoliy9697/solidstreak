@@ -12,6 +12,7 @@ type Repo interface {
 	Update(h *hPkg.Habit) error
 	GetByID(id int64) (*hPkg.Habit, error)
 	GetByOwnerID(ownerID int64, onlyActive bool) ([]*hPkg.Habit, error)
+	GetByIDAndOwnerID(id, ownerID int64) (*hPkg.Habit, error)
 }
 
 func Init(c context.Context, p *pgxpool.Pool) Repo {

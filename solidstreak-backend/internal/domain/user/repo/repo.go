@@ -12,6 +12,7 @@ type Repo interface {
 	Create(*usrPkg.User) error
 	Update(*usrPkg.User) error
 	GetByID(int64) (*usrPkg.User, error)
+	GetByTgID(int64) (*usrPkg.User, error)
 }
 
 func Init(c context.Context, p *pgxpool.Pool) Repo {

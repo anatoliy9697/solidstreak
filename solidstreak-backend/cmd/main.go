@@ -68,11 +68,12 @@ func main() {
 	// tgBotAPI.Debug = true
 
 	resources := resources.Resources{
-		Logger:    logger,
-		TgBotAPI:  tgBotAPI,
-		UsrRepo:   usrRepo.Init(mainCtx, pgPool),
-		TCRepo:    tcRepo.Init(mainCtx, pgPool),
-		HabitRepo: hRepo.Init(mainCtx, pgPool),
+		TgBotAPIToken: os.Getenv("TG_BOT_API_TOKEN"),
+		Logger:        logger,
+		TgBotAPI:      tgBotAPI,
+		UsrRepo:       usrRepo.Init(mainCtx, pgPool),
+		TCRepo:        tcRepo.Init(mainCtx, pgPool),
+		HabitRepo:     hRepo.Init(mainCtx, pgPool),
 	}
 
 	goroutineDoneCh := make(chan struct{}, 2)

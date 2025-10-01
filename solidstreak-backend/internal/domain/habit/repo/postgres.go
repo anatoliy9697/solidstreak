@@ -51,8 +51,8 @@ func (r pgRepo) Update(h *hPkg.Habit) error {
 			active = $1,
 			title = $2,
 			description = $3,
-			updated_at = $5
-		WHERE id = $6
+			updated_at = $4
+		WHERE id = $5
 	`
 	_, err := r.p.Exec(
 		r.c,
@@ -88,7 +88,7 @@ func (r pgRepo) GetByID(id int64) (*hPkg.Habit, error) {
 	)
 	if err != nil {
 		if err == pgx.ErrNoRows {
-			return nil, apperrors.ErrNotFound("there is no habit with id " + strconv.FormatInt(id, 10))
+			return nil, apperrors.ErrNotFound("couldn't find habit with id " + strconv.FormatInt(id, 10))
 		}
 		return nil, err
 	}
@@ -138,4 +138,45 @@ func (r pgRepo) GetByOwnerID(ownerID int64, onlyActive bool) ([]*hPkg.Habit, err
 	}
 
 	return habits, nil
+}
+
+func (r pgRepo) GetByIDAndOwnerID(id, ownerID int64) (*hPkg.Habit, error) {
+	sql := `
+		WITH habit AS (
+			SELECT *
+			FROM habits h
+			WHERE h.id = $1
+		)
+		SELECT h.id, h.active, h.title, h.description, h.creator_id, h.created_at, h.updated_at
+		FROM habit h
+		JOIN users_habits uh ON 
+			h.id = uh.habit_id 
+			AND uh.active = TRUE
+		WHERE 
+			uh.user_id = $2
+	`
+
+	h := &hPkg.Habit{}
+	err := r.p.QueryRow(
+		r.c,
+		sql,
+		id,
+		ownerID,
+	).Scan(
+		&h.ID,
+		&h.Active,
+		&h.Title,
+		&h.Description,
+		&h.CreatorID,
+		&h.CreatedAt,
+		&h.UpdatedAt,
+	)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			return nil, apperrors.ErrNotFound("couldn't find habit with id " + strconv.FormatInt(id, 10) + " for specified user")
+		}
+		return nil, err
+	}
+
+	return h, nil
 }

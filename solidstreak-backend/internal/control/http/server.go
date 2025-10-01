@@ -26,11 +26,17 @@ func (s Server) Run(mainCtx context.Context, doneCh chan struct{}) {
 
 	router := chi.NewRouter()
 
-	router.Use(s.Recovery())
-	router.Use(s.Logger())
+	api := chi.NewRouter()
 
-	router.Get("/api/v1/habits/{id}", s.getHabit)
-	router.Post("/api/v1/habits", s.postHabit)
+	api.Use(s.Recovery())
+	api.Use(s.Logger())
+	api.Use(s.ValidateTelegramInitData())
+
+	api.Post("/habits", s.postHabit)
+	api.Get("/habits/{id}", s.getHabit)
+	api.Put("/habits/{id}", s.putHabit)
+
+	router.Mount("/api/v1", api)
 
 	router.HandleFunc("/*", func(w http.ResponseWriter, r *http.Request) {
 		staticPath := filepath.Join("static", r.URL.Path)

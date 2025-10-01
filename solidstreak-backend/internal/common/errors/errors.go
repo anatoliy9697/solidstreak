@@ -33,3 +33,11 @@ func ErrInternal(detail string) Error {
 func ErrBadRequest(detail string) Error {
 	return New(400, "bad request", detail)
 }
+
+func ErrUnauthorized(detail string) Error {
+	return New(401, "unauthorized", detail)
+}
+
+func ErrForbidden(detail string) Error {
+	return New(403, "forbidden", detail)
+}
