@@ -31,7 +31,12 @@ type PostPutHabitResponse struct {
 	Data *hPkg.Habit `json:"data"`
 }
 
+type GetHabitsResponse struct {
+	Data []*hPkg.Habit `json:"data"`
+}
+
 // TODO: Попробовать избавиться от дублирования кода
+// TODO: Шифровать БДшные идентификаторы в ответах
 
 func (s Server) getHabit(w http.ResponseWriter, r *http.Request) {
 	var err error
@@ -220,6 +225,44 @@ func (s Server) putHabit(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response := PostPutHabitResponse{Data: habit}
+
+	json.NewEncoder(w).Encode(response)
+}
+
+func (s Server) getHabits(w http.ResponseWriter, r *http.Request) {
+	var err error
+
+	logger := s.Res.Logger
+
+	// Adding request ID to request context
+	reqID, _ := r.Context().Value(ctxKeyRequestID{}).(string)
+	if reqID != "" {
+		logger = logger.With("requestId", reqID)
+	}
+
+	defer func() {
+		if err != nil {
+			processError(w, logger, err)
+		}
+	}()
+
+	userTgID, ok := r.Context().Value(ctxKeyUserTgID{}).(int64)
+	if !ok {
+		err = apperrors.ErrUnauthorized("couldn't identify user")
+		return
+	}
+
+	var user *usrPkg.User
+	if user, err = s.Res.UsrRepo.GetByTgID(userTgID); err != nil {
+		return
+	}
+
+	var habits []*hPkg.Habit
+	if habits, err = s.Res.HabitRepo.GetByOwnerID(user.ID, true); err != nil {
+		return
+	}
+
+	response := GetHabitsResponse{Data: habits}
 
 	json.NewEncoder(w).Encode(response)
 }

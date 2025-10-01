@@ -35,6 +35,7 @@ func (s Server) Run(mainCtx context.Context, doneCh chan struct{}) {
 	api.Post("/habits", s.postHabit)
 	api.Get("/habits/{id}", s.getHabit)
 	api.Put("/habits/{id}", s.putHabit)
+	api.Get("/habits", s.getHabits)
 
 	router.Mount("/api/v1", api)
 
