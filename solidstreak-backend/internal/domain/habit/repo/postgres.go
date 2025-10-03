@@ -7,8 +7,9 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	apperrors "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/common/errors"
 	hPkg "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/habit"
+	"github.com/anatoliy9697/solidstreak/solidstreak-backend/pkg/date"
+	apperrors "github.com/anatoliy9697/solidstreak/solidstreak-backend/pkg/errors"
 )
 
 type pgRepo struct {
@@ -67,36 +68,7 @@ func (r pgRepo) Update(h *hPkg.Habit) error {
 	return err
 }
 
-func (r pgRepo) GetByID(id int64) (*hPkg.Habit, error) {
-	sql := `
-		SELECT id, active, title, description, creator_id, created_at, updated_at
-		FROM habits WHERE id = $1
-	`
-	h := &hPkg.Habit{}
-	err := r.p.QueryRow(
-		r.c,
-		sql,
-		id,
-	).Scan(
-		&h.ID,
-		&h.Active,
-		&h.Title,
-		&h.Description,
-		&h.CreatorID,
-		&h.CreatedAt,
-		&h.UpdatedAt,
-	)
-	if err != nil {
-		if err == pgx.ErrNoRows {
-			return nil, apperrors.ErrNotFound("couldn't find habit with id " + strconv.FormatInt(id, 10))
-		}
-		return nil, err
-	}
-
-	return h, nil
-}
-
-func (r pgRepo) GetByOwnerID(ownerID int64, onlyActive bool) ([]*hPkg.Habit, error) {
+func (r pgRepo) GetByOwnerID(ownerID int64, gettingMode string) ([]*hPkg.Habit, error) {
 	sql := `
 		SELECT h.id, h.active, h.title, h.description, h.creator_id, h.created_at, h.updated_at
 		FROM habits h
@@ -106,8 +78,11 @@ func (r pgRepo) GetByOwnerID(ownerID int64, onlyActive bool) ([]*hPkg.Habit, err
 		WHERE 
 			uh.user_id = $1
 	`
-	if onlyActive {
+	switch gettingMode {
+	case Active:
 		sql += " AND h.active = TRUE"
+	case NotActive:
+		sql += " AND h.active = FALSE"
 	}
 
 	rows, err := r.p.Query(r.c, sql, ownerID)
@@ -179,4 +154,71 @@ func (r pgRepo) GetByIDAndOwnerID(id, ownerID int64) (*hPkg.Habit, error) {
 	}
 
 	return h, nil
+}
+
+func (r pgRepo) SetUserHabitCheck(hc *hPkg.HabitCheck) error {
+	sql := `
+		INSERT INTO user_habit_checks (user_id, habit_id, check_date, completed, checked_at)
+		VALUES ($1, $2, $3, $4, $5)
+		ON CONFLICT (habit_id, user_id, check_date) DO UPDATE SET
+			completed = EXCLUDED.completed,
+			checked_at = EXCLUDED.checked_at
+	`
+	_, err := r.p.Exec(
+		r.c,
+		sql,
+		hc.UserID,
+		hc.HabitID,
+		hc.CheckDate,
+		hc.Completed,
+		hc.CheckedAt,
+	)
+
+	return err
+}
+
+func (r pgRepo) GetUserHabitsCompletedChecks(userID int64, habitIDs []int64, from, to date.Date) ([]*hPkg.HabitCheck, error) {
+	sql := `
+		SELECT habit_id, user_id, completed, check_date, checked_at
+		FROM user_habit_checks
+		WHERE user_id = $1
+			AND habit_id = ANY($2)
+			AND check_date >= $3
+			AND check_date <= $4
+			AND completed = TRUE
+		ORDER BY check_date ASC
+	`
+	rows, err := r.p.Query(
+		r.c,
+		sql,
+		userID,
+		habitIDs,
+		from,
+		to,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	checks := []*hPkg.HabitCheck{}
+	for rows.Next() {
+		hc := &hPkg.HabitCheck{}
+		err = rows.Scan(
+			&hc.HabitID,
+			&hc.UserID,
+			&hc.Completed,
+			&hc.CheckDate,
+			&hc.CheckedAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+		checks = append(checks, hc)
+	}
+	if rows.Err() != nil {
+		return nil, rows.Err()
+	}
+
+	return checks, nil
 }

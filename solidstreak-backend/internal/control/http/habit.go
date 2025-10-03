@@ -8,8 +8,10 @@ import (
 
 	"github.com/go-chi/chi/v5"
 
-	apperrors "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/common/errors"
+	apperrors "github.com/anatoliy9697/solidstreak/solidstreak-backend/pkg/errors"
+
 	hPkg "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/habit"
+	hRepo "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/habit/repo"
 	usrPkg "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/user"
 )
 
@@ -35,8 +37,7 @@ type GetHabitsResponse struct {
 	Data []*hPkg.Habit `json:"data"`
 }
 
-// TODO: Попробовать избавиться от дублирования кода
-// TODO: Шифровать БДшные идентификаторы в ответах
+// TODO: попробовать избавиться от дублирования кода
 
 func (s Server) getHabit(w http.ResponseWriter, r *http.Request) {
 	var err error
@@ -258,7 +259,7 @@ func (s Server) getHabits(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var habits []*hPkg.Habit
-	if habits, err = s.Res.HabitRepo.GetByOwnerID(user.ID, true); err != nil {
+	if habits, err = s.Res.HabitRepo.GetByOwnerID(user.ID, hRepo.Any); err != nil { // TODO: получать gettingMode из query параметра
 		return
 	}
 

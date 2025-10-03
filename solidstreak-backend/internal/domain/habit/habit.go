@@ -1,15 +1,28 @@
 package habit
 
-import "time"
+import (
+	"time"
+
+	"github.com/anatoliy9697/solidstreak/solidstreak-backend/pkg/date"
+)
 
 type Habit struct {
-	ID          int64     `json:"id"`
-	Active      bool      `json:"active"`
-	Title       string    `json:"title"`
-	Description string    `json:"description"`
-	CreatorID   int64     `json:"creatorId"`
-	CreatedAt   time.Time `json:"createdAt"`
-	UpdatedAt   time.Time `json:"updatedAt"`
+	ID          int64         `json:"id"`
+	Active      bool          `json:"active"`
+	Title       string        `json:"title"`
+	Description string        `json:"description"`
+	CreatorID   int64         `json:"creatorId"`
+	CreatedAt   time.Time     `json:"createdAt"`
+	UpdatedAt   time.Time     `json:"updatedAt"`
+	Checks      []*HabitCheck `json:"checks,omitempty"`
+}
+
+type HabitCheck struct {
+	HabitID   int64     `json:"-"`
+	UserID    int64     `json:"-"`
+	Completed bool      `json:"completed"`
+	CheckDate date.Date `json:"checkDate"`
+	CheckedAt time.Time `json:"checkedAt"`
 }
 
 func NewHabit(title, description string, creatorID int64) *Habit {

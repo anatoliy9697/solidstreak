@@ -5,7 +5,7 @@ import (
 	"log/slog"
 	"net/http"
 
-	apperrors "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/common/errors"
+	apperrors "github.com/anatoliy9697/solidstreak/solidstreak-backend/pkg/errors"
 )
 
 type ErrorResponse struct {

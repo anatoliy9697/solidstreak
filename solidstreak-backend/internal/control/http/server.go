@@ -11,8 +11,6 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-type ctxKeyRequestID struct{}
-
 type Server struct {
 	Addr string
 	Res  resources.Resources

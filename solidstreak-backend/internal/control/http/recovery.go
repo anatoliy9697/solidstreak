@@ -4,9 +4,11 @@ import (
 	"context"
 	"net/http"
 
-	apperrors "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/common/errors"
+	apperrors "github.com/anatoliy9697/solidstreak/solidstreak-backend/pkg/errors"
 	"github.com/google/uuid"
 )
+
+type ctxKeyRequestID struct{}
 
 func (s Server) Recovery() func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {

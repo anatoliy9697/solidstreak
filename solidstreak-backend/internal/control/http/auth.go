@@ -12,7 +12,7 @@ import (
 	"sort"
 	"strings"
 
-	apperrors "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/common/errors"
+	apperrors "github.com/anatoliy9697/solidstreak/solidstreak-backend/pkg/errors"
 )
 
 type ctxKeyUserTgID struct{}
