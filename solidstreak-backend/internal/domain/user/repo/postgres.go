@@ -3,8 +3,12 @@ package repo
 import (
 	"context"
 
-	usrPkg "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/user"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+
+	apperrors "github.com/anatoliy9697/solidstreak/solidstreak-backend/pkg/errors"
+
+	usrPkg "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/user"
 )
 
 type pgRepo struct {
@@ -96,6 +100,9 @@ func (r pgRepo) GetByID(ID int64) (*usrPkg.User, error) {
 		&u.CreatedAt,
 	)
 	if err != nil {
+		if err == pgx.ErrNoRows {
+			return nil, apperrors.ErrNotFound("couldn't find user")
+		}
 		return nil, err
 	}
 
@@ -124,6 +131,9 @@ func (r pgRepo) GetByTgID(tgID int64) (*usrPkg.User, error) {
 		&u.CreatedAt,
 	)
 	if err != nil {
+		if err == pgx.ErrNoRows {
+			return nil, apperrors.ErrNotFound("couldn't find user")
+		}
 		return nil, err
 	}
 

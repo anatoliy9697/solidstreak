@@ -5,9 +5,11 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"time"
 
 	"github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/common/resources"
+	apperrors "github.com/anatoliy9697/solidstreak/solidstreak-backend/pkg/errors"
 	"github.com/go-chi/chi/v5"
 )
 
@@ -34,6 +36,7 @@ func (s Server) Run(mainCtx context.Context, doneCh chan struct{}) {
 	api.Get("/habits/{id}", s.getHabit)
 	api.Put("/habits/{id}", s.putHabit)
 	api.Get("/habits", s.getHabits)
+	api.Post("/users/{userId}/habit/{habitId}/check", s.postUserHabitCheck)
 
 	router.Mount("/api/v1", api)
 
@@ -81,4 +84,38 @@ func (s Server) Run(mainCtx context.Context, doneCh chan struct{}) {
 	}
 
 	s.Res.Logger.Info("web server stopped")
+}
+
+func getUserIDFromURL(r *http.Request) (int64, error) {
+	userIDStr := chi.URLParam(r, "userId")
+	if userIDStr == "" {
+		return 0, apperrors.ErrBadRequest("missing user id")
+	}
+
+	var (
+		userID int64
+		err    error
+	)
+	if userID, err = strconv.ParseInt(userIDStr, 10, 64); err != nil {
+		return 0, apperrors.ErrBadRequest("invalid user id")
+	}
+
+	return userID, nil
+}
+
+func getHabitIDFromURL(r *http.Request) (int64, error) {
+	habitIDStr := chi.URLParam(r, "habitId")
+	if habitIDStr == "" {
+		return 0, apperrors.ErrBadRequest("missing habit id")
+	}
+
+	var (
+		habitID int64
+		err     error
+	)
+	if habitID, err = strconv.ParseInt(habitIDStr, 10, 64); err != nil {
+		return 0, apperrors.ErrBadRequest("invalid habit id")
+	}
+
+	return habitID, nil
 }

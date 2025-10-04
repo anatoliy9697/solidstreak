@@ -8,6 +8,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 
+	"github.com/anatoliy9697/solidstreak/solidstreak-backend/pkg/date"
 	apperrors "github.com/anatoliy9697/solidstreak/solidstreak-backend/pkg/errors"
 
 	hPkg "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/habit"
@@ -35,6 +36,20 @@ type PostPutHabitResponse struct {
 
 type GetHabitsResponse struct {
 	Data []*hPkg.Habit `json:"data"`
+}
+
+type HabitCheck struct {
+	CheckDate *date.Date `json:"checkDate"`
+	Completed *bool      `json:"completed"`
+}
+
+type PostHabitCheckRequest struct {
+	Data *HabitCheck `json:"data"`
+	Meta *Metadata   `json:"meta"`
+}
+
+type PostHabitCheckResponse struct {
+	Data hPkg.HabitCheck `json:"data"`
 }
 
 // TODO: попробовать избавиться от дублирования кода
@@ -107,6 +122,12 @@ func (s Server) postHabit(w http.ResponseWriter, r *http.Request) {
 		}
 	}()
 
+	userTgID, ok := r.Context().Value(ctxKeyUserTgID{}).(int64)
+	if !ok {
+		err = apperrors.ErrUnauthorized("couldn't identify user")
+		return
+	}
+
 	var req PostPutHabitRequest
 
 	decoder := json.NewDecoder(r.Body)
@@ -114,18 +135,13 @@ func (s Server) postHabit(w http.ResponseWriter, r *http.Request) {
 		err = apperrors.ErrBadRequest("invalid request payload")
 		return
 	}
+
 	if req.Data.Title == "" {
 		err = apperrors.ErrBadRequest("habit title is required")
 		return
 	}
 	if req.Meta.UserID == 0 {
 		err = apperrors.ErrBadRequest("userId in meta is required")
-		return
-	}
-
-	userTgID, ok := r.Context().Value(ctxKeyUserTgID{}).(int64)
-	if !ok {
-		err = apperrors.ErrUnauthorized("couldn't identify user")
 		return
 	}
 
@@ -264,6 +280,94 @@ func (s Server) getHabits(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response := GetHabitsResponse{Data: habits}
+
+	json.NewEncoder(w).Encode(response)
+}
+
+func (s Server) postUserHabitCheck(w http.ResponseWriter, r *http.Request) {
+	var err error
+
+	logger := s.Res.Logger
+
+	// Adding request ID to request context
+	reqID, _ := r.Context().Value(ctxKeyRequestID{}).(string)
+	if reqID != "" {
+		logger = logger.With("requestId", reqID)
+	}
+
+	defer func() {
+		if err != nil {
+			processError(w, logger, err)
+		}
+	}()
+
+	userTgID, ok := r.Context().Value(ctxKeyUserTgID{}).(int64)
+	if !ok {
+		err = apperrors.ErrUnauthorized("couldn't identify user")
+		return
+	}
+
+	var userID int64
+	userID, err = getUserIDFromURL(r)
+	if err != nil {
+		return
+	}
+
+	habitID, err := getHabitIDFromURL(r)
+	if err != nil {
+		return
+	}
+
+	var req PostHabitCheckRequest
+
+	decoder := json.NewDecoder(r.Body)
+	if err = decoder.Decode(&req); err != nil {
+		err = apperrors.ErrBadRequest("invalid request payload")
+		return
+	}
+
+	if req.Data == nil {
+		err = apperrors.ErrBadRequest("request data is required")
+		return
+	}
+	if req.Data.CheckDate == nil {
+		err = apperrors.ErrBadRequest("habit check date is required")
+		return
+	}
+	if req.Data.Completed == nil {
+		err = apperrors.ErrBadRequest("habit completion status is required")
+		return
+	}
+
+	var user *usrPkg.User
+	if user, err = s.Res.UsrRepo.GetByTgID(userTgID); err != nil {
+		return
+	}
+
+	if userID != user.ID {
+		err = apperrors.ErrForbidden("couldn't check habit for another user")
+		return
+	}
+
+	var habit *hPkg.Habit
+	habit, err = s.Res.HabitRepo.GetByIDAndOwnerID(habitID, user.ID)
+	if err != nil {
+		return
+	}
+
+	habitCheck := &hPkg.HabitCheck{
+		HabitID:   habit.ID,
+		UserID:    user.ID,
+		CheckDate: *req.Data.CheckDate,
+		Completed: *req.Data.Completed,
+		CheckedAt: time.Now(),
+	}
+
+	if err = s.Res.HabitRepo.SetUserHabitCheck(habitCheck); err != nil {
+		return
+	}
+
+	response := PostHabitCheckResponse{Data: *habitCheck}
 
 	json.NewEncoder(w).Encode(response)
 }

@@ -2,7 +2,6 @@ package repo
 
 import (
 	"context"
-	"strconv"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -148,7 +147,7 @@ func (r pgRepo) GetByIDAndOwnerID(id, ownerID int64) (*hPkg.Habit, error) {
 	)
 	if err != nil {
 		if err == pgx.ErrNoRows {
-			return nil, apperrors.ErrNotFound("couldn't find habit with id " + strconv.FormatInt(id, 10) + " for specified user")
+			return nil, apperrors.ErrNotFound("couldn't find habit for specified user")
 		}
 		return nil, err
 	}

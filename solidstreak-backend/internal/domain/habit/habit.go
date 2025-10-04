@@ -20,8 +20,8 @@ type Habit struct {
 type HabitCheck struct {
 	HabitID   int64     `json:"-"`
 	UserID    int64     `json:"-"`
-	Completed bool      `json:"completed"`
 	CheckDate date.Date `json:"checkDate"`
+	Completed bool      `json:"completed"`
 	CheckedAt time.Time `json:"checkedAt"`
 }
 
