@@ -18,6 +18,14 @@ func (d Date) String() string {
 	return time.Time(d).Format(time.DateOnly)
 }
 
+func Parse(s string) (Date, error) {
+	t, err := time.Parse(time.DateOnly, s)
+	if err != nil {
+		return Date{}, err
+	}
+	return New(t), nil
+}
+
 func (d Date) MarshalJSON() ([]byte, error) {
 	return []byte(`"` + time.Time(d).Format(time.DateOnly) + `"`), nil
 }
@@ -62,4 +70,12 @@ func (d *Date) Scan(value interface{}) error {
 	default:
 		return errors.New("cannot scan type into Date: " + reflect.TypeOf(value).String())
 	}
+}
+
+func Today() Date {
+	return New(time.Now())
+}
+
+func (d Date) AddDate(years int, months int, days int) Date {
+	return New(time.Time(d).AddDate(years, months, days))
 }

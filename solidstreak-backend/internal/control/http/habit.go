@@ -26,8 +26,8 @@ type Habit struct {
 }
 
 type PostPutHabitRequest struct {
-	Data Habit    `json:"data"`
-	Meta Metadata `json:"meta"`
+	Data *Habit    `json:"data"`
+	Meta *Metadata `json:"meta"`
 }
 
 type PostPutHabitResponse struct {
@@ -49,7 +49,11 @@ type PostHabitCheckRequest struct {
 }
 
 type PostHabitCheckResponse struct {
-	Data hPkg.HabitCheck `json:"data"`
+	Data *hPkg.HabitCheck `json:"data"`
+}
+
+type GetUserHabitsCompletedChecksResponse struct {
+	Data []*hPkg.HabitCheck `json:"data"`
 }
 
 // TODO: попробовать избавиться от дублирования кода
@@ -71,6 +75,12 @@ func (s Server) getHabit(w http.ResponseWriter, r *http.Request) {
 		}
 	}()
 
+	userTgID, ok := r.Context().Value(ctxKeyUserTgID{}).(int64)
+	if !ok {
+		err = apperrors.ErrUnauthorized("couldn't identify user")
+		return
+	}
+
 	idStr := chi.URLParam(r, "id")
 	if idStr == "" {
 		err = apperrors.ErrBadRequest("missing habit id")
@@ -81,12 +91,6 @@ func (s Server) getHabit(w http.ResponseWriter, r *http.Request) {
 	id, err = strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
 		err = apperrors.ErrBadRequest("invalid habit id")
-		return
-	}
-
-	userTgID, ok := r.Context().Value(ctxKeyUserTgID{}).(int64)
-	if !ok {
-		err = apperrors.ErrUnauthorized("couldn't identify user")
 		return
 	}
 
@@ -136,6 +140,10 @@ func (s Server) postHabit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if req.Data == nil {
+		err = apperrors.ErrBadRequest("habit data is required")
+		return
+	}
 	if req.Data.Title == "" {
 		err = apperrors.ErrBadRequest("habit title is required")
 		return
@@ -183,6 +191,12 @@ func (s Server) putHabit(w http.ResponseWriter, r *http.Request) {
 		}
 	}()
 
+	userTgID, ok := r.Context().Value(ctxKeyUserTgID{}).(int64)
+	if !ok {
+		err = apperrors.ErrUnauthorized("couldn't identify user")
+		return
+	}
+
 	idStr := chi.URLParam(r, "id")
 	if idStr == "" {
 		err = apperrors.ErrBadRequest("missing habit id")
@@ -203,18 +217,17 @@ func (s Server) putHabit(w http.ResponseWriter, r *http.Request) {
 		err = apperrors.ErrBadRequest("invalid request payload")
 		return
 	}
+
+	if req.Data == nil {
+		err = apperrors.ErrBadRequest("habit data is required")
+		return
+	}
 	if req.Data.Title == "" {
 		err = apperrors.ErrBadRequest("habit title is required")
 		return
 	}
 	if req.Meta.UserID == 0 {
 		err = apperrors.ErrBadRequest("userId in meta is required")
-		return
-	}
-
-	userTgID, ok := r.Context().Value(ctxKeyUserTgID{}).(int64)
-	if !ok {
-		err = apperrors.ErrUnauthorized("couldn't identify user")
 		return
 	}
 
@@ -308,12 +321,13 @@ func (s Server) postUserHabitCheck(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var userID int64
-	userID, err = getUserIDFromURL(r)
+	userID, err = getInt64FromURLParams(r, "userId", true)
 	if err != nil {
 		return
 	}
 
-	habitID, err := getHabitIDFromURL(r)
+	var habitID int64
+	habitID, err = getInt64FromURLParams(r, "habitId", true)
 	if err != nil {
 		return
 	}
@@ -367,7 +381,81 @@ func (s Server) postUserHabitCheck(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response := PostHabitCheckResponse{Data: *habitCheck}
+	response := PostHabitCheckResponse{Data: habitCheck}
+
+	json.NewEncoder(w).Encode(response)
+}
+
+func (s Server) getUserHabitCompletedChecks(w http.ResponseWriter, r *http.Request) {
+	var err error
+
+	logger := s.Res.Logger
+
+	// Adding request ID to request context
+	reqID, _ := r.Context().Value(ctxKeyRequestID{}).(string)
+	if reqID != "" {
+		logger = logger.With("requestId", reqID)
+	}
+
+	defer func() {
+		if err != nil {
+			processError(w, logger, err)
+		}
+	}()
+
+	userTgID, ok := r.Context().Value(ctxKeyUserTgID{}).(int64)
+	if !ok {
+		err = apperrors.ErrUnauthorized("couldn't identify user")
+		return
+	}
+
+	var userID int64
+	userID, err = getInt64FromURLParams(r, "userId", true)
+	if err != nil {
+		return
+	}
+
+	var habitID int64
+	habitID, err = getInt64FromURLParams(r, "habitId", true)
+	if err != nil {
+		return
+	}
+
+	var fromDate, toDate *date.Date
+	fromDate, err = getDateFromURLQuery(r, "from", false)
+	if err != nil {
+		return
+	}
+	if fromDate == nil {
+		d := date.Today().AddDate(-1, 0, 0)
+		fromDate = &d
+	}
+	toDate, err = getDateFromURLQuery(r, "to", false)
+	if err != nil {
+		return
+	}
+	if toDate == nil {
+		d := date.Today()
+		toDate = &d
+	}
+
+	var user *usrPkg.User
+	if user, err = s.Res.UsrRepo.GetByTgID(userTgID); err != nil {
+		return
+	}
+
+	// TODO: временно. будет исправлено в рамках https://github.com/anatoliy9697/solidstreak/issues/27
+	if userID != user.ID {
+		err = apperrors.ErrForbidden("couldn't get habit checks for another user")
+		return
+	}
+
+	var habitChecks []*hPkg.HabitCheck
+	if habitChecks, err = s.Res.HabitRepo.GetUserHabitsCompletedChecks(userID, []int64{habitID}, fromDate, toDate); err != nil {
+		return
+	}
+
+	response := GetUserHabitsCompletedChecksResponse{Data: habitChecks}
 
 	json.NewEncoder(w).Encode(response)
 }

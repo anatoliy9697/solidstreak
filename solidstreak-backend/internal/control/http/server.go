@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/common/resources"
+	"github.com/anatoliy9697/solidstreak/solidstreak-backend/pkg/date"
 	apperrors "github.com/anatoliy9697/solidstreak/solidstreak-backend/pkg/errors"
 	"github.com/go-chi/chi/v5"
 )
@@ -37,6 +38,7 @@ func (s Server) Run(mainCtx context.Context, doneCh chan struct{}) {
 	api.Put("/habits/{id}", s.putHabit)
 	api.Get("/habits", s.getHabits)
 	api.Post("/users/{userId}/habit/{habitId}/check", s.postUserHabitCheck)
+	api.Get("/users/{userId}/habit/{habitId}/checks", s.getUserHabitCompletedChecks)
 
 	router.Mount("/api/v1", api)
 
@@ -86,36 +88,37 @@ func (s Server) Run(mainCtx context.Context, doneCh chan struct{}) {
 	s.Res.Logger.Info("web server stopped")
 }
 
-func getUserIDFromURL(r *http.Request) (int64, error) {
-	userIDStr := chi.URLParam(r, "userId")
-	if userIDStr == "" {
-		return 0, apperrors.ErrBadRequest("missing user id")
+func getInt64FromURLParams(r *http.Request, key string, required bool) (int64, error) {
+	strValue := chi.URLParam(r, key)
+	if strValue == "" {
+		if required {
+			return 0, apperrors.ErrBadRequest("missing \"" + key + "\" in URL params")
+		}
+		return 0, nil
 	}
 
-	var (
-		userID int64
-		err    error
-	)
-	if userID, err = strconv.ParseInt(userIDStr, 10, 64); err != nil {
-		return 0, apperrors.ErrBadRequest("invalid user id")
+	value, err := strconv.ParseInt(strValue, 10, 64)
+	if err != nil {
+		return 0, apperrors.ErrBadRequest("invalid \"" + key + "\" in URL params")
 	}
 
-	return userID, nil
+	return value, nil
 }
 
-func getHabitIDFromURL(r *http.Request) (int64, error) {
-	habitIDStr := chi.URLParam(r, "habitId")
-	if habitIDStr == "" {
-		return 0, apperrors.ErrBadRequest("missing habit id")
+func getDateFromURLQuery(r *http.Request, key string, required bool) (*date.Date, error) {
+	dateStr := r.URL.Query().Get(key)
+
+	if dateStr == "" {
+		if required {
+			return nil, apperrors.ErrBadRequest("missing \"" + key + "\" date in URL query")
+		}
+		return nil, nil
 	}
 
-	var (
-		habitID int64
-		err     error
-	)
-	if habitID, err = strconv.ParseInt(habitIDStr, 10, 64); err != nil {
-		return 0, apperrors.ErrBadRequest("invalid habit id")
+	d, err := date.Parse(dateStr)
+	if err != nil {
+		return nil, apperrors.ErrBadRequest("invalid \"" + key + "\" date in URL query")
 	}
 
-	return habitID, nil
+	return &d, nil
 }

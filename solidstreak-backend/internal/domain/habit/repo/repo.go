@@ -20,7 +20,7 @@ type Repo interface {
 	GetByOwnerID(int64, string) ([]*hPkg.Habit, error)
 	GetByIDAndOwnerID(int64, int64) (*hPkg.Habit, error)
 	SetUserHabitCheck(*hPkg.HabitCheck) error
-	GetUserHabitsCompletedChecks(int64, []int64, date.Date, date.Date) ([]*hPkg.HabitCheck, error)
+	GetUserHabitsCompletedChecks(int64, []int64, *date.Date, *date.Date) ([]*hPkg.HabitCheck, error)
 }
 
 func Init(c context.Context, p *pgxpool.Pool) Repo {

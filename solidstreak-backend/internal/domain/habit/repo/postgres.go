@@ -176,7 +176,7 @@ func (r pgRepo) SetUserHabitCheck(hc *hPkg.HabitCheck) error {
 	return err
 }
 
-func (r pgRepo) GetUserHabitsCompletedChecks(userID int64, habitIDs []int64, from, to date.Date) ([]*hPkg.HabitCheck, error) {
+func (r pgRepo) GetUserHabitsCompletedChecks(userID int64, habitIDs []int64, from, to *date.Date) ([]*hPkg.HabitCheck, error) {
 	sql := `
 		SELECT habit_id, user_id, completed, check_date, checked_at
 		FROM user_habit_checks
