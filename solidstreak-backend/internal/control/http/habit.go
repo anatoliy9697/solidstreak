@@ -3,10 +3,7 @@ package http
 import (
 	"encoding/json"
 	"net/http"
-	"strconv"
 	"time"
-
-	"github.com/go-chi/chi/v5"
 
 	"github.com/anatoliy9697/solidstreak/solidstreak-backend/pkg/date"
 	apperrors "github.com/anatoliy9697/solidstreak/solidstreak-backend/pkg/errors"
@@ -26,8 +23,7 @@ type Habit struct {
 }
 
 type PostPutHabitRequest struct {
-	Data *Habit    `json:"data"`
-	Meta *Metadata `json:"meta"`
+	Data *Habit `json:"data"`
 }
 
 type PostPutHabitResponse struct {
@@ -45,7 +41,6 @@ type HabitCheck struct {
 
 type PostHabitCheckRequest struct {
 	Data *HabitCheck `json:"data"`
-	Meta *Metadata   `json:"meta"`
 }
 
 type PostHabitCheckResponse struct {
@@ -81,17 +76,24 @@ func (s Server) getHabit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	idStr := chi.URLParam(r, "id")
-	if idStr == "" {
-		err = apperrors.ErrBadRequest("missing habit id")
+	var userID, habitID int64
+	userID, habitID, err = getUserIDAndHabitIDFromURLParams(r)
+	if err != nil {
 		return
 	}
 
-	var id int64
-	id, err = strconv.ParseInt(idStr, 10, 64)
+	var withChecks bool
+	withChecks, err = getBoolFromURLQuery(r, "with_checks", false)
 	if err != nil {
-		err = apperrors.ErrBadRequest("invalid habit id")
 		return
+	}
+
+	var fromDate, toDate *date.Date
+	if withChecks {
+		fromDate, toDate, err = getFromToDatesFromURLQuery(r)
+		if err != nil {
+			return
+		}
 	}
 
 	var user *usrPkg.User
@@ -99,9 +101,23 @@ func (s Server) getHabit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var habit *hPkg.Habit
-	if habit, err = s.Res.HabitRepo.GetByIDAndOwnerID(id, user.ID); err != nil {
+	// TODO: временно. будет исправлено в рамках https://github.com/anatoliy9697/solidstreak/issues/27
+	if userID != user.ID {
+		err = apperrors.ErrForbidden("couldn't get habit for another user")
 		return
+	}
+
+	var habit *hPkg.Habit
+	if habit, err = s.Res.HabitRepo.GetByIDAndOwnerID(habitID, user.ID); err != nil {
+		return
+	}
+
+	if withChecks {
+		var habitChecks []*hPkg.HabitCheck
+		if habitChecks, err = s.Res.HabitRepo.GetUserHabitsCompletedChecks(user.ID, []int64{habit.ID}, fromDate, toDate); err != nil {
+			return
+		}
+		habit.Checks = habitChecks
 	}
 
 	response := GetHabitResponse{Data: habit}
@@ -132,6 +148,12 @@ func (s Server) postHabit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var userID int64
+	userID, err = getInt64FromURLParams(r, "userID", true)
+	if err != nil {
+		return
+	}
+
 	var req PostPutHabitRequest
 
 	decoder := json.NewDecoder(r.Body)
@@ -148,22 +170,18 @@ func (s Server) postHabit(w http.ResponseWriter, r *http.Request) {
 		err = apperrors.ErrBadRequest("habit title is required")
 		return
 	}
-	if req.Meta.UserID == 0 {
-		err = apperrors.ErrBadRequest("userId in meta is required")
-		return
-	}
 
 	var user *usrPkg.User
 	if user, err = s.Res.UsrRepo.GetByTgID(userTgID); err != nil {
 		return
 	}
 
-	if user.ID != req.Meta.UserID {
-		err = apperrors.ErrForbidden("userId in meta does not match the authenticated user")
+	if userID != user.ID {
+		err = apperrors.ErrForbidden("couldn't create habit for another user")
 		return
 	}
 
-	habit := hPkg.NewHabit(req.Data.Title, req.Data.Description, req.Meta.UserID)
+	habit := hPkg.NewHabit(req.Data.Title, req.Data.Description, user.ID)
 
 	if err = s.Res.HabitRepo.Create(habit); err != nil {
 		return
@@ -197,16 +215,9 @@ func (s Server) putHabit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	idStr := chi.URLParam(r, "id")
-	if idStr == "" {
-		err = apperrors.ErrBadRequest("missing habit id")
-		return
-	}
-
-	var id int64
-	id, err = strconv.ParseInt(idStr, 10, 64)
+	var habitID, userID int64
+	userID, habitID, err = getUserIDAndHabitIDFromURLParams(r)
 	if err != nil {
-		err = apperrors.ErrBadRequest("invalid habit id")
 		return
 	}
 
@@ -226,22 +237,18 @@ func (s Server) putHabit(w http.ResponseWriter, r *http.Request) {
 		err = apperrors.ErrBadRequest("habit title is required")
 		return
 	}
-	if req.Meta.UserID == 0 {
-		err = apperrors.ErrBadRequest("userId in meta is required")
-		return
-	}
 
 	var user *usrPkg.User
 	if user, err = s.Res.UsrRepo.GetByTgID(userTgID); err != nil {
 		return
 	}
 
-	if user.ID != req.Meta.UserID {
-		err = apperrors.ErrForbidden("userId in meta does not match the authenticated user")
+	if userID != user.ID {
+		err = apperrors.ErrForbidden("couldn't update habit for another user")
 		return
 	}
 
-	habit, err := s.Res.HabitRepo.GetByIDAndOwnerID(id, req.Meta.UserID)
+	habit, err := s.Res.HabitRepo.GetByIDAndOwnerID(habitID, user.ID)
 	if err != nil {
 		return
 	}
@@ -282,14 +289,58 @@ func (s Server) getHabits(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var userID int64
+	userID, err = getInt64FromURLParams(r, "userID", true)
+	if err != nil {
+		return
+	}
+
+	var withChecks bool
+	withChecks, err = getBoolFromURLQuery(r, "with_checks", false)
+	if err != nil {
+		return
+	}
+
+	var fromDate, toDate *date.Date
+	if withChecks {
+		fromDate, toDate, err = getFromToDatesFromURLQuery(r)
+		if err != nil {
+			return
+		}
+	}
+
 	var user *usrPkg.User
 	if user, err = s.Res.UsrRepo.GetByTgID(userTgID); err != nil {
+		return
+	}
+
+	// TODO: временно. будет исправлено в рамках https://github.com/anatoliy9697/solidstreak/issues/27
+	if userID != user.ID {
+		err = apperrors.ErrForbidden("couldn't get habits for another user")
 		return
 	}
 
 	var habits []*hPkg.Habit
 	if habits, err = s.Res.HabitRepo.GetByOwnerID(user.ID, hRepo.Any); err != nil { // TODO: получать gettingMode из query параметра
 		return
+	}
+
+	if withChecks && len(habits) > 0 {
+		habitIDs := make([]int64, 0, len(habits))
+		for _, h := range habits {
+			habitIDs = append(habitIDs, h.ID)
+		}
+		var habitChecks []*hPkg.HabitCheck
+		if habitChecks, err = s.Res.HabitRepo.GetUserHabitsCompletedChecks(user.ID, habitIDs, fromDate, toDate); err != nil {
+			return
+		}
+		habitChecksByHabitID := make(map[int64][]*hPkg.HabitCheck)
+		for _, hc := range habitChecks {
+			habitChecksByHabitID[hc.HabitID] = append(habitChecksByHabitID[hc.HabitID], hc)
+		}
+		for _, h := range habits {
+			h.Checks = habitChecksByHabitID[h.ID]
+		}
 	}
 
 	response := GetHabitsResponse{Data: habits}
@@ -321,13 +372,13 @@ func (s Server) postUserHabitCheck(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var userID int64
-	userID, err = getInt64FromURLParams(r, "userId", true)
+	userID, err = getInt64FromURLParams(r, "userID", true)
 	if err != nil {
 		return
 	}
 
 	var habitID int64
-	habitID, err = getInt64FromURLParams(r, "habitId", true)
+	habitID, err = getInt64FromURLParams(r, "habitID", true)
 	if err != nil {
 		return
 	}
@@ -409,34 +460,16 @@ func (s Server) getUserHabitCompletedChecks(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	var userID int64
-	userID, err = getInt64FromURLParams(r, "userId", true)
-	if err != nil {
-		return
-	}
-
-	var habitID int64
-	habitID, err = getInt64FromURLParams(r, "habitId", true)
+	var userID, habitID int64
+	userID, habitID, err = getUserIDAndHabitIDFromURLParams(r)
 	if err != nil {
 		return
 	}
 
 	var fromDate, toDate *date.Date
-	fromDate, err = getDateFromURLQuery(r, "from", false)
+	fromDate, toDate, err = getFromToDatesFromURLQuery(r)
 	if err != nil {
 		return
-	}
-	if fromDate == nil {
-		d := date.Today().AddDate(-1, 0, 0)
-		fromDate = &d
-	}
-	toDate, err = getDateFromURLQuery(r, "to", false)
-	if err != nil {
-		return
-	}
-	if toDate == nil {
-		d := date.Today()
-		toDate = &d
 	}
 
 	var user *usrPkg.User
@@ -458,4 +491,50 @@ func (s Server) getUserHabitCompletedChecks(w http.ResponseWriter, r *http.Reque
 	response := GetUserHabitsCompletedChecksResponse{Data: habitChecks}
 
 	json.NewEncoder(w).Encode(response)
+}
+
+func getUserIDAndHabitIDFromURLParams(r *http.Request) (int64, int64, error) {
+	var (
+		err             error
+		userID, habitID int64
+	)
+
+	userID, err = getInt64FromURLParams(r, "userID", true)
+	if err != nil {
+		return 0, 0, err
+	}
+
+	habitID, err = getInt64FromURLParams(r, "habitID", true)
+	if err != nil {
+		return 0, 0, err
+	}
+
+	return userID, habitID, nil
+}
+
+func getFromToDatesFromURLQuery(r *http.Request) (*date.Date, *date.Date, error) {
+	var (
+		err              error
+		fromDate, toDate *date.Date
+	)
+
+	fromDate, err = getDateFromURLQuery(r, "from", false)
+	if err != nil {
+		return nil, nil, err
+	}
+	if fromDate == nil {
+		d := date.Today().AddDate(-1, 0, 0)
+		fromDate = &d
+	}
+
+	toDate, err = getDateFromURLQuery(r, "to", false)
+	if err != nil {
+		return nil, nil, err
+	}
+	if toDate == nil {
+		d := date.Today()
+		toDate = &d
+	}
+
+	return fromDate, toDate, nil
 }

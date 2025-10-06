@@ -33,12 +33,12 @@ func (s Server) Run(mainCtx context.Context, doneCh chan struct{}) {
 	api.Use(s.Logger())
 	api.Use(s.ValidateTelegramInitData())
 
-	api.Post("/habits", s.postHabit)
-	api.Get("/habits/{id}", s.getHabit)
-	api.Put("/habits/{id}", s.putHabit)
-	api.Get("/habits", s.getHabits)
-	api.Post("/users/{userId}/habit/{habitId}/check", s.postUserHabitCheck)
-	api.Get("/users/{userId}/habit/{habitId}/checks", s.getUserHabitCompletedChecks)
+	api.Post("/users/{userID}/habits", s.postHabit)
+	api.Get("/users/{userID}/habits/{habitID}", s.getHabit)
+	api.Put("/users/{userID}/habits/{habitID}", s.putHabit)
+	api.Get("/users/{userID}/habits", s.getHabits)
+	api.Post("/users/{userID}/habits/{habitID}/checks", s.postUserHabitCheck)
+	api.Get("/users/{userID}/habits/{habitID}/checks", s.getUserHabitCompletedChecks)
 
 	router.Mount("/api/v1", api)
 
@@ -121,4 +121,21 @@ func getDateFromURLQuery(r *http.Request, key string, required bool) (*date.Date
 	}
 
 	return &d, nil
+}
+
+func getBoolFromURLQuery(r *http.Request, key string, required bool) (bool, error) {
+	strValue := r.URL.Query().Get(key)
+	if strValue == "" {
+		if required {
+			return false, apperrors.ErrBadRequest("missing \"" + key + "\" in URL query")
+		}
+		return false, nil
+	}
+
+	value, err := strconv.ParseBool(strValue)
+	if err != nil {
+		return false, apperrors.ErrBadRequest("invalid \"" + key + "\" in URL query")
+	}
+
+	return value, nil
 }
