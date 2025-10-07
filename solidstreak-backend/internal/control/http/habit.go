@@ -9,7 +9,6 @@ import (
 	apperrors "github.com/anatoliy9697/solidstreak/solidstreak-backend/pkg/errors"
 
 	hPkg "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/habit"
-	hRepo "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/habit/repo"
 	usrPkg "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/user"
 )
 
@@ -18,8 +17,10 @@ type GetHabitResponse struct {
 }
 
 type Habit struct {
-	Title       string `json:"title"`
-	Description string `json:"description,omitempty"`
+	Archived    *bool   `json:"archived"`
+	Title       *string `json:"title"`
+	Description *string `json:"description"`
+	IsPublic    *bool   `json:"isPublic"`
 }
 
 type PostPutHabitRequest struct {
@@ -101,20 +102,17 @@ func (s Server) getHabit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO: временно. будет исправлено в рамках https://github.com/anatoliy9697/solidstreak/issues/27
-	if userID != user.ID {
-		err = apperrors.ErrForbidden("couldn't get habit for another user")
-		return
-	}
-
-	var habit *hPkg.Habit
-	if habit, err = s.Res.HabitRepo.GetByIDAndOwnerID(habitID, user.ID); err != nil {
+	var (
+		requestedByOwner bool = userID == user.ID
+		habit            *hPkg.Habit
+	)
+	if habit, err = s.Res.HabitRepo.GetByIDAndOwnerID(habitID, userID, requestedByOwner); err != nil {
 		return
 	}
 
 	if withChecks {
 		var habitChecks []*hPkg.HabitCheck
-		if habitChecks, err = s.Res.HabitRepo.GetUserHabitsCompletedChecks(user.ID, []int64{habit.ID}, fromDate, toDate); err != nil {
+		if habitChecks, err = s.Res.HabitRepo.GetUserHabitsCompletedChecks(userID, []int64{habit.ID}, fromDate, toDate); err != nil {
 			return
 		}
 		habit.Checks = habitChecks
@@ -166,8 +164,12 @@ func (s Server) postHabit(w http.ResponseWriter, r *http.Request) {
 		err = apperrors.ErrBadRequest("habit data is required")
 		return
 	}
-	if req.Data.Title == "" {
+	if req.Data.Title == nil {
 		err = apperrors.ErrBadRequest("habit title is required")
+		return
+	}
+	if req.Data.IsPublic == nil {
+		err = apperrors.ErrBadRequest("habit public status is required")
 		return
 	}
 
@@ -181,7 +183,7 @@ func (s Server) postHabit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	habit := hPkg.NewHabit(req.Data.Title, req.Data.Description, user.ID)
+	habit := hPkg.NewHabit(*req.Data.Title, *req.Data.Description, user.ID, *req.Data.IsPublic)
 
 	if err = s.Res.HabitRepo.Create(habit); err != nil {
 		return
@@ -233,8 +235,16 @@ func (s Server) putHabit(w http.ResponseWriter, r *http.Request) {
 		err = apperrors.ErrBadRequest("habit data is required")
 		return
 	}
-	if req.Data.Title == "" {
+	if req.Data.Archived == nil {
+		err = apperrors.ErrBadRequest("habit archived status is required")
+		return
+	}
+	if req.Data.Title == nil {
 		err = apperrors.ErrBadRequest("habit title is required")
+		return
+	}
+	if req.Data.IsPublic == nil {
+		err = apperrors.ErrBadRequest("habit public status is required")
 		return
 	}
 
@@ -243,18 +253,25 @@ func (s Server) putHabit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if userID != user.ID {
+	requestedByOwner := userID == user.ID
+	if !requestedByOwner {
 		err = apperrors.ErrForbidden("couldn't update habit for another user")
 		return
 	}
 
-	habit, err := s.Res.HabitRepo.GetByIDAndOwnerID(habitID, user.ID)
+	habit, err := s.Res.HabitRepo.GetByIDAndOwnerID(habitID, userID, requestedByOwner)
 	if err != nil {
 		return
 	}
 
-	habit.Title = req.Data.Title
-	habit.Description = req.Data.Description
+	habit.Archived = *req.Data.Archived
+	habit.Title = *req.Data.Title
+	if req.Data.Description != nil {
+		habit.Description = *req.Data.Description
+	} else {
+		habit.Description = ""
+	}
+	habit.IsPublic = *req.Data.IsPublic
 	habit.UpdatedAt = time.Now()
 
 	if err = s.Res.HabitRepo.Update(habit); err != nil {
@@ -295,6 +312,12 @@ func (s Server) getHabits(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var status hPkg.HabitStatus
+	status, err = getHabitStatusFromURLQuery(r)
+	if err != nil {
+		return
+	}
+
 	var withChecks bool
 	withChecks, err = getBoolFromURLQuery(r, "with_checks", false)
 	if err != nil {
@@ -314,14 +337,11 @@ func (s Server) getHabits(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO: временно. будет исправлено в рамках https://github.com/anatoliy9697/solidstreak/issues/27
-	if userID != user.ID {
-		err = apperrors.ErrForbidden("couldn't get habits for another user")
-		return
-	}
-
-	var habits []*hPkg.Habit
-	if habits, err = s.Res.HabitRepo.GetByOwnerID(user.ID, hRepo.Any); err != nil { // TODO: получать gettingMode из query параметра
+	var (
+		requestedByOwner bool = userID == user.ID
+		habits           []*hPkg.Habit
+	)
+	if habits, err = s.Res.HabitRepo.GetByOwnerIDAndStatus(userID, status, requestedByOwner); err != nil {
 		return
 	}
 
@@ -331,7 +351,7 @@ func (s Server) getHabits(w http.ResponseWriter, r *http.Request) {
 			habitIDs = append(habitIDs, h.ID)
 		}
 		var habitChecks []*hPkg.HabitCheck
-		if habitChecks, err = s.Res.HabitRepo.GetUserHabitsCompletedChecks(user.ID, habitIDs, fromDate, toDate); err != nil {
+		if habitChecks, err = s.Res.HabitRepo.GetUserHabitsCompletedChecks(userID, habitIDs, fromDate, toDate); err != nil {
 			return
 		}
 		habitChecksByHabitID := make(map[int64][]*hPkg.HabitCheck)
@@ -409,13 +429,14 @@ func (s Server) postUserHabitCheck(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if userID != user.ID {
+	requestedByOwner := userID == user.ID
+	if !requestedByOwner {
 		err = apperrors.ErrForbidden("couldn't check habit for another user")
 		return
 	}
 
 	var habit *hPkg.Habit
-	habit, err = s.Res.HabitRepo.GetByIDAndOwnerID(habitID, user.ID)
+	habit, err = s.Res.HabitRepo.GetByIDAndOwnerID(habitID, userID, requestedByOwner)
 	if err != nil {
 		return
 	}
@@ -477,14 +498,16 @@ func (s Server) getUserHabitCompletedChecks(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	// TODO: временно. будет исправлено в рамках https://github.com/anatoliy9697/solidstreak/issues/27
-	if userID != user.ID {
-		err = apperrors.ErrForbidden("couldn't get habit checks for another user")
+	var (
+		requestedByOwner bool = userID == user.ID
+		habit            *hPkg.Habit
+	)
+	if habit, err = s.Res.HabitRepo.GetByIDAndOwnerID(habitID, userID, requestedByOwner); err != nil {
 		return
 	}
 
 	var habitChecks []*hPkg.HabitCheck
-	if habitChecks, err = s.Res.HabitRepo.GetUserHabitsCompletedChecks(userID, []int64{habitID}, fromDate, toDate); err != nil {
+	if habitChecks, err = s.Res.HabitRepo.GetUserHabitsCompletedChecks(userID, []int64{habit.ID}, fromDate, toDate); err != nil {
 		return
 	}
 
@@ -537,4 +560,21 @@ func getFromToDatesFromURLQuery(r *http.Request) (*date.Date, *date.Date, error)
 	}
 
 	return fromDate, toDate, nil
+}
+
+func getHabitStatusFromURLQuery(r *http.Request) (hPkg.HabitStatus, error) {
+	var statusStr string
+	if statusStr = r.URL.Query().Get("status"); statusStr == "" {
+		return hPkg.Any, nil
+	}
+
+	var (
+		status hPkg.HabitStatus
+		ok     bool
+	)
+	if status, ok = hPkg.HabitStatusMapping[statusStr]; !ok {
+		return hPkg.Any, apperrors.ErrBadRequest("invalid habit status \"" + statusStr + "\" in URL query")
+	}
+
+	return status, nil
 }

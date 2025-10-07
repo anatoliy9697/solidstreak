@@ -23,23 +23,25 @@ func initPGRepo(c context.Context, p *pgxpool.Pool) *pgRepo {
 func (r pgRepo) Create(h *hPkg.Habit) error {
 	sql := `
 		WITH habit AS (
-			INSERT INTO habits (active, title, description, creator_id, created_at, updated_at)
-			VALUES ($1, $2, $3, $4, $5, $6)
+			INSERT INTO habits (active, archived, title, description, creator_id, created_at, updated_at)
+			VALUES ($1, $2, $3, $4, $5, $6, $7)
 			RETURNING id, creator_id
 		)
-		INSERT INTO users_habits (active, user_id, habit_id)
-		SELECT TRUE, habit.creator_id, habit.id FROM habit
+		INSERT INTO users_habits (active, user_id, habit_id, is_public)
+		SELECT TRUE, habit.creator_id, habit.id, $8 FROM habit
 		RETURNING habit_id
 	`
 	err := r.p.QueryRow(
 		r.c,
 		sql,
 		h.Active,
+		h.Archived,
 		h.Title,
 		h.Description,
 		h.CreatorID,
 		h.CreatedAt,
 		h.UpdatedAt,
+		h.IsPublic,
 	).Scan(&h.ID)
 
 	return err
@@ -47,41 +49,57 @@ func (r pgRepo) Create(h *hPkg.Habit) error {
 
 func (r pgRepo) Update(h *hPkg.Habit) error {
 	sql := `
-		UPDATE habits SET
-			active = $1,
-			title = $2,
-			description = $3,
-			updated_at = $4
-		WHERE id = $5
+		WITH habit AS (
+			UPDATE habits SET
+				active = $1,
+				archived = $2,
+				title = $3,
+				description = $4,
+				updated_at = $5
+			WHERE id = $6
+			RETURNING id, creator_id
+		)
+		UPDATE users_habits SET
+			is_public = $7
+		FROM habit h
+		WHERE 
+			users_habits.habit_id = h.id
+			AND users_habits.user_id = h.creator_id
 	`
 	_, err := r.p.Exec(
 		r.c,
 		sql,
 		h.Active,
+		h.Archived,
 		h.Title,
 		h.Description,
 		h.UpdatedAt,
 		h.ID,
+		h.IsPublic,
 	)
 
 	return err
 }
 
-func (r pgRepo) GetByOwnerID(ownerID int64, gettingMode string) ([]*hPkg.Habit, error) {
+func (r pgRepo) GetByOwnerIDAndStatus(ownerID int64, status hPkg.HabitStatus, requestedByOwner bool) ([]*hPkg.Habit, error) {
 	sql := `
-		SELECT h.id, h.active, h.title, h.description, h.creator_id, h.created_at, h.updated_at
+		SELECT h.id, h.active, h.archived, h.title, h.description, h.creator_id, uh.is_public, h.created_at, h.updated_at
 		FROM habits h
 		JOIN users_habits uh ON 
 			h.id = uh.habit_id 
 			AND uh.active = TRUE
 		WHERE 
-			uh.user_id = $1
+			h.active IS TRUE
+			AND uh.user_id = $1
 	`
-	switch gettingMode {
-	case Active:
-		sql += " AND h.active = TRUE"
-	case NotActive:
-		sql += " AND h.active = FALSE"
+	switch status {
+	case hPkg.Active:
+		sql += " AND h.archived = FALSE"
+	case hPkg.Archived:
+		sql += " AND h.archived = TRUE"
+	}
+	if !requestedByOwner {
+		sql += " AND uh.is_public = TRUE"
 	}
 
 	rows, err := r.p.Query(r.c, sql, ownerID)
@@ -96,9 +114,11 @@ func (r pgRepo) GetByOwnerID(ownerID int64, gettingMode string) ([]*hPkg.Habit, 
 		err = rows.Scan(
 			&h.ID,
 			&h.Active,
+			&h.Archived,
 			&h.Title,
 			&h.Description,
 			&h.CreatorID,
+			&h.IsPublic,
 			&h.CreatedAt,
 			&h.UpdatedAt,
 		)
@@ -114,14 +134,14 @@ func (r pgRepo) GetByOwnerID(ownerID int64, gettingMode string) ([]*hPkg.Habit, 
 	return habits, nil
 }
 
-func (r pgRepo) GetByIDAndOwnerID(id, ownerID int64) (*hPkg.Habit, error) {
+func (r pgRepo) GetByIDAndOwnerID(id int64, ownerID int64, requestedByOwner bool) (*hPkg.Habit, error) {
 	sql := `
 		WITH habit AS (
 			SELECT *
 			FROM habits h
 			WHERE h.id = $1
 		)
-		SELECT h.id, h.active, h.title, h.description, h.creator_id, h.created_at, h.updated_at
+		SELECT h.id, h.active, h.archived, h.title, h.description, h.creator_id, uh.is_public, h.created_at, h.updated_at
 		FROM habit h
 		JOIN users_habits uh ON 
 			h.id = uh.habit_id 
@@ -129,6 +149,9 @@ func (r pgRepo) GetByIDAndOwnerID(id, ownerID int64) (*hPkg.Habit, error) {
 		WHERE 
 			uh.user_id = $2
 	`
+	if !requestedByOwner {
+		sql += " AND uh.is_public = TRUE"
+	}
 
 	h := &hPkg.Habit{}
 	err := r.p.QueryRow(
@@ -139,9 +162,11 @@ func (r pgRepo) GetByIDAndOwnerID(id, ownerID int64) (*hPkg.Habit, error) {
 	).Scan(
 		&h.ID,
 		&h.Active,
+		&h.Archived,
 		&h.Title,
 		&h.Description,
 		&h.CreatorID,
+		&h.IsPublic,
 		&h.CreatedAt,
 		&h.UpdatedAt,
 	)
