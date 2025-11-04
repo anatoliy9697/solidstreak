@@ -1,5 +1,16 @@
 import axios from 'axios';
-import type { Habit } from '@/models/habit';
+import type { Habit, HabitCheck } from '@/models/habit';
+
+export interface Metadata {
+  username: string;
+}
+
+export interface PostHabitCheckRequest {
+  data: HabitCheck;
+  meta?: Metadata;
+}
+
+export type ApiRequest = PostHabitCheckRequest
 
 export interface Error {
   HTTPCode: number;
@@ -12,7 +23,12 @@ export interface GetHabitsResponse {
   errors?: Error[];
 }
 
-export type ApiResponse = GetHabitsResponse
+export interface PostHabitCheckResponse {
+  data: HabitCheck;
+  errors?: Error[];
+}
+
+export type ApiResponse = GetHabitsResponse | PostHabitCheckResponse;
 
 export interface RequestResult {
   success: boolean;
@@ -22,8 +38,9 @@ export interface RequestResult {
   response: ApiResponse | null;
 }
 
-// async function performRequest<T>(method: 'get' | 'post' | 'put', url: string, data?: any): Promise<T> {
-async function performRequest(method: 'get' | 'post' | 'put', url: string): Promise<RequestResult> {
+async function performRequest(method: 'get' | 'post' | 'put', url: string,  data?: ApiRequest): Promise<RequestResult> {
+  if (data && !data.meta?.username) data.meta = { username: 'telegram_user' }; // TODO: должно приходить из внешнего контекста
+  
   const result: RequestResult = {
     success: true,
     httpCode: 200,
@@ -34,13 +51,12 @@ async function performRequest(method: 'get' | 'post' | 'put', url: string): Prom
 
   try {
 
-    console.log(window.Telegram?.WebApp?.initData);
     const response = await axios.request<ApiResponse>({
       method,
       url,
-      // data,
+      data,
       headers: {
-        'X-Telegram-InitData': window.Telegram?.WebApp?.initData,
+        'X-Telegram-InitData': window.Telegram?.WebApp?.initData, // TODO: должно приходить из внешнего контекста
         'X-Request-ID': crypto.randomUUID(),
       },
     });
@@ -67,4 +83,9 @@ async function performRequest(method: 'get' | 'post' | 'put', url: string): Prom
 
 export async function fetchHabits(userId: number): Promise<RequestResult> {
   return await performRequest('get', `/api/v1/users/${userId}/habits?with_checks=true`);
+}
+
+export async function postHabitCheck(userId: number, habitId: number, habitCheck: HabitCheck): Promise<RequestResult> {
+  const payload: PostHabitCheckRequest = { data: habitCheck };
+  return await performRequest('post', `/api/v1/users/${userId}/habits/${habitId}/checks`, payload);
 }

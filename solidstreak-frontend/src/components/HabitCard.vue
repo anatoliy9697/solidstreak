@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import type { Habit } from '@/models/habit'
 import { ref, computed } from 'vue';
+import type { Habit, HabitCheck } from '@/models/habit'
+import { useHabitStore } from '@/stores/habit';
 
 const props = defineProps<{
   habit: Habit
@@ -8,27 +9,33 @@ const props = defineProps<{
   expanded?: boolean
 }>()
 
-const checksMap = ref<Map<string, boolean>>(new Map());
-if (props.habit.checks) {
-  props.habit.checks.forEach(check => {
-    if (check.checkDate && check.completed) {
-      checksMap.value.set(check.checkDate, true);
-    }
-  });
-}
+const habitStore = useHabitStore();
 
 const checksArray = computed(() => {
-  return Array.from(checksMap.value.keys()).map(date => ({ date, count: 0 }));
+  return props.habit.checks?.map(check => ({
+    date: check.checkDate,
+    count: check.completed ? 0 : null
+  })) || [];
 });
 
-const currentDateCheck = ref<boolean>(false);
-function processCurrentDateCheck() {
-  currentDateCheck.value = !currentDateCheck.value;
-  if (currentDateCheck.value) {
-    checksMap.value.set(props.currentDate, true);
-  } else {
-    checksMap.value.delete(props.currentDate);
-  }
+const currentDateCheck = ref<boolean>(props.habit.checks?.some(check => check.checkDate === props.currentDate && check.completed) || false);
+
+async function processCurrentDateCheck(): Promise<void> {
+
+  const habitCheck: HabitCheck = {
+    checkDate: props.currentDate,
+    completed: !currentDateCheck.value,
+    checkedAt: new Date()
+  };
+
+  const result = await habitStore.setHabitCheck(
+    3,  // TODO: получать из внешнего контекста
+    props.habit.id, 
+    habitCheck
+  );
+
+  if (result.success) currentDateCheck.value = habitCheck.completed;
+
 }
 
 </script>

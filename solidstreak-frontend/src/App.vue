@@ -9,9 +9,9 @@ const isHabitsLoading = ref<boolean>(true);
 const habitsSuccessfullyLoaded = ref<boolean>(false);
 
 onMounted(async () => {
-  await habitStore.fetchHabits(3);
+  const result = await habitStore.fetchHabits(3);
   isHabitsLoading.value = false;
-  habitsSuccessfullyLoaded.value = habitStore.requestResult?.success || false;
+  habitsSuccessfullyLoaded.value = result.success || false;
 });
 
 const expandedHabitCardId = ref<number | null>(null);
