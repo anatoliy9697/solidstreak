@@ -34,8 +34,9 @@ func (s Server) Run(mainCtx context.Context, doneCh chan struct{}) {
 	api.Use(s.ValidateTelegramInitData())
 
 	api.Post("/users/{userID}/habits", s.postHabit)
-	api.Get("/users/{userID}/habits/{habitID}", s.getHabit)
 	api.Put("/users/{userID}/habits/{habitID}", s.putHabit)
+	api.Get("/users/{userID}/habits/{habitID}", s.getHabit)
+	api.Delete("/users/{userID}/habits/{habitID}", s.deleteHabit)
 	api.Get("/users/{userID}/habits", s.getHabits)
 	api.Post("/users/{userID}/habits/{habitID}/checks", s.postUserHabitCheck)
 	api.Get("/users/{userID}/habits/{habitID}/checks", s.getUserHabitCompletedChecks)

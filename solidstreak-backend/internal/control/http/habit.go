@@ -54,75 +54,6 @@ type GetUserHabitsCompletedChecksResponse struct {
 
 // TODO: попробовать избавиться от дублирования кода
 
-func (s Server) getHabit(w http.ResponseWriter, r *http.Request) {
-	var err error
-
-	logger := s.Res.Logger
-
-	// Adding request ID to request context
-	reqID, _ := r.Context().Value(ctxKeyRequestID{}).(string)
-	if reqID != "" {
-		logger = logger.With("requestId", reqID)
-	}
-
-	defer func() {
-		if err != nil {
-			processError(w, logger, err)
-		}
-	}()
-
-	userTgID, ok := r.Context().Value(ctxKeyUserTgID{}).(int64)
-	if !ok {
-		err = apperrors.ErrUnauthorized("couldn't identify user")
-		return
-	}
-
-	var userID, habitID int64
-	userID, habitID, err = getUserIDAndHabitIDFromURLParams(r)
-	if err != nil {
-		return
-	}
-
-	var withChecks bool
-	withChecks, err = getBoolFromURLQuery(r, "with_checks", false)
-	if err != nil {
-		return
-	}
-
-	var fromDate, toDate *date.Date
-	if withChecks {
-		fromDate, toDate, err = getFromToDatesFromURLQuery(r)
-		if err != nil {
-			return
-		}
-	}
-
-	var user *usrPkg.User
-	if user, err = s.Res.UsrRepo.GetByTgID(userTgID); err != nil {
-		return
-	}
-
-	var (
-		requestedByOwner bool = userID == user.ID
-		habit            *hPkg.Habit
-	)
-	if habit, err = s.Res.HabitRepo.GetByIDAndOwnerID(habitID, userID, requestedByOwner); err != nil {
-		return
-	}
-
-	if withChecks {
-		var habitChecks []*hPkg.HabitCheck
-		if habitChecks, err = s.Res.HabitRepo.GetUserHabitsCompletedChecks(userID, []int64{habit.ID}, fromDate, toDate); err != nil {
-			return
-		}
-		habit.Checks = habitChecks
-	}
-
-	response := GetHabitResponse{Data: habit}
-
-	json.NewEncoder(w).Encode(response)
-}
-
 func (s Server) postHabit(w http.ResponseWriter, r *http.Request) {
 	var err error
 
@@ -279,6 +210,132 @@ func (s Server) putHabit(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response := PostPutHabitResponse{Data: habit}
+
+	json.NewEncoder(w).Encode(response)
+}
+
+func (s Server) deleteHabit(w http.ResponseWriter, r *http.Request) {
+	var err error
+
+	logger := s.Res.Logger
+
+	// Adding request ID to request context
+	reqID, _ := r.Context().Value(ctxKeyRequestID{}).(string)
+	if reqID != "" {
+		logger = logger.With("requestId", reqID)
+	}
+
+	defer func() {
+		if err != nil {
+			processError(w, logger, err)
+		}
+	}()
+
+	userTgID, ok := r.Context().Value(ctxKeyUserTgID{}).(int64)
+	if !ok {
+		err = apperrors.ErrUnauthorized("couldn't identify user")
+		return
+	}
+
+	var habitID, userID int64
+	userID, habitID, err = getUserIDAndHabitIDFromURLParams(r)
+	if err != nil {
+		return
+	}
+
+	var user *usrPkg.User
+	if user, err = s.Res.UsrRepo.GetByTgID(userTgID); err != nil {
+		return
+	}
+
+	requestedByOwner := userID == user.ID
+	if !requestedByOwner {
+		err = apperrors.ErrForbidden("couldn't delete habit for another user")
+		return
+	}
+
+	habit, err := s.Res.HabitRepo.GetByIDAndOwnerID(habitID, userID, requestedByOwner)
+	if err != nil {
+		return
+	}
+
+	habit.Active = false
+	habit.UpdatedAt = time.Now()
+
+	if err = s.Res.HabitRepo.Update(habit); err != nil {
+		return
+	}
+
+	response := PostPutHabitResponse{Data: habit}
+
+	json.NewEncoder(w).Encode(response)
+}
+
+func (s Server) getHabit(w http.ResponseWriter, r *http.Request) {
+	var err error
+
+	logger := s.Res.Logger
+
+	// Adding request ID to request context
+	reqID, _ := r.Context().Value(ctxKeyRequestID{}).(string)
+	if reqID != "" {
+		logger = logger.With("requestId", reqID)
+	}
+
+	defer func() {
+		if err != nil {
+			processError(w, logger, err)
+		}
+	}()
+
+	userTgID, ok := r.Context().Value(ctxKeyUserTgID{}).(int64)
+	if !ok {
+		err = apperrors.ErrUnauthorized("couldn't identify user")
+		return
+	}
+
+	var userID, habitID int64
+	userID, habitID, err = getUserIDAndHabitIDFromURLParams(r)
+	if err != nil {
+		return
+	}
+
+	var withChecks bool
+	withChecks, err = getBoolFromURLQuery(r, "with_checks", false)
+	if err != nil {
+		return
+	}
+
+	var fromDate, toDate *date.Date
+	if withChecks {
+		fromDate, toDate, err = getFromToDatesFromURLQuery(r)
+		if err != nil {
+			return
+		}
+	}
+
+	var user *usrPkg.User
+	if user, err = s.Res.UsrRepo.GetByTgID(userTgID); err != nil {
+		return
+	}
+
+	var (
+		requestedByOwner bool = userID == user.ID
+		habit            *hPkg.Habit
+	)
+	if habit, err = s.Res.HabitRepo.GetByIDAndOwnerID(habitID, userID, requestedByOwner); err != nil {
+		return
+	}
+
+	if withChecks {
+		var habitChecks []*hPkg.HabitCheck
+		if habitChecks, err = s.Res.HabitRepo.GetUserHabitsCompletedChecks(userID, []int64{habit.ID}, fromDate, toDate); err != nil {
+			return
+		}
+		habit.Checks = habitChecks
+	}
+
+	response := GetHabitResponse{Data: habit}
 
 	json.NewEncoder(w).Encode(response)
 }

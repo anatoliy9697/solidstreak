@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import type { Habit, HabitCheck } from '@/models/habit';
-import { fetchHabits, postHabitCheck } from '@/api/habit';
+import { fetchHabits, putHabit, deleteHabit, postHabitCheck } from '@/api/habit';
 import type { RequestResult } from '@/api/habit';
 
 export const useHabitStore = defineStore('habit', {
@@ -26,6 +26,55 @@ export const useHabitStore = defineStore('habit', {
       return result;
     },
 
+    async updateHabit(userId: number, habit: Habit): Promise<RequestResult> {
+      const result = await putHabit(userId, habit);
+
+      if (result.success) {
+        const updatedHabit = result.response?.data as Habit;
+        updatedHabit.checks = habit.checks;
+        this.habitsMap.set(updatedHabit.id, updatedHabit);
+        const index = this.habits.findIndex(h => h.id === updatedHabit.id);
+        if (index !== -1) {
+          this.habits[index] = updatedHabit;
+        }
+      }
+
+      return result;
+    },
+
+    async setHabitArchived(userId: number, habitId: number, archived: boolean): Promise<RequestResult> {
+      const habit = this.habitsMap.get(habitId);
+
+      if (!habit) {
+        return {
+          success: false,
+          httpCode: 404,
+          httpError: 'Habit not found',
+          apiErrors: [{
+            HTTPCode: 404,
+            Title: 'not found',
+            Detail: `couldn't find habit with specified id`,
+          }],
+          response: null,
+        };
+      }
+
+      const updatedHabit = { ...habit, archived };
+      
+      return await this.updateHabit(userId, updatedHabit);
+    },
+
+    async deleteHabit(userId: number, habitId: number): Promise<RequestResult> {
+      const result = await deleteHabit(userId, habitId);
+
+      if (result.success) {
+        this.habitsMap.delete(habitId);
+        this.habits = this.habits.filter(h => h.id !== habitId);
+      }
+
+      return result;
+    },
+    
     async setHabitCheck(userId: number, habitId: number, habitCheck: HabitCheck): Promise<RequestResult> {
       const result = await postHabitCheck(userId, habitId, habitCheck);
 
@@ -42,7 +91,7 @@ export const useHabitStore = defineStore('habit', {
       }
 
       return result;
-    }
+    },
 
   }
 

@@ -5,17 +5,36 @@ export interface Metadata {
   username: string;
 }
 
+export interface PutHabitRequest {
+  data: Habit;
+  meta?: Metadata;
+}
+
+export interface DeleteHabitRequest {
+  meta?: Metadata;
+}
+
 export interface PostHabitCheckRequest {
   data: HabitCheck;
   meta?: Metadata;
 }
 
-export type ApiRequest = PostHabitCheckRequest
+export type ApiRequest = PutHabitRequest | DeleteHabitRequest | PostHabitCheckRequest
 
 export interface Error {
   HTTPCode: number;
 	Title: string;
 	Detail?: string;
+}
+
+export interface PutHabitResponse {
+  data: Habit;
+  errors?: Error[];
+}
+
+export interface DeleteHabitResponse {
+  data: Habit;
+  errors?: Error[];
 }
 
 export interface GetHabitsResponse {
@@ -28,7 +47,7 @@ export interface PostHabitCheckResponse {
   errors?: Error[];
 }
 
-export type ApiResponse = GetHabitsResponse | PostHabitCheckResponse;
+export type ApiResponse = PutHabitResponse | DeleteHabitResponse | GetHabitsResponse | PostHabitCheckResponse;
 
 export interface RequestResult {
   success: boolean;
@@ -38,7 +57,7 @@ export interface RequestResult {
   response: ApiResponse | null;
 }
 
-async function performRequest(method: 'get' | 'post' | 'put', url: string,  data?: ApiRequest): Promise<RequestResult> {
+async function performRequest(method: 'post' | 'put' | 'delete' | 'get', url: string,  data?: ApiRequest): Promise<RequestResult> {
   if (data && !data.meta?.username) data.meta = { username: 'telegram_user' }; // TODO: должно приходить из внешнего контекста
   
   const result: RequestResult = {
@@ -83,6 +102,16 @@ async function performRequest(method: 'get' | 'post' | 'put', url: string,  data
 
 export async function fetchHabits(userId: number): Promise<RequestResult> {
   return await performRequest('get', `/api/v1/users/${userId}/habits?with_checks=true`);
+}
+
+export async function putHabit(userId: number, habit: Habit): Promise<RequestResult> {
+  const payload: PutHabitRequest = { data: habit };
+  return await performRequest('put', `/api/v1/users/${userId}/habits/${habit.id}`, payload);
+}
+
+export async function deleteHabit(userId: number, habitId: number): Promise<RequestResult> {
+  const payload: DeleteHabitRequest = {};
+  return await performRequest('delete', `/api/v1/users/${userId}/habits/${habitId}`, payload);
 }
 
 export async function postHabitCheck(userId: number, habitId: number, habitCheck: HabitCheck): Promise<RequestResult> {
