@@ -1,8 +1,9 @@
 <script setup lang="ts">
 
 import { ref, onMounted } from 'vue'
-import HabitCard from '@/components/HabitCard.vue'
+import Toast from 'primevue/toast';
 import { useHabitStore } from '@/stores/habit';
+import HabitCard from '@/components/HabitCard.vue'
 
 const habitStore = useHabitStore();
 const isHabitsLoading = ref<boolean>(true);
@@ -19,6 +20,7 @@ const expandedHabitCardId = ref<number | null>(null);
 </script>
 
 <template>
+  
   <div class="p-2">
 
   <p v-if="isHabitsLoading">Loading...</p>
@@ -36,6 +38,9 @@ const expandedHabitCardId = ref<number | null>(null);
   </template>
 
   </div>
+
+  <Toast position="bottom-right"/>
+
 </template>
 
 <style scoped></style>

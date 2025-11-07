@@ -9,6 +9,7 @@ export interface Habit {
     archived: boolean
     title: string
     description?: string
+    color?: string
     isPublic: boolean
     createdAt: Date
     updatedAt: Date

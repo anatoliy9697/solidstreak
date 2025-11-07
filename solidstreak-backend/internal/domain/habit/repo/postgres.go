@@ -23,12 +23,12 @@ func initPGRepo(c context.Context, p *pgxpool.Pool) *pgRepo {
 func (r pgRepo) Create(h *hPkg.Habit) error {
 	sql := `
 		WITH habit AS (
-			INSERT INTO habits (active, archived, title, description, creator_id, created_at, updated_at)
-			VALUES ($1, $2, $3, $4, $5, $6, $7)
+			INSERT INTO habits (active, archived, title, description, color, creator_id, created_at, updated_at)
+			VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 			RETURNING id, creator_id
 		)
 		INSERT INTO users_habits (active, user_id, habit_id, is_public)
-		SELECT TRUE, habit.creator_id, habit.id, $8 FROM habit
+		SELECT TRUE, habit.creator_id, habit.id, $9 FROM habit
 		RETURNING habit_id
 	`
 	err := r.p.QueryRow(
@@ -38,6 +38,7 @@ func (r pgRepo) Create(h *hPkg.Habit) error {
 		h.Archived,
 		h.Title,
 		h.Description,
+		h.Color,
 		h.CreatorID,
 		h.CreatedAt,
 		h.UpdatedAt,
@@ -55,12 +56,13 @@ func (r pgRepo) Update(h *hPkg.Habit) error {
 				archived = $2,
 				title = $3,
 				description = $4,
-				updated_at = $5
-			WHERE id = $6
+				color = $5,
+				updated_at = $6
+			WHERE id = $7
 			RETURNING id, creator_id
 		)
 		UPDATE users_habits SET
-			is_public = $7
+			is_public = $8
 		FROM habit h
 		WHERE 
 			users_habits.habit_id = h.id
@@ -73,6 +75,7 @@ func (r pgRepo) Update(h *hPkg.Habit) error {
 		h.Archived,
 		h.Title,
 		h.Description,
+		h.Color,
 		h.UpdatedAt,
 		h.ID,
 		h.IsPublic,
@@ -83,7 +86,7 @@ func (r pgRepo) Update(h *hPkg.Habit) error {
 
 func (r pgRepo) GetByOwnerIDAndStatus(ownerID int64, status hPkg.HabitStatus, requestedByOwner bool) ([]*hPkg.Habit, error) {
 	sql := `
-		SELECT h.id, h.active, h.archived, h.title, h.description, h.creator_id, uh.is_public, h.created_at, h.updated_at
+		SELECT h.id, h.active, h.archived, h.title, h.description, h.color, h.creator_id, uh.is_public, h.created_at, h.updated_at
 		FROM habits h
 		JOIN users_habits uh ON 
 			h.id = uh.habit_id 
@@ -117,6 +120,7 @@ func (r pgRepo) GetByOwnerIDAndStatus(ownerID int64, status hPkg.HabitStatus, re
 			&h.Archived,
 			&h.Title,
 			&h.Description,
+			&h.Color,
 			&h.CreatorID,
 			&h.IsPublic,
 			&h.CreatedAt,
@@ -141,7 +145,7 @@ func (r pgRepo) GetByIDAndOwnerID(id int64, ownerID int64, requestedByOwner bool
 			FROM habits h
 			WHERE h.id = $1
 		)
-		SELECT h.id, h.active, h.archived, h.title, h.description, h.creator_id, uh.is_public, h.created_at, h.updated_at
+		SELECT h.id, h.active, h.archived, h.title, h.description, h.color, h.creator_id, uh.is_public, h.created_at, h.updated_at
 		FROM habit h
 		JOIN users_habits uh ON 
 			h.id = uh.habit_id 
@@ -165,6 +169,7 @@ func (r pgRepo) GetByIDAndOwnerID(id int64, ownerID int64, requestedByOwner bool
 		&h.Archived,
 		&h.Title,
 		&h.Description,
+		&h.Color,
 		&h.CreatorID,
 		&h.IsPublic,
 		&h.CreatedAt,

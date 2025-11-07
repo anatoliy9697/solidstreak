@@ -1,6 +1,9 @@
 import './style.css'
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
+import PrimeVue from 'primevue/config'
+import Aura from '@primeuix/themes/aura'
+import ToastService  from 'primevue/toastservice'
 import VueCalendarHeatmap from 'vue3-calendar-heatmap'
 
 import App from './App.vue'
@@ -10,6 +13,12 @@ const app = createApp(App)
 
 app.use(createPinia())
 // app.use(router)
-app.use(VueCalendarHeatmap)
+app.use(PrimeVue, {
+    theme: {
+        preset: Aura
+    }
+});
+app.use(ToastService);
+app.use(VueCalendarHeatmap);
 
-app.mount('#app')
+app.mount('#app');

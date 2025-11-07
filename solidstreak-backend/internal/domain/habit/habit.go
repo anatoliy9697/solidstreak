@@ -12,6 +12,7 @@ type Habit struct {
 	Archived    bool          `json:"archived"`
 	Title       string        `json:"title"`
 	Description string        `json:"description"`
+	Color       Color         `json:"color"`
 	CreatorID   int64         `json:"creatorId"`
 	IsPublic    bool          `json:"isPublic"`
 	CreatedAt   time.Time     `json:"createdAt"`
@@ -33,6 +34,22 @@ var HabitStatusMapping = map[string]HabitStatus{
 	string(Any):      Any,
 }
 
+type Color string
+
+const (
+	Green  Color = "green"
+	Red    Color = "red"
+	Blue   Color = "blue"
+	Yellow Color = "yellow"
+)
+
+var ColorMapping = map[string]Color{
+	string(Green):  Green,
+	string(Red):    Red,
+	string(Blue):   Blue,
+	string(Yellow): Yellow,
+}
+
 type HabitCheck struct {
 	HabitID   int64     `json:"-"`
 	UserID    int64     `json:"-"`
@@ -41,12 +58,13 @@ type HabitCheck struct {
 	CheckedAt time.Time `json:"checkedAt"`
 }
 
-func NewHabit(title, description string, creatorID int64, isPublic bool) *Habit {
+func NewHabit(title, description string, color Color, creatorID int64, isPublic bool) *Habit {
 	return &Habit{
 		Active:      true,
 		Archived:    false,
 		Title:       title,
 		Description: description,
+		Color:       color,
 		IsPublic:    isPublic,
 		CreatorID:   creatorID,
 		CreatedAt:   time.Now(),

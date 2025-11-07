@@ -87,6 +87,9 @@ export const useHabitStore = defineStore('habit', {
             return result;
           }
         }
+        if (habit && !habit.checks) {
+          habit.checks = [];
+        }
         habit?.checks?.push(habitCheck);
       }
 

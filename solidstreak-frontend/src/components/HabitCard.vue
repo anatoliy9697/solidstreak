@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
+import { useToast } from 'primevue/usetoast';
 import type { Habit, HabitCheck } from '@/models/habit'
+import { COLORS, GREEN } from '@/models/color'
 import { useHabitStore } from '@/stores/habit';
 import { SquarePen, Package, PackageOpen, Trash2 } from 'lucide-vue-next';
 
@@ -8,7 +10,11 @@ const props = defineProps<{
   habit: Habit
   currentDate: string
   expanded?: boolean
-}>()
+}>();
+
+const toast = useToast();
+
+const color = COLORS[props.habit.color as keyof typeof COLORS] || GREEN;
 
 const userId = 3; // TODO: получать из внешнего контекста
 
@@ -23,11 +29,15 @@ const checksArray = computed(() => {
 
 const currentDateCheck = ref<boolean>(props.habit.checks?.some(check => check.checkDate === props.currentDate && check.completed) || false);
 
+const isCheckButtonHovered = ref<boolean>(false);
+
 async function processCurrentDateCheck(): Promise<void> {
+
+  const check = !currentDateCheck.value;
 
   const habitCheck: HabitCheck = {
     checkDate: props.currentDate,
-    completed: !currentDateCheck.value,
+    completed: check,
     checkedAt: new Date()
   };
 
@@ -37,13 +47,33 @@ async function processCurrentDateCheck(): Promise<void> {
     habitCheck
   );
 
-  if (result.success) currentDateCheck.value = habitCheck.completed;
+  if (result.success) {
+    currentDateCheck.value = check;
+  } else {
+    toast.add({severity:'error', summary: 'Error', detail: 'Failed to ' + (check ? 'check' : 'uncheck') + ' habit', life: 3000});
+  }
 
+}
+
+async function processHabitArchiving(): Promise<void> {
+  const archive = !props.habit.archived;
+  const result = await habitStore.setHabitArchived(userId, props.habit.id, archive);
+  if (!result.success) {
+    toast.add({severity:'error', summary: 'Error', detail: 'Failed to ' + (archive ? 'archive' : 'unarchive') + ' habit', life: 3000});
+  }
+}
+
+async function processHabitDeletion(): Promise<void> {
+  const result = await habitStore.deleteHabit(userId, props.habit.id);
+  if (!result.success) {
+    toast.add({severity:'error', summary: 'Error', detail: 'Failed to delete habit', life: 3000});
+  }
 }
 
 </script>
 
 <template>
+
   <div :class="['bg-white rounded-md shadow-sm border border-gray-300 px-4 py-2 cursor-pointer', habit.archived ? 'opacity-50' : '']">
 
   <div :class="['flex items-start justify-between', expanded && !habit.archived ? 'mb-2' : '']">
@@ -57,23 +87,20 @@ async function processCurrentDateCheck(): Promise<void> {
 
         <div class="flex items-center" v-if="expanded">
           <span title="Delete">
-            <!-- TODO: сделать обработку ошибки запроса -->
             <Trash2 
-              @click.stop="habitStore.deleteHabit(userId, habit.id)"
+              @click.stop="processHabitDeletion()"
               class="w-5 h-5 mr-2 text-gray-300 hover:text-gray-400 cursor-pointer"
             />
           </span>
           <span title="Archive" v-if="!habit.archived">
-            <!-- TODO: сделать обработку ошибки запроса -->
             <Package 
-              @click.stop="habitStore.setHabitArchived(userId, habit.id, true)"
+              @click.stop="processHabitArchiving()"
               class="w-5 h-5 mr-2 text-gray-300 hover:text-gray-400 cursor-pointer"
             />
           </span>
           <span title="Unarchive" v-else>
-            <!-- TODO: сделать обработку ошибки запроса -->
             <PackageOpen 
-              @click.stop="habitStore.setHabitArchived(userId, habit.id, false)"
+              @click.stop="processHabitArchiving()"
               class="w-5 h-5 mr-2 text-gray-300 hover:text-gray-400 cursor-pointer"
             />
           </span>
@@ -87,10 +114,19 @@ async function processCurrentDateCheck(): Promise<void> {
         <div v-if="!habit.archived" class="ml-4">
           <button
             @click.stop="processCurrentDateCheck()"
+            @mouseover="isCheckButtonHovered = true"
+            @mouseleave="isCheckButtonHovered = false"
+            :style="currentDateCheck
+              ? {
+                  borderColor: isCheckButtonHovered ? color.value500hex : color.value600hex,
+                  backgroundColor: isCheckButtonHovered ? color.value400hex : color.value500hex,
+                  color: '#fff'
+                }
+              : {}"
             :class="[
               'w-7 h-7 flex items-center justify-center rounded-lg border cursor-pointer',
               currentDateCheck
-                ? 'border-green-600 text-white bg-green-500 hover:border-green-500 hover:bg-green-400'
+                ? ''
                 : 'border-gray-400 text-gray-400 hover:text-gray-500 hover:border-gray-500'
             ]"
           >
@@ -108,10 +144,11 @@ async function processCurrentDateCheck(): Promise<void> {
       v-if="expanded && !habit.archived"
       :values="checksArray"
       :end-date="currentDate"
-      :range-color="['#e5e7eb', '#16a34a']"
+      :range-color="[color.value100hex, color.value600hex]"
       :tooltip="false"
       :round="3"
     />
     
   </div>
+
 </template> 

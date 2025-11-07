@@ -20,6 +20,7 @@ type Habit struct {
 	Archived    *bool   `json:"archived"`
 	Title       *string `json:"title"`
 	Description *string `json:"description"`
+	Color       *string `json:"color"`
 	IsPublic    *bool   `json:"isPublic"`
 }
 
@@ -99,6 +100,17 @@ func (s Server) postHabit(w http.ResponseWriter, r *http.Request) {
 		err = apperrors.ErrBadRequest("habit title is required")
 		return
 	}
+	var color hPkg.Color
+	if req.Data.Color != nil {
+		var ok bool
+		if color, ok = hPkg.ColorMapping[*req.Data.Color]; !ok {
+			err = apperrors.ErrBadRequest("invalid habit color")
+			return
+		}
+	}
+	if color == "" {
+		color = hPkg.Green
+	}
 	if req.Data.IsPublic == nil {
 		err = apperrors.ErrBadRequest("habit public status is required")
 		return
@@ -114,7 +126,7 @@ func (s Server) postHabit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	habit := hPkg.NewHabit(*req.Data.Title, *req.Data.Description, user.ID, *req.Data.IsPublic)
+	habit := hPkg.NewHabit(*req.Data.Title, *req.Data.Description, color, user.ID, *req.Data.IsPublic)
 
 	if err = s.Res.HabitRepo.Create(habit); err != nil {
 		return
@@ -174,6 +186,17 @@ func (s Server) putHabit(w http.ResponseWriter, r *http.Request) {
 		err = apperrors.ErrBadRequest("habit title is required")
 		return
 	}
+	var color hPkg.Color
+	if req.Data.Color != nil {
+		var ok bool
+		if color, ok = hPkg.ColorMapping[*req.Data.Color]; !ok {
+			err = apperrors.ErrBadRequest("invalid habit color")
+			return
+		}
+	}
+	if color == "" {
+		color = hPkg.Green
+	}
 	if req.Data.IsPublic == nil {
 		err = apperrors.ErrBadRequest("habit public status is required")
 		return
@@ -202,6 +225,7 @@ func (s Server) putHabit(w http.ResponseWriter, r *http.Request) {
 	} else {
 		habit.Description = ""
 	}
+	habit.Color = color
 	habit.IsPublic = *req.Data.IsPublic
 	habit.UpdatedAt = time.Now()
 
