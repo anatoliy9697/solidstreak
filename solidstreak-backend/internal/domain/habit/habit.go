@@ -37,17 +37,23 @@ var HabitStatusMapping = map[string]HabitStatus{
 type Color string
 
 const (
-	Green  Color = "green"
 	Red    Color = "red"
-	Blue   Color = "blue"
+	Orange Color = "orange"
 	Yellow Color = "yellow"
+	Lime   Color = "lime"
+	Green  Color = "green"
+	Blue   Color = "blue"
+	Purple Color = "purple"
 )
 
 var ColorMapping = map[string]Color{
-	string(Green):  Green,
 	string(Red):    Red,
-	string(Blue):   Blue,
+	string(Orange): Orange,
 	string(Yellow): Yellow,
+	string(Lime):   Lime,
+	string(Green):  Green,
+	string(Blue):   Blue,
+	string(Purple): Purple,
 }
 
 type HabitCheck struct {

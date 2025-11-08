@@ -5,11 +5,16 @@
 }
 
 body {
-  @apply font-sans bg-gray-100 text-xs text-neutral-950;
+  @apply font-sans bg-gray-100 text-xs text-neutral-950 p-2;
 }
 
 h2 {
   @apply text-lg font-semibold;
+}
+
+.p-toast {
+  box-sizing: border-box;
+  max-width: calc(100vw - 40px);
 }
 
 .p-toast-detail {

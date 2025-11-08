@@ -145,7 +145,7 @@ async function processHabitDeletion(): Promise<void> {
       :values="checksArray"
       :end-date="currentDate"
       :range-color="[color.value100hex, color.value600hex]"
-      :tooltip="false"
+      :tooltip="false" 
       :round="3"
     />
     
