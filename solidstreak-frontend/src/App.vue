@@ -4,13 +4,14 @@ import { ref, onMounted, computed } from 'vue'
 import Toast from 'primevue/toast';
 import { type Color, PURPLE, generateColorGradient } from '@/models/color'
 import { useHabitStore } from '@/stores/habit';
-import HabitCard from '@/components/HabitCard.vue'
+import HabitCard from '@/components/habit-card/HabitCard.vue'
+import CalendarHeatmap from '@/components/calendar-heatmap/CalendarHeatmap.vue'
 
 const habitStore = useHabitStore();
 const isHabitsLoading = ref<boolean>(true);
 const habitsSuccessfullyLoaded = ref<boolean>(false);
 const currentDate = new Date().toISOString().split('T')[0] || '';
-const activitiesColor = ref<Color>(PURPLE)
+const mainHeatmapColor = ref<Color>(PURPLE)
 
 onMounted(async () => {
   const result = await habitStore.fetchHabits(3);
@@ -52,7 +53,7 @@ const expandedHabitCardId = ref<number | null>(null);
       :values="Array.from(activitiesMap.entries()).map(([date, count]) => ({ date, count }))"
       :end-date="currentDate"
       :max="activeHabitsCount"
-      :range-color="['#ffffff', '#ffffff', ...generateColorGradient(activitiesColor.value200hex, activitiesColor.value800hex, (activeHabitsCount > 4 ? 4 : activeHabitsCount))]"
+      :range-color="['#ffffff', ...generateColorGradient(mainHeatmapColor.value200hex, mainHeatmapColor.value800hex, activeHabitsCount)]"
       :round="3"
       class="mb-4 px-2"
     />

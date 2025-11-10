@@ -21,7 +21,3 @@ h2 {
   @apply text-neutral-950;
   color: #0a0a0a !important;
 }
-
-.vch__legend {
-  @apply hidden;
-}

@@ -5,6 +5,7 @@ import type { Habit, HabitCheck } from '@/models/habit'
 import { COLORS, GREEN } from '@/models/color'
 import { useHabitStore } from '@/stores/habit';
 import { SquarePen, Package, PackageOpen, Trash2 } from 'lucide-vue-next';
+import CalendarHeatmap from '@/components/calendar-heatmap/CalendarHeatmap.vue'
 
 const props = defineProps<{
   habit: Habit
@@ -21,10 +22,11 @@ const userId = 3; // TODO: получать из внешнего контекс
 const habitStore = useHabitStore();
 
 const checksArray = computed(() => {
-  return props.habit.checks?.map(check => ({
-    date: check.checkDate,
-    count: check.completed ? 0 : null
-  })) || [];
+  return props.habit.checks?.filter(check => check.completed)
+    .map(check => ({
+      date: check.checkDate,
+      count: 1
+    })) || [];
 });
 
 const currentDateCheck = ref<boolean>(props.habit.checks?.some(check => check.checkDate === props.currentDate && check.completed) || false);
@@ -144,6 +146,7 @@ async function processHabitDeletion(): Promise<void> {
       v-if="expanded && !habit.archived"
       :values="checksArray"
       :end-date="currentDate"
+      :max="1"
       :range-color="[color.value100hex, color.value600hex]"
       :tooltip="false" 
       :round="3"
