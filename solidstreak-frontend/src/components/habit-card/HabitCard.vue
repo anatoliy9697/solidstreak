@@ -1,26 +1,43 @@
 <script setup lang="ts">
+
 import { ref, computed } from 'vue';
+import { useConfirm } from "primevue/useconfirm";
 import { useToast } from 'primevue/usetoast';
-import type { Habit, HabitCheck } from '@/models/habit'
-import { COLORS, GREEN } from '@/models/color'
-import { useHabitStore } from '@/stores/habit';
 import { SquarePen, Package, PackageOpen, Trash2 } from 'lucide-vue-next';
+
+import { useHabitStore } from '@/stores/habit';
+import { COLORS, GREEN } from '@/models/color'
+import type { Habit, HabitCheck } from '@/models/habit'
 import CalendarHeatmap from '@/components/calendar-heatmap/CalendarHeatmap.vue'
 
+// ─────────────────────────────────────────────
+// Props
+// ─────────────────────────────────────────────
 const props = defineProps<{
   habit: Habit
   currentDate: string
   expanded?: boolean
 }>();
 
+// ─────────────────────────────────────────────
+// Composables & stores
+// ─────────────────────────────────────────────
+const confirm = useConfirm();
 const toast = useToast();
-
-const color = COLORS[props.habit.color as keyof typeof COLORS] || GREEN;
-
-const userId = 3; // TODO: получать из внешнего контекста
-
 const habitStore = useHabitStore();
 
+// ─────────────────────────────────────────────
+// Constants & reactive state
+// ─────────────────────────────────────────────
+const userId = 3; // TODO: получать из внешнего контекста
+const color = COLORS[props.habit.color as keyof typeof COLORS] || GREEN;
+
+const isCheckButtonHovered = ref<boolean>(false);
+const currentDateCheck = ref<boolean>(props.habit.checks?.some(check => check.checkDate === props.currentDate && check.completed) || false);
+
+// ─────────────────────────────────────────────
+// Computed
+// ─────────────────────────────────────────────
 const checksArray = computed(() => {
   return props.habit.checks?.filter(check => check.completed)
     .map(check => ({
@@ -29,12 +46,10 @@ const checksArray = computed(() => {
     })) || [];
 });
 
-const currentDateCheck = ref<boolean>(props.habit.checks?.some(check => check.checkDate === props.currentDate && check.completed) || false);
-
-const isCheckButtonHovered = ref<boolean>(false);
-
+// ─────────────────────────────────────────────
+// Methods
+// ─────────────────────────────────────────────
 async function processCurrentDateCheck(): Promise<void> {
-
   const check = !currentDateCheck.value;
 
   const habitCheck: HabitCheck = {
@@ -54,22 +69,35 @@ async function processCurrentDateCheck(): Promise<void> {
   } else {
     toast.add({severity:'error', summary: 'Error', detail: 'Failed to ' + (check ? 'check' : 'uncheck') + ' habit', life: 3000});
   }
-
 }
 
 async function processHabitArchiving(): Promise<void> {
-  const archive = !props.habit.archived;
-  const result = await habitStore.setHabitArchived(userId, props.habit.id, archive);
-  if (!result.success) {
-    toast.add({severity:'error', summary: 'Error', detail: 'Failed to ' + (archive ? 'archive' : 'unarchive') + ' habit', life: 3000});
-  }
+  confirm.require({
+    group: 'headless',
+    message: `Are you sure you want to ${props.habit.archived ? 'unarchive' : 'archive'} this habit?`,
+    header: 'Confirm',
+    accept: async () => {
+      const archive = !props.habit.archived;
+      const result = await habitStore.setHabitArchived(userId, props.habit.id, archive);
+      if (!result.success) {
+        toast.add({severity:'error', summary: 'Error', detail: `Failed to ${archive ? 'archive' : 'unarchive'} habit`, life: 3000});
+      }
+    }
+  });
 }
 
 async function processHabitDeletion(): Promise<void> {
-  const result = await habitStore.deleteHabit(userId, props.habit.id);
-  if (!result.success) {
-    toast.add({severity:'error', summary: 'Error', detail: 'Failed to delete habit', life: 3000});
-  }
+  confirm.require({
+    group: 'headless',
+    message: `Are you sure you want to delete this habit?`,
+    header: 'Confirm',
+    accept: async () => {
+      const result = await habitStore.deleteHabit(userId, props.habit.id);
+      if (!result.success) {
+        toast.add({severity:'error', summary: 'Error', detail: 'Failed to delete habit', life: 3000});
+      }
+    }
+  });
 }
 
 </script>
@@ -142,7 +170,7 @@ async function processHabitDeletion(): Promise<void> {
       
     </div>
     
-    <calendar-heatmap
+    <CalendarHeatmap
       v-if="expanded && !habit.archived"
       :values="checksArray"
       :end-date="currentDate"

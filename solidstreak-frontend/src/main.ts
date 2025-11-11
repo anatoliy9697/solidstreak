@@ -4,7 +4,7 @@ import { createPinia } from 'pinia'
 import PrimeVue from 'primevue/config'
 import Aura from '@primeuix/themes/aura'
 import ToastService  from 'primevue/toastservice'
-// import VueCalendarHeatmap from 'vue3-calendar-heatmap'
+import ConfirmationService from 'primevue/confirmationservice';
 
 import App from './App.vue'
 // import router from './router'
@@ -19,6 +19,6 @@ app.use(PrimeVue, {
     }
 });
 app.use(ToastService);
-// app.use(VueCalendarHeatmap);
+app.use(ConfirmationService);
 
 app.mount('#app');
