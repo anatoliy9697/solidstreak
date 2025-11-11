@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
+
 import type { Habit, HabitCheck } from '@/models/habit';
-import { fetchHabits, putHabit, deleteHabit, postHabitCheck } from '@/api/habit';
-import type { RequestResult } from '@/api/habit';
+import { type RequestResult, fetchHabits, putHabit, deleteHabit, postHabitCheck } from '@/api/habit';
 
 export const useHabitStore = defineStore('habit', {
   
@@ -96,6 +96,39 @@ export const useHabitStore = defineStore('habit', {
       return result;
     },
 
-  }
+  },
+
+  getters: {
+    
+    activeHabits(state): Habit[] {
+      return state.habits.filter(habit => !habit.archived);
+    },
+
+    archivedHabits(state): Habit[] {
+      return state.habits.filter(habit => habit.archived);
+    },
+
+    activeHabitsCount(state): number {
+      return state.habits.filter(habit => !habit.archived).length;
+    },
+
+    activities(state): { date: string; count: number }[] {
+      const map = new Map<string, number>();
+  
+      state.habits
+        .filter(habit => !habit.archived)
+        .forEach(habit => {
+          habit.checks?.forEach(check => {
+            if (check.completed) {
+              const date = check.checkDate;
+              map.set(date, (map.get(date) || 0) + 1);
+            }
+          });
+        });
+
+      return Array.from(map.entries()).map(([date, count]) => ({ date, count }));
+    },
+
+  },
 
 });

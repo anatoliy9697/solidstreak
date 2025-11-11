@@ -8,6 +8,12 @@ body {
   @apply font-sans bg-gray-100 text-sm p-2 text-black;
 }
 
+a {
+  @apply underline cursor-pointer text-blue-600;
+  text-underline-offset: .2rem;
+  text-decoration-color: #155dfc;
+}
+
 h2 {
   @apply text-lg font-semibold;
 }
