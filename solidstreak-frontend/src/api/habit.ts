@@ -5,7 +5,7 @@ export interface Metadata {
   username: string;
 }
 
-export interface PutHabitRequest {
+export interface PostPutHabitRequest {
   data: Habit;
   meta?: Metadata;
 }
@@ -19,7 +19,7 @@ export interface PostHabitCheckRequest {
   meta?: Metadata;
 }
 
-export type ApiRequest = PutHabitRequest | DeleteHabitRequest | PostHabitCheckRequest
+export type ApiRequest = PostPutHabitRequest | DeleteHabitRequest | PostHabitCheckRequest
 
 export interface Error {
   HTTPCode: number;
@@ -104,8 +104,13 @@ export async function fetchHabits(userId: number): Promise<RequestResult> {
   return await performRequest('get', `/api/v1/users/${userId}/habits?with_checks=true`);
 }
 
+export async function postHabit(userId: number, habit: Habit): Promise<RequestResult> {
+  const payload: PostPutHabitRequest = { data: habit };
+  return await performRequest('post', `/api/v1/users/${userId}/habits`, payload);
+}
+
 export async function putHabit(userId: number, habit: Habit): Promise<RequestResult> {
-  const payload: PutHabitRequest = { data: habit };
+  const payload: PostPutHabitRequest = { data: habit };
   return await performRequest('put', `/api/v1/users/${userId}/habits/${habit.id}`, payload);
 }
 

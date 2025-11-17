@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 
 import type { Habit, HabitCheck } from '@/models/habit';
-import { type RequestResult, fetchHabits, putHabit, deleteHabit, postHabitCheck } from '@/api/habit';
+import { type RequestResult, fetchHabits, postHabit, putHabit, deleteHabit, postHabitCheck } from '@/api/habit';
 
 export const useHabitStore = defineStore('habit', {
   
@@ -26,16 +26,34 @@ export const useHabitStore = defineStore('habit', {
       return result;
     },
 
+    async createHabit(userId: number, habit: Habit): Promise<RequestResult> {
+      const result = await postHabit(userId, habit);
+
+      if (result.success) {
+        const createdHabit = result.response?.data as Habit;
+        this.habitsMap.set(createdHabit.id, createdHabit);
+        this.habits.push(createdHabit);
+      }
+
+      return result;
+    },
+
     async updateHabit(userId: number, habit: Habit): Promise<RequestResult> {
       const result = await putHabit(userId, habit);
 
       if (result.success) {
         const updatedHabit = result.response?.data as Habit;
-        updatedHabit.checks = habit.checks;
-        this.habitsMap.set(updatedHabit.id, updatedHabit);
+        
+        habit = this.habitsMap.get(updatedHabit.id)!;
+        
+        habit.title = updatedHabit.title;
+        habit.description = updatedHabit.description;
+        habit.color = updatedHabit.color;
+        habit.updatedAt = updatedHabit.updatedAt;
+
         const index = this.habits.findIndex(h => h.id === updatedHabit.id);
         if (index !== -1) {
-          this.habits[index] = updatedHabit;
+          console.log(this.habits[index]);
         }
       }
 
@@ -127,6 +145,10 @@ export const useHabitStore = defineStore('habit', {
         });
 
       return Array.from(map.entries()).map(([date, count]) => ({ date, count }));
+    },
+
+    habitById(state): (id: number) => Habit | undefined {
+      return (id: number) => state.habitsMap.get(id);
     },
 
   },

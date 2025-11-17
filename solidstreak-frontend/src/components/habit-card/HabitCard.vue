@@ -20,6 +20,13 @@ const props = defineProps<{
 }>();
 
 // ─────────────────────────────────────────────
+// Emits
+// ─────────────────────────────────────────────
+const emit = defineEmits<{
+  (e: 'editHabit', habitId: number): void
+}>();
+
+// ─────────────────────────────────────────────
 // Composables & stores
 // ─────────────────────────────────────────────
 const confirm = useConfirm();
@@ -30,7 +37,6 @@ const habitStore = useHabitStore();
 // Constants & reactive state
 // ─────────────────────────────────────────────
 const userId = 3; // TODO: получать из внешнего контекста
-const color = COLORS[props.habit.color as keyof typeof COLORS] || GREEN;
 
 const isCheckButtonHovered = ref<boolean>(false);
 const currentDateCheck = ref<boolean>(props.habit.checks?.some(check => check.checkDate === props.currentDate && check.completed) || false);
@@ -45,6 +51,8 @@ const checksArray = computed(() => {
       count: 1
     })) || [];
 });
+
+const color = computed(() => COLORS[props.habit.color as keyof typeof COLORS] || GREEN);
 
 // ─────────────────────────────────────────────
 // Methods
@@ -136,6 +144,7 @@ async function processHabitDeletion(): Promise<void> {
           </span>
           <span title="Edit">
             <SquarePen 
+              @click.stop="emit('editHabit', habit.id)"
               class="w-5 h-5 text-gray-300 hover:text-gray-400 cursor-pointer"
             />
           </span>

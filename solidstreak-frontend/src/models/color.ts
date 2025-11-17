@@ -1,4 +1,5 @@
 export interface Color {
+    name: string
     value50: string
     value50hex: string
     value100: string
@@ -17,6 +18,7 @@ export interface Color {
 
 
 export const RED: Color = {
+    name: 'red',
     value50: 'red-50',
     value50hex: '#fef2f2',
     value100: 'red-100',
@@ -33,6 +35,7 @@ export const RED: Color = {
     value800hex: '#991b1b',
 };
 export const ORANGE: Color = {
+    name: 'orange',
     value50: 'orange-50',
     value50hex: '#fff7ed',
     value100: 'orange-100',
@@ -49,6 +52,7 @@ export const ORANGE: Color = {
     value800hex: '#9a3412',
 };
 export const YELLOW: Color = {
+    name: 'yellow',
     value50: 'yellow-50',
     value50hex: '#fefce8',
     value100: 'yellow-100',
@@ -65,6 +69,7 @@ export const YELLOW: Color = {
     value800hex: '#854d0e',
 };
 export const LIME: Color = {
+    name: 'lime',
     value50: 'lime-50',
     value50hex: '#f7fee7',
     value100: 'lime-100',
@@ -81,6 +86,7 @@ export const LIME: Color = {
     value800hex: '#365314',
 };
 export const GREEN: Color = {
+    name: 'green',
     value50: 'green-50',
     value50hex: '#f0fdf4',
     value100: 'green-100',
@@ -97,6 +103,7 @@ export const GREEN: Color = {
     value800hex: '#166534',
 };
 export const BLUE: Color = {
+    name: 'blue',
     value50: 'blue-50',
     value50hex: '#eff6ff',
     value100: 'blue-100',
@@ -113,6 +120,7 @@ export const BLUE: Color = {
     value800hex: '#1e40af',
 };
 export const PURPLE: Color = {
+    name: 'purple',
     value50: 'purple-50',
     value50hex: '#faf5ff',
     value100: 'purple-100',
@@ -130,13 +138,13 @@ export const PURPLE: Color = {
 };
 
 export const COLORS: { [key: string]: Color } = {
-    'red': RED,
-    'orange': ORANGE,
-    'yellow': YELLOW,
-    'lime': LIME,
-    'green': GREEN,
-    'blue': BLUE,
-    'purple': PURPLE,
+    [RED.name]: RED,
+    [ORANGE.name]: ORANGE,
+    [YELLOW.name]: YELLOW,
+    [LIME.name]: LIME,
+    [GREEN.name]: GREEN,
+    [BLUE.name]: BLUE,
+    [PURPLE.name]: PURPLE
 };
 
 function hexToRgb(hex: string) {

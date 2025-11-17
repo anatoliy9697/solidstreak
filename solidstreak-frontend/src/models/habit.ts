@@ -11,7 +11,7 @@ export interface Habit {
     description?: string
     color?: string
     isPublic: boolean
-    createdAt: Date
-    updatedAt: Date
+    createdAt?: Date
+    updatedAt?: Date
     checks?: HabitCheck[]
 }
