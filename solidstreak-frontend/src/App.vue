@@ -81,7 +81,7 @@ onMounted(async () => {
     </div>
 
     <HabitCard
-      v-show="view === 'active'"
+      v-show="view === 'active' && habitStore.activeHabits.length > 0"
       v-for="habit in habitStore.activeHabits"
       :key="habit.id"
       :habit="habit"
@@ -93,7 +93,7 @@ onMounted(async () => {
     />
 
     <HabitCard
-      v-show="view === 'archived'"
+      v-show="view === 'archived' && habitStore.archivedHabits.length > 0"
       v-for="habit in habitStore.archivedHabits"
       :key="habit.id"
       :habit="habit"
@@ -103,6 +103,15 @@ onMounted(async () => {
       @edit-habit="openHabitDialog"
       class="mb-2"
     />
+
+    <p 
+      v-if="view === 'active' && habitStore.activeHabits.length === 0" 
+      class="text-gray-500 text-center"
+    >No active habits. <a @click="openHabitDialog()">Create one</a>!</p>
+    <p 
+      v-else-if="view === 'archived' && habitStore.archivedHabits.length === 0" 
+      class="text-gray-500 text-center"
+    >No archived habits</p>
 
   </template>
 

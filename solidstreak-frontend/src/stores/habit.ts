@@ -49,12 +49,16 @@ export const useHabitStore = defineStore('habit', {
         habit.title = updatedHabit.title;
         habit.description = updatedHabit.description;
         habit.color = updatedHabit.color;
+        habit.isPublic = updatedHabit.isPublic;
+        habit.archived = updatedHabit.archived;
         habit.updatedAt = updatedHabit.updatedAt;
 
-        const index = this.habits.findIndex(h => h.id === updatedHabit.id);
-        if (index !== -1) {
-          console.log(this.habits[index]);
-        }
+        // this.habitsMap.set(updatedHabit.id, habit);
+
+        // const index = this.habits.findIndex(h => h.id === updatedHabit.id);
+        // if (index !== -1) {
+        //   this.habits[index] = habit;
+        // }
       }
 
       return result;
@@ -77,9 +81,20 @@ export const useHabitStore = defineStore('habit', {
         };
       }
 
-      const updatedHabit = { ...habit, archived };
+      const updatedHabit = {
+        id: habit.id,
+        title: habit.title,
+        description: habit.description,
+        color: habit.color,
+        isPublic: habit.isPublic,
+        archived: archived
+      } as Habit;
       
-      return await this.updateHabit(userId, updatedHabit);
+      const result = await this.updateHabit(userId, updatedHabit);
+
+      // if (result.success) this.habits = [...this.habits];
+
+      return result;
     },
 
     async deleteHabit(userId: number, habitId: number): Promise<RequestResult> {
