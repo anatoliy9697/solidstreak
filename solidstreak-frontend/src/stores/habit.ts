@@ -1,19 +1,24 @@
 import { defineStore } from 'pinia';
 
 import type { Habit, HabitCheck } from '@/models/habit';
-import { type RequestResult, fetchHabits, postHabit, putHabit, deleteHabit, postHabitCheck } from '@/api/habit';
+import type { ApiFetcher, RequestResult } from '@/api/request';
 
 export const useHabitStore = defineStore('habit', {
   
   state: () => ({
+    apiFetcher: null as ApiFetcher | null,
     habits: [] as Habit[],
     habitsMap: new Map<number, Habit>()
   }),
 
   actions: {
 
+    async init(apiFetcher: ApiFetcher) {
+      this.apiFetcher = apiFetcher;
+    },
+
     async fetchHabits(userId: number): Promise<RequestResult> {
-      const result = await fetchHabits(userId);
+      const result = await this.apiFetcher!.fetchHabits(userId);
 
       const data = result.response?.data;
       this.habits = (data ? data as Habit[] : []);
@@ -27,7 +32,7 @@ export const useHabitStore = defineStore('habit', {
     },
 
     async createHabit(userId: number, habit: Habit): Promise<RequestResult> {
-      const result = await postHabit(userId, habit);
+      const result = await this.apiFetcher!.postHabit(userId, habit);
 
       if (result.success) {
         const createdHabit = result.response?.data as Habit;
@@ -39,7 +44,7 @@ export const useHabitStore = defineStore('habit', {
     },
 
     async updateHabit(userId: number, habit: Habit): Promise<RequestResult> {
-      const result = await putHabit(userId, habit);
+      const result = await this.apiFetcher!.putHabit(userId, habit);
 
       if (result.success) {
         const updatedHabit = result.response?.data as Habit;
@@ -98,7 +103,7 @@ export const useHabitStore = defineStore('habit', {
     },
 
     async deleteHabit(userId: number, habitId: number): Promise<RequestResult> {
-      const result = await deleteHabit(userId, habitId);
+      const result = await this.apiFetcher!.deleteHabit(userId, habitId);
 
       if (result.success) {
         this.habitsMap.delete(habitId);
@@ -109,7 +114,7 @@ export const useHabitStore = defineStore('habit', {
     },
     
     async setHabitCheck(userId: number, habitId: number, habitCheck: HabitCheck): Promise<RequestResult> {
-      const result = await postHabitCheck(userId, habitId, habitCheck);
+      const result = await this.apiFetcher!.postHabitCheck(userId, habitId, habitCheck);
 
       if (result.success) {
         const habit = this.habitsMap.get(habitId);

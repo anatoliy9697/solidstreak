@@ -3,6 +3,8 @@
 import { ref, onMounted } from 'vue';
 import Toast from 'primevue/toast';
 
+import { ApiFetcher } from '@/api/request';
+import { useUserStore } from '@/stores/user';
 import { useHabitStore } from '@/stores/habit';
 import { type Color, PURPLE, generateColorGradient } from '@/models/color'
 import ConfirmDialog from '@/components/confirm-dialog/ConfirmDialog.vue'
@@ -13,13 +15,14 @@ import HabitDialog from '@/components/habit-dialog/HabitDialog.vue'
 // ─────────────────────────────────────────────
 // States & stores
 // ─────────────────────────────────────────────
+const userStore = useUserStore();
 const habitStore = useHabitStore();
 
 const currentDate = new Date().toISOString().split('T')[0] || '';
 const mainHeatmapColor = ref<Color>(PURPLE)
 
-const isHabitsLoading = ref<boolean>(true);
-const habitsSuccessfullyLoaded = ref<boolean>(false);
+const init = ref<boolean>(true);
+const initErrorMsg = ref<string | null>(null);
 const view = ref<'active' | 'archived'>('active');
 const expandedHabitCardId = ref<number | null>(null);
 const editingHabitId = ref<number | null>(null);
@@ -36,22 +39,50 @@ const openHabitDialog = (habitId?: number): void => {
 // ─────────────────────────────────────────────
 // Lifecycle
 // ─────────────────────────────────────────────
-onMounted(async () => {
-  const result = await habitStore.fetchHabits(3);
-  isHabitsLoading.value = false;
-  habitsSuccessfullyLoaded.value = result.success || false;
+onMounted(async (): Promise<void> => {
+  const initData = window.Telegram?.WebApp?.initData;
+  const user = window.Telegram?.WebApp?.initDataUnsafe?.user;
+  const chat = window.Telegram?.WebApp?.initDataUnsafe?.chat;
+
+  if (!initData || !user?.id) {
+    initErrorMsg.value = 'Initialization failed';
+    init.value = false;
+    return;
+  }
+
+  const apiFetcher = new ApiFetcher(initData, user.username);
+  
+  userStore.init(apiFetcher);
+  const userInfoResult = await userStore.upsertUserInfo(user, chat || { id: user.id }); // Use personal chat with user if no other chat info
+  if (!userInfoResult.success) {
+    initErrorMsg.value = 'Initialization failed';
+    init.value = false;
+    return;
+  }
+
+  habitStore.init(apiFetcher);
+  const habitsResult = await habitStore.fetchHabits(userStore.id);
+  if (!habitsResult.success) {
+    initErrorMsg.value = 'Initialization failed';
+    init.value = false;
+    return;
+  }
+  
+  userStore.setAvatarUrl(user.photo_url || '');
+
+  init.value = false;
 });
 
 </script>
 
 <template>
 
-  <p v-if="isHabitsLoading">Loading...</p>
-  <p v-else-if="!habitsSuccessfullyLoaded">Failed to load habits</p>
+  <p v-if="init">Loading...</p>
+  <p v-else-if="initErrorMsg">{{ initErrorMsg }}</p>
   <template v-else>
 
     <CalendarHeatmap
-      v-if="!isHabitsLoading && habitsSuccessfullyLoaded"
+      v-if="!init && !initErrorMsg"
       :values="habitStore.activities"
       :end-date="new Date().toISOString().split('T')[0] || ''"
       :max="habitStore.activeHabitsCount"

@@ -5,6 +5,7 @@ import { useConfirm } from "primevue/useconfirm";
 import { useToast } from 'primevue/usetoast';
 import { SquarePen, Package, PackageOpen, Trash2 } from 'lucide-vue-next';
 
+import { useUserStore } from '@/stores/user';
 import { useHabitStore } from '@/stores/habit';
 import { COLORS, GREEN } from '@/models/color'
 import type { Habit, HabitCheck } from '@/models/habit'
@@ -31,13 +32,12 @@ const emit = defineEmits<{
 // ─────────────────────────────────────────────
 const confirm = useConfirm();
 const toast = useToast();
+const userStore = useUserStore();
 const habitStore = useHabitStore();
 
 // ─────────────────────────────────────────────
 // Constants & reactive state
 // ─────────────────────────────────────────────
-const userId = 3; // TODO: получать из внешнего контекста
-
 const isCheckButtonHovered = ref<boolean>(false);
 const currentDateCheck = ref<boolean>(props.habit.checks?.some(check => check.checkDate === props.currentDate && check.completed) || false);
 
@@ -67,7 +67,7 @@ async function processCurrentDateCheck(): Promise<void> {
   };
 
   const result = await habitStore.setHabitCheck(
-    userId,
+    userStore.id,
     props.habit.id, 
     habitCheck
   );
@@ -86,7 +86,7 @@ async function processHabitArchiving(): Promise<void> {
     header: 'Confirm',
     accept: async () => {
       const archive = !props.habit.archived;
-      const result = await habitStore.setHabitArchived(userId, props.habit.id, archive);
+      const result = await habitStore.setHabitArchived(userStore.id, props.habit.id, archive);
       if (!result.success) {
         toast.add({severity:'error', summary: 'Error', detail: `Failed to ${archive ? 'archive' : 'unarchive'} habit`, life: 3000});
       }
@@ -100,7 +100,7 @@ async function processHabitDeletion(): Promise<void> {
     message: `Are you sure you want to delete this habit?`,
     header: 'Confirm',
     accept: async () => {
-      const result = await habitStore.deleteHabit(userId, props.habit.id);
+      const result = await habitStore.deleteHabit(userStore.id, props.habit.id);
       if (!result.success) {
         toast.add({severity:'error', summary: 'Error', detail: 'Failed to delete habit', life: 3000});
       }

@@ -33,6 +33,9 @@ func (s Server) Run(mainCtx context.Context, doneCh chan struct{}) {
 	api.Use(s.Logger())
 	api.Use(s.ValidateTelegramInitData())
 
+	api.Post("/user-info/upsert", s.postUserInfo)
+	api.Get("/users/{userId}", s.getUser)
+
 	api.Post("/users/{userID}/habits", s.postHabit)
 	api.Put("/users/{userID}/habits/{habitID}", s.putHabit)
 	api.Get("/users/{userID}/habits/{habitID}", s.getHabit)
@@ -105,6 +108,24 @@ func getInt64FromURLParams(r *http.Request, key string, required bool) (int64, e
 
 	return value, nil
 }
+
+// func getInt64FromURLQuery(r *http.Request, key string, required bool) (int64, error) {
+// 	strValue := r.URL.Query().Get(key)
+
+// 	if strValue == "" {
+// 		if required {
+// 			return 0, apperrors.ErrBadRequest("missing \"" + key + "\" in URL query")
+// 		}
+// 		return 0, nil
+// 	}
+
+// 	value, err := strconv.ParseInt(strValue, 10, 64)
+// 	if err != nil {
+// 		return 0, apperrors.ErrBadRequest("invalid \"" + key + "\" in URL query")
+// 	}
+
+// 	return value, nil
+// }
 
 func getDateFromURLQuery(r *http.Request, key string, required bool) (*date.Date, error) {
 	dateStr := r.URL.Query().Get(key)

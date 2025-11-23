@@ -49,15 +49,13 @@ func (r pgRepo) Create(tc *tcPkg.Chat) error {
 func (r pgRepo) Update(c *tcPkg.Chat) error {
 	sql := `
 		UPDATE tg_chats SET
-			user_id = $1,
-			created_at = $2
-		WHERE tg_id = $3
+			user_id = $1
+		WHERE tg_id = $2
 	`
 	_, err := r.p.Exec(
 		r.c,
 		sql,
 		c.UserID,
-		c.CreatedAt,
 		c.TgID,
 	)
 

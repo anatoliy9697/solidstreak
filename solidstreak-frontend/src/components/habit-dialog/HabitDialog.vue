@@ -7,9 +7,10 @@ import Dialog from 'primevue/dialog';
 import InputText from 'primevue/inputtext';
 import Textarea from 'primevue/textarea';
 
+import { useUserStore } from '@/stores/user';
 import { useHabitStore } from '@/stores/habit';
 import type { Habit } from '@/models/habit'
-import type { RequestResult } from '@/api/habit'
+import type { RequestResult } from '@/api/request';
 import { type Color, COLORS, GREEN } from '@/models/color'
 import ColorPicker from '@/components/color-picker/ColorPicker.vue';
 
@@ -32,6 +33,7 @@ const emit = defineEmits<{
 // ─────────────────────────────────────────────
 // Composables & stores
 // ─────────────────────────────────────────────
+const userStore = useUserStore();
 const habitStore = useHabitStore();
 const toast = useToast();
 
@@ -84,9 +86,9 @@ async function processHabitSaving(): Promise<void> {
   
   let result: RequestResult;
   if (props.newHabit) {
-    result = await habitStore.createHabit(3, newHabit); // TODO: передавать не хардкоженный userId
+    result = await habitStore.createHabit(userStore.id, newHabit);
   } else {
-    result = await habitStore.updateHabit(3, newHabit); // TODO: передавать не хардкоженный userId
+    result = await habitStore.updateHabit(userStore.id, newHabit);
   }
   
   if (!result.success) {
