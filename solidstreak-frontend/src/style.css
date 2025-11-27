@@ -42,7 +42,6 @@ h2 {
   color: #000 !important;
   border-color: #99a1af !important;
 }
-
 .p-inputtext:focus, .p-textarea:focus {
   border-color: #6a7282 !important;
 }
@@ -50,4 +49,20 @@ h2 {
 .p-inputtext.p-invalid {
   border-color: #d32f2f !important;
   box-shadow: 0 0 0 2px rgba(211,47,47,0.15);
+}
+
+.p-datepicker .p-inputtext, .p-datepicker .p-datepicker:focus {
+  border: none !important;
+}
+.p-datepicker .p-inputtext {
+  width: 7rem !important;
+  text-align: center !important;
+}
+
+.p-button {
+  padding : 0.25rem 0.5rem !important;
+}
+
+.p-datepicker-buttonbar {
+  justify-content: center !important;
 }

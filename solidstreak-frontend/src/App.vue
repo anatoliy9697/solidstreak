@@ -3,12 +3,14 @@
 import { ref, onMounted } from 'vue';
 import Toast from 'primevue/toast';
 
+import { dateToLocalString } from './utils/date';
 import { ApiFetcher } from '@/api/request';
 import { useUserStore } from '@/stores/user';
 import { useHabitStore } from '@/stores/habit';
 import { type Color, PURPLE, generateColorGradient } from '@/models/color'
 import ConfirmDialog from '@/components/confirm-dialog/ConfirmDialog.vue'
 import CalendarHeatmap from '@/components/calendar-heatmap/CalendarHeatmap.vue'
+import DatePicker from '@/components/date-picker/DatePicker.vue'
 import HabitCard from '@/components/habit-card/HabitCard.vue'
 import HabitDialog from '@/components/habit-dialog/HabitDialog.vue'
 
@@ -18,7 +20,7 @@ import HabitDialog from '@/components/habit-dialog/HabitDialog.vue'
 const userStore = useUserStore();
 const habitStore = useHabitStore();
 
-const currentDate = new Date().toISOString().split('T')[0] || '';
+const selectedDate = ref<Date>(new Date());
 const mainHeatmapColor = ref<Color>(PURPLE)
 
 const init = ref<boolean>(true);
@@ -84,7 +86,7 @@ onMounted(async (): Promise<void> => {
     <CalendarHeatmap
       v-if="!init && !initErrorMsg"
       :values="habitStore.activities"
-      :end-date="new Date().toISOString().split('T')[0] || ''"
+      :end-date="dateToLocalString(new Date())"
       :max="habitStore.activeHabitsCount"
       tooltip-unit="checks"
       :range-color="['#ffffff', ...generateColorGradient(habitStore.activeHabitsCount == 2 ? mainHeatmapColor.value400hex : mainHeatmapColor.value200hex, mainHeatmapColor.value800hex, habitStore.activeHabitsCount)]"
@@ -116,7 +118,7 @@ onMounted(async (): Promise<void> => {
       v-for="habit in habitStore.activeHabits"
       :key="habit.id"
       :habit="habit"
-      :current-date="currentDate"
+      :selectedDate="selectedDate"
       :expanded="expandedHabitCardId === habit.id"
       @click="expandedHabitCardId = habit.id"
       @edit-habit="openHabitDialog"
@@ -128,7 +130,7 @@ onMounted(async (): Promise<void> => {
       v-for="habit in habitStore.archivedHabits"
       :key="habit.id"
       :habit="habit"
-      :current-date="new Date().toISOString().split('T')[0] || ''"
+      :selectedDate="selectedDate"
       :expanded="expandedHabitCardId === habit.id"
       @click="expandedHabitCardId = habit.id"
       @edit-habit="openHabitDialog"
@@ -143,6 +145,12 @@ onMounted(async (): Promise<void> => {
       v-else-if="view === 'archived' && habitStore.archivedHabits.length === 0" 
       class="text-gray-500 text-center"
     >No archived habits</p>
+
+    <DatePicker 
+      v-if="view === 'active'" 
+      :date="selectedDate" 
+      @dateSelected="selectedDate = $event"
+    />
 
   </template>
 

@@ -1,10 +1,11 @@
 <script setup lang="ts">
 
-import { ref, computed } from 'vue';
+import { ref, watch, computed } from 'vue';
 import { useConfirm } from "primevue/useconfirm";
 import { useToast } from 'primevue/usetoast';
 import { SquarePen, Package, PackageOpen, Trash2 } from 'lucide-vue-next';
 
+import { dateToLocalString } from '@/utils/date';
 import { useUserStore } from '@/stores/user';
 import { useHabitStore } from '@/stores/habit';
 import { COLORS, GREEN } from '@/models/color'
@@ -16,7 +17,7 @@ import CalendarHeatmap from '@/components/calendar-heatmap/CalendarHeatmap.vue'
 // ─────────────────────────────────────────────
 const props = defineProps<{
   habit: Habit
-  currentDate: string
+  selectedDate: Date
   expanded?: boolean
 }>();
 
@@ -34,12 +35,18 @@ const confirm = useConfirm();
 const toast = useToast();
 const userStore = useUserStore();
 const habitStore = useHabitStore();
-
+  
 // ─────────────────────────────────────────────
 // Constants & reactive state
 // ─────────────────────────────────────────────
+const selectedDateStr = ref<string>(dateToLocalString(props.selectedDate));
 const isCheckButtonHovered = ref<boolean>(false);
-const currentDateCheck = ref<boolean>(props.habit.checks?.some(check => check.checkDate === props.currentDate && check.completed) || false);
+const selectedDateChecked = ref<boolean>(props.habit.checks?.some(check => check.checkDate === dateToLocalString(props.selectedDate) && check.completed) || false);
+
+watch(() => props.selectedDate, (newDate) => {
+  selectedDateStr.value = dateToLocalString(newDate);
+  selectedDateChecked.value = props.habit.checks?.some(check => check.checkDate === selectedDateStr.value && check.completed) || false;
+});
 
 // ─────────────────────────────────────────────
 // Computed
@@ -58,10 +65,10 @@ const color = computed(() => COLORS[props.habit.color as keyof typeof COLORS] ||
 // Methods
 // ─────────────────────────────────────────────
 async function processCurrentDateCheck(): Promise<void> {
-  const check = !currentDateCheck.value;
+  const check = !selectedDateChecked.value;
 
   const habitCheck: HabitCheck = {
-    checkDate: props.currentDate,
+    checkDate: selectedDateStr.value,
     completed: check,
     checkedAt: new Date()
   };
@@ -73,7 +80,7 @@ async function processCurrentDateCheck(): Promise<void> {
   );
 
   if (result.success) {
-    currentDateCheck.value = check;
+    selectedDateChecked.value = check;
   } else {
     toast.add({severity:'error', summary: 'Error', detail: 'Failed to ' + (check ? 'check' : 'uncheck') + ' habit', life: 3000});
   }
@@ -155,7 +162,7 @@ async function processHabitDeletion(): Promise<void> {
             @click.stop="processCurrentDateCheck()"
             @mouseover="isCheckButtonHovered = true"
             @mouseleave="isCheckButtonHovered = false"
-            :style="currentDateCheck
+            :style="selectedDateChecked
               ? {
                   borderColor: isCheckButtonHovered ? color.value500hex : color.value600hex,
                   backgroundColor: isCheckButtonHovered ? color.value400hex : color.value500hex,
@@ -164,7 +171,7 @@ async function processHabitDeletion(): Promise<void> {
               : {}"
             :class="[
               'w-7 h-7 flex items-center justify-center rounded-lg border cursor-pointer',
-              currentDateCheck
+              selectedDateChecked
                 ? ''
                 : 'border-gray-400 text-gray-400 hover:text-gray-500 hover:border-gray-500'
             ]"
@@ -182,7 +189,7 @@ async function processHabitDeletion(): Promise<void> {
     <CalendarHeatmap
       v-if="expanded && !habit.archived"
       :values="checksArray"
-      :end-date="currentDate"
+      :end-date="dateToLocalString(new Date())"
       :max="1"
       :range-color="[color.value100hex, color.value600hex]"
       :tooltip="false" 
