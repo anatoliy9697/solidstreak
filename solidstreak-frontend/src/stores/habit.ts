@@ -1,62 +1,60 @@
-import { defineStore } from 'pinia';
+import { defineStore } from 'pinia'
 
-import type { Habit, HabitCheck } from '@/models/habit';
-import type { ApiFetcher, RequestResult } from '@/api/request';
+import type { Habit, HabitCheck } from '@/models/habit'
+import type { ApiFetcher, RequestResult } from '@/api/request'
 
 export const useHabitStore = defineStore('habit', {
-  
   state: () => ({
     apiFetcher: null as ApiFetcher | null,
     habits: [] as Habit[],
-    habitsMap: new Map<number, Habit>()
+    habitsMap: new Map<number, Habit>(),
   }),
 
   actions: {
-
     async init(apiFetcher: ApiFetcher) {
-      this.apiFetcher = apiFetcher;
+      this.apiFetcher = apiFetcher
     },
 
     async fetchHabits(userId: number): Promise<RequestResult> {
-      const result = await this.apiFetcher!.fetchHabits(userId);
+      const result = await this.apiFetcher!.fetchHabits(userId)
 
-      const data = result.response?.data;
-      this.habits = (data ? data as Habit[] : []);
+      const data = result.response?.data
+      this.habits = data ? (data as Habit[]) : []
 
-      this.habitsMap.clear();
+      this.habitsMap.clear()
       for (const habit of this.habits) {
-        this.habitsMap.set(habit.id, habit);
+        this.habitsMap.set(habit.id, habit)
       }
 
-      return result;
+      return result
     },
 
     async createHabit(userId: number, habit: Habit): Promise<RequestResult> {
-      const result = await this.apiFetcher!.postHabit(userId, habit);
+      const result = await this.apiFetcher!.postHabit(userId, habit)
 
       if (result.success) {
-        const createdHabit = result.response?.data as Habit;
-        this.habitsMap.set(createdHabit.id, createdHabit);
-        this.habits.push(createdHabit);
+        const createdHabit = result.response?.data as Habit
+        this.habitsMap.set(createdHabit.id, createdHabit)
+        this.habits.push(createdHabit)
       }
 
-      return result;
+      return result
     },
 
     async updateHabit(userId: number, habit: Habit): Promise<RequestResult> {
-      const result = await this.apiFetcher!.putHabit(userId, habit);
+      const result = await this.apiFetcher!.putHabit(userId, habit)
 
       if (result.success) {
-        const updatedHabit = result.response?.data as Habit;
-        
-        habit = this.habitsMap.get(updatedHabit.id)!;
-        
-        habit.title = updatedHabit.title;
-        habit.description = updatedHabit.description;
-        habit.color = updatedHabit.color;
-        habit.isPublic = updatedHabit.isPublic;
-        habit.archived = updatedHabit.archived;
-        habit.updatedAt = updatedHabit.updatedAt;
+        const updatedHabit = result.response?.data as Habit
+
+        habit = this.habitsMap.get(updatedHabit.id)!
+
+        habit.title = updatedHabit.title
+        habit.description = updatedHabit.description
+        habit.color = updatedHabit.color
+        habit.isPublic = updatedHabit.isPublic
+        habit.archived = updatedHabit.archived
+        habit.updatedAt = updatedHabit.updatedAt
 
         // this.habitsMap.set(updatedHabit.id, habit);
 
@@ -66,24 +64,30 @@ export const useHabitStore = defineStore('habit', {
         // }
       }
 
-      return result;
+      return result
     },
 
-    async setHabitArchived(userId: number, habitId: number, archived: boolean): Promise<RequestResult> {
-      const habit = this.habitsMap.get(habitId);
+    async setHabitArchived(
+      userId: number,
+      habitId: number,
+      archived: boolean,
+    ): Promise<RequestResult> {
+      const habit = this.habitsMap.get(habitId)
 
       if (!habit) {
         return {
           success: false,
           httpCode: 404,
           httpError: 'Habit not found',
-          apiErrors: [{
-            HTTPCode: 404,
-            Title: 'not found',
-            Detail: `couldn't find habit with specified id`,
-          }],
+          apiErrors: [
+            {
+              HTTPCode: 404,
+              Title: 'not found',
+              Detail: `couldn't find habit with specified id`,
+            },
+          ],
           response: null,
-        };
+        }
       }
 
       const updatedHabit = {
@@ -92,85 +96,85 @@ export const useHabitStore = defineStore('habit', {
         description: habit.description,
         color: habit.color,
         isPublic: habit.isPublic,
-        archived: archived
-      } as Habit;
-      
-      const result = await this.updateHabit(userId, updatedHabit);
+        archived: archived,
+      } as Habit
+
+      const result = await this.updateHabit(userId, updatedHabit)
 
       // if (result.success) this.habits = [...this.habits];
 
-      return result;
+      return result
     },
 
     async deleteHabit(userId: number, habitId: number): Promise<RequestResult> {
-      const result = await this.apiFetcher!.deleteHabit(userId, habitId);
+      const result = await this.apiFetcher!.deleteHabit(userId, habitId)
 
       if (result.success) {
-        this.habitsMap.delete(habitId);
-        this.habits = this.habits.filter(h => h.id !== habitId);
+        this.habitsMap.delete(habitId)
+        this.habits = this.habits.filter((h) => h.id !== habitId)
       }
 
-      return result;
+      return result
     },
-    
-    async setHabitCheck(userId: number, habitId: number, habitCheck: HabitCheck): Promise<RequestResult> {
-      const result = await this.apiFetcher!.postHabitCheck(userId, habitId, habitCheck);
+
+    async setHabitCheck(
+      userId: number,
+      habitId: number,
+      habitCheck: HabitCheck,
+    ): Promise<RequestResult> {
+      const result = await this.apiFetcher!.postHabitCheck(userId, habitId, habitCheck)
 
       if (result.success) {
-        const habit = this.habitsMap.get(habitId);
+        const habit = this.habitsMap.get(habitId)
         for (const check of habit?.checks || []) {
           if (check.checkDate === habitCheck.checkDate) {
-            check.completed = habitCheck.completed;
-            check.checkedAt = habitCheck.checkedAt;
-            return result;
+            check.completed = habitCheck.completed
+            check.checkedAt = habitCheck.checkedAt
+            return result
           }
         }
         if (habit && !habit.checks) {
-          habit.checks = [];
+          habit.checks = []
         }
-        habit?.checks?.push(habitCheck);
+        habit?.checks?.push(habitCheck)
       }
 
-      return result;
+      return result
     },
-
   },
 
   getters: {
-    
     activeHabits(state): Habit[] {
-      return state.habits.filter(habit => !habit.archived);
+      return state.habits.filter((habit) => !habit.archived)
     },
 
     archivedHabits(state): Habit[] {
-      return state.habits.filter(habit => habit.archived);
+      return state.habits.filter((habit) => habit.archived)
     },
 
     activeHabitsCount(state): number {
-      return state.habits.filter(habit => !habit.archived).length;
+      return state.habits.filter((habit) => !habit.archived).length
     },
 
     activities(state): { date: string; count: number }[] {
-      const map = new Map<string, number>();
-  
-      state.habits
-        .filter(habit => !habit.archived)
-        .forEach(habit => {
-          habit.checks?.forEach(check => {
-            if (check.completed) {
-              const date = check.checkDate;
-              map.set(date, (map.get(date) || 0) + 1);
-            }
-          });
-        });
+      const map = new Map<string, number>()
 
-      return Array.from(map.entries()).map(([date, count]) => ({ date, count }));
+      state.habits
+        .filter((habit) => !habit.archived)
+        .forEach((habit) => {
+          habit.checks?.forEach((check) => {
+            if (check.completed) {
+              const date = check.checkDate
+              map.set(date, (map.get(date) || 0) + 1)
+            }
+          })
+        })
+
+      return Array.from(map.entries()).map(([date, count]) => ({ date, count }))
     },
 
     habitById(state): (id: number) => Habit | undefined {
-      return (id: number) => state.habitsMap.get(id);
+      return (id: number) => state.habitsMap.get(id)
     },
-
   },
-
-});
+})

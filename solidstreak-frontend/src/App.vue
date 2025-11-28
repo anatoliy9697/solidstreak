@@ -1,12 +1,11 @@
 <script setup lang="ts">
+import { ref, onMounted } from 'vue'
+import Toast from 'primevue/toast'
 
-import { ref, onMounted } from 'vue';
-import Toast from 'primevue/toast';
-
-import { dateToLocalString } from './utils/date';
-import { ApiFetcher } from '@/api/request';
-import { useUserStore } from '@/stores/user';
-import { useHabitStore } from '@/stores/habit';
+import { dateToLocalString } from './utils/date'
+import { ApiFetcher } from '@/api/request'
+import { useUserStore } from '@/stores/user'
+import { useHabitStore } from '@/stores/habit'
 import { type Color, BLUE, generateColorGradient } from '@/models/color'
 import ConfirmDialog from '@/components/confirm-dialog/ConfirmDialog.vue'
 import CalendarHeatmap from '@/components/calendar-heatmap/CalendarHeatmap.vue'
@@ -17,86 +16,91 @@ import HabitDialog from '@/components/habit-dialog/HabitDialog.vue'
 // ─────────────────────────────────────────────
 // States & stores
 // ─────────────────────────────────────────────
-const userStore = useUserStore();
-const habitStore = useHabitStore();
+const userStore = useUserStore()
+const habitStore = useHabitStore()
 
-const selectedDate = ref<Date>(new Date());
+const selectedDate = ref<Date>(new Date())
 const mainHeatmapColor = ref<Color>(BLUE)
 
-const init = ref<boolean>(true);
-const initErrorMsg = ref<string | null>(null);
-const view = ref<'active' | 'archived'>('active');
-const expandedHabitCardId = ref<number | null>(null);
-const editingHabitId = ref<number | null>(null);
-const isHabitDialogVisible = ref(false);
+const init = ref<boolean>(true)
+const initErrorMsg = ref<string | null>(null)
+const view = ref<'active' | 'archived'>('active')
+const expandedHabitCardId = ref<number | null>(null)
+const editingHabitId = ref<number | null>(null)
+const isHabitDialogVisible = ref(false)
 
 // ─────────────────────────────────────────────
 // Methods
 // ─────────────────────────────────────────────
 const openHabitDialog = (habitId?: number): void => {
-  editingHabitId.value = habitId || null;
-  isHabitDialogVisible.value = true;
+  editingHabitId.value = habitId || null
+  isHabitDialogVisible.value = true
 }
 
 // ─────────────────────────────────────────────
 // Lifecycle
 // ─────────────────────────────────────────────
 onMounted(async (): Promise<void> => {
-  const initData = window.Telegram?.WebApp?.initData;
-  const user = window.Telegram?.WebApp?.initDataUnsafe?.user;
-  const chat = window.Telegram?.WebApp?.initDataUnsafe?.chat;
+  const initData = window.Telegram?.WebApp?.initData
+  const user = window.Telegram?.WebApp?.initDataUnsafe?.user
+  const chat = window.Telegram?.WebApp?.initDataUnsafe?.chat
 
   if (!initData || !user?.id) {
-    initErrorMsg.value = 'Initialization failed';
-    init.value = false;
-    return;
+    initErrorMsg.value = 'Initialization failed'
+    init.value = false
+    return
   }
 
-  const apiFetcher = new ApiFetcher(initData, user.username);
-  
-  userStore.init(apiFetcher);
-  const userInfoResult = await userStore.upsertUserInfo(user, chat || { id: user.id }); // Use personal chat with user if no other chat info
+  const apiFetcher = new ApiFetcher(initData, user.username)
+
+  userStore.init(apiFetcher)
+  const userInfoResult = await userStore.upsertUserInfo(user, chat || { id: user.id }) // Use personal chat with user if no other chat info
   if (!userInfoResult.success) {
-    initErrorMsg.value = 'Initialization failed';
-    init.value = false;
-    return;
+    initErrorMsg.value = 'Initialization failed'
+    init.value = false
+    return
   }
 
-  habitStore.init(apiFetcher);
-  const habitsResult = await habitStore.fetchHabits(userStore.id);
+  habitStore.init(apiFetcher)
+  const habitsResult = await habitStore.fetchHabits(userStore.id)
   if (!habitsResult.success) {
-    initErrorMsg.value = 'Initialization failed';
-    init.value = false;
-    return;
+    initErrorMsg.value = 'Initialization failed'
+    init.value = false
+    return
   }
-  
-  userStore.setAvatarUrl(user.photo_url || '');
 
-  init.value = false;
-});
+  userStore.setAvatarUrl(user.photo_url || '')
 
+  init.value = false
+})
 </script>
 
 <template>
-
   <p v-if="init">Loading...</p>
   <p v-else-if="initErrorMsg">{{ initErrorMsg }}</p>
   <template v-else>
-
     <CalendarHeatmap
       v-if="!init && !initErrorMsg"
       :values="habitStore.activities"
       :end-date="dateToLocalString(new Date())"
       :max="habitStore.activeHabitsCount"
       tooltip-unit="checks"
-      :range-color="['#ffffff', ...generateColorGradient(habitStore.activeHabitsCount == 2 ? mainHeatmapColor.value400hex : mainHeatmapColor.value200hex, mainHeatmapColor.value800hex, habitStore.activeHabitsCount)]"
+      :range-color="[
+        '#ffffff',
+        ...generateColorGradient(
+          habitStore.activeHabitsCount == 2
+            ? mainHeatmapColor.value400hex
+            : mainHeatmapColor.value200hex,
+          mainHeatmapColor.value800hex,
+          habitStore.activeHabitsCount,
+        ),
+      ]"
       :round="3"
       class="mb-2 px-2"
     />
 
-    <div class="flex justify-between items-center mb-2">
-
-      <div class="h-10 flex items-center px-4">
+    <div class="mb-2 flex items-center justify-between">
+      <div class="flex h-10 items-center px-4">
         <span v-if="view === 'active'" class="text-lg font-semibold text-gray-500">Active</span>
         <a v-else @click="view = 'active'">Active</a>
         <span class="text-gray-500">&nbsp;/&nbsp;</span>
@@ -107,10 +111,11 @@ onMounted(async (): Promise<void> => {
       <div v-show="view === 'active'">
         <button
           @click="openHabitDialog()"
-          class="px-4 py-2 rounded-md border border-gray-300 bg-gray-100 text-blue-800 font-medium hover:bg-blue-100 hover:border-blue-100 active:bg-blue-200 active:border-blue-200"
-        >+ New habit</button>
+          class="rounded-md border border-gray-300 bg-gray-100 px-4 py-2 font-medium text-blue-800 hover:border-blue-100 hover:bg-blue-100 active:border-blue-200 active:bg-blue-200"
+        >
+          + New habit
+        </button>
       </div>
-
     </div>
 
     <HabitCard
@@ -137,21 +142,24 @@ onMounted(async (): Promise<void> => {
       class="mb-2"
     />
 
-    <p 
-      v-if="view === 'active' && habitStore.activeHabits.length === 0" 
-      class="text-gray-500 text-center"
-    >No active habits. <a @click="openHabitDialog()">Create one</a>!</p>
-    <p 
-      v-else-if="view === 'archived' && habitStore.archivedHabits.length === 0" 
-      class="text-gray-500 text-center"
-    >No archived habits</p>
+    <p
+      v-if="view === 'active' && habitStore.activeHabits.length === 0"
+      class="text-center text-gray-500"
+    >
+      No active habits. <a @click="openHabitDialog()">Create one</a>!
+    </p>
+    <p
+      v-else-if="view === 'archived' && habitStore.archivedHabits.length === 0"
+      class="text-center text-gray-500"
+    >
+      No archived habits
+    </p>
 
-    <DatePicker 
-      v-if="view === 'active'" 
-      :date="selectedDate" 
+    <DatePicker
+      v-if="view === 'active'"
+      :date="selectedDate"
       @dateSelected="selectedDate = $event"
     />
-
   </template>
 
   <HabitDialog
@@ -161,8 +169,7 @@ onMounted(async (): Promise<void> => {
     @closeHabitDialog="isHabitDialogVisible = false"
   />
   <ConfirmDialog :style="{ borderRadius: '0.375rem' }"></ConfirmDialog>
-  <Toast position="bottom-right"/>
-
+  <Toast position="bottom-right" />
 </template>
 
 <style scoped></style>

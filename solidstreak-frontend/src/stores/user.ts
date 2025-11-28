@@ -1,10 +1,9 @@
-import { defineStore } from 'pinia';
+import { defineStore } from 'pinia'
 
-import { ApiFetcher, type RequestResult } from '@/api/request';
-import type { User } from '@/models/user';
+import { ApiFetcher, type RequestResult } from '@/api/request'
+import type { User } from '@/models/user'
 
 export const useUserStore = defineStore('user', {
-  
   state: () => ({
     apiFetcher: null as ApiFetcher | null,
     id: 0 as number,
@@ -17,13 +16,12 @@ export const useUserStore = defineStore('user', {
   }),
 
   actions: {
-
     init(apiFetcher: ApiFetcher): void {
-      this.apiFetcher = apiFetcher;
+      this.apiFetcher = apiFetcher
     },
 
     setAvatarUrl(avatarUrl: string): void {
-      this.avatarUrl = avatarUrl;
+      this.avatarUrl = avatarUrl
     },
 
     async upsertUserInfo(webAppUser: WebAppUser, webAppChat: WebAppChat): Promise<RequestResult> {
@@ -34,24 +32,22 @@ export const useUserStore = defineStore('user', {
         tgLastName: webAppUser.last_name,
         tgLangCode: webAppUser.language_code,
         tgIsBot: webAppUser.is_bot,
-      } as User;
+      } as User
 
-      const result = await this.apiFetcher!.upsertUserInfo(inputUser, { tgId: webAppChat.id });
-      
-      const user = (result.response?.data ? result.response?.data as User : null);
-      
+      const result = await this.apiFetcher!.upsertUserInfo(inputUser, { tgId: webAppChat.id })
+
+      const user = result.response?.data ? (result.response?.data as User) : null
+
       if (user) {
-        this.id = user.id || 0;
-        this.tgId = user.tgId;
-        this.tgUsername = user.tgUsername || '';
-        this.tgFirstName = user.tgFirstName ;
-        this.tgLastName = user.tgLastName || '';
-        this.tgLangCode = user.tgLangCode || '';
+        this.id = user.id || 0
+        this.tgId = user.tgId
+        this.tgUsername = user.tgUsername || ''
+        this.tgFirstName = user.tgFirstName
+        this.tgLastName = user.tgLastName || ''
+        this.tgLangCode = user.tgLangCode || ''
       }
 
-      return result;
+      return result
     },
-
   },
-
-});
+})

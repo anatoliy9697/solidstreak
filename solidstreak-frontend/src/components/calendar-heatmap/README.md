@@ -8,4 +8,4 @@ razorness' lightweight calendar heatmap Vue 3 component built on SVG, inspired b
 
 ## Modifications
 
-Made it possible to use more than six cell colors and removed the vch__legend block. Maybe later I'll extract it and publish it as a separate npm package
+Made it possible to use more than six cell colors and removed the vch\_\_legend block. Maybe later I'll extract it and publish it as a separate npm package

@@ -12,7 +12,7 @@ interface WebAppChat {
   id: number
 }
 
-interface	WebAppInitData {
+interface WebAppInitData {
   user?: WebAppUser
   chat?: WebAppChat
 }
