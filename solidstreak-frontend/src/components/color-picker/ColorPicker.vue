@@ -25,7 +25,7 @@ const emit = defineEmits<{
             v-for="color in Object.values(COLORS)"
             :key="color.name"
             @click.stop="emit('colorSelected', color)"
-            class="inline-block w-5 h-5 rounded-full cursor-pointer hover:ring-2 hover:ring-gray-400 text-center font-semibold text-white"
+            class="inline-block w-5 h-5 rounded-full cursor-pointer hover:ring-2 hover:ring-gray-200 text-center font-semibold text-white"
             :style="{ backgroundColor: color.value500hex }"
         >{{ selectedColor.name === color.name ? '✓' : '' }}</span>
     </div>

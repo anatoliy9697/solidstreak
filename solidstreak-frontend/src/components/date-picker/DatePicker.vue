@@ -55,10 +55,10 @@ function processDateShift(diff: number): void {
 
 <template>
     
-    <div class="h-10 fixed bottom-4 left-1/2 -translate-x-1/2 z-50 bg-white rounded-full shadow-sm border border-gray-300 flex items-center">
+    <div class="h-14 p-2 fixed bottom-8 left-1/2 -translate-x-1/2 z-50 bg-white rounded-full shadow-sm border border-gray-200 flex items-center">
       
       <ChevronLeft 
-        :class="['w-10 h-10 py-2 text-gray-400', isBeforeDay(minDate, selectedDate) ? 'hover:text-gray-500 cursor-pointer' : 'opacity-50 cursor-not-allowed']"
+        :class="['w-10 h-10 py-2 rounded-full', isBeforeDay(minDate, selectedDate) ? 'text-blue-800  hover:bg-blue-50 active:bg-blue-100 cursor-pointer' : 'text-gray-400 opacity-50 cursor-not-allowed']"
         @click="processDateShift(-1)"
       />
 
@@ -76,7 +76,7 @@ function processDateShift(diff: number): void {
           <button 
             @click="todayCallback"
             type="button"
-            class="px-2 py-1 p-button p-component p-button-text p-datepicker-today-button"
+            class="px-2 py-1 p-button-text p-datepicker-today-button rounded-md"
           >
             <span class="p-button-label justify-center">Today</span>
           </button>
@@ -84,14 +84,14 @@ function processDateShift(diff: number): void {
       </DatePicker>
 
       <ChevronRight 
-        :class="['w-10 h-10 py-2 text-gray-400', isBeforeDay(selectedDate, maxDate) ? 'hover:text-gray-500 cursor-pointer' : 'opacity-50 cursor-not-allowed']"
+        :class="['w-10 h-10 py-2 text-blue-800 rounded-full', isBeforeDay(selectedDate, maxDate) ? 'text-blue-800  hover:bg-blue-50 active:bg-blue-100 cursor-pointer' : 'text-gray-400 opacity-50 cursor-not-allowed']"
         @click="processDateShift(1)"
       />
 
     </div>
 
     <div 
-      class="fixed bottom-0 left-0 h-20 w-dvw z-49 pointer-events-none"
+      class="fixed bottom-0 left-0 h-28 w-dvw z-49 pointer-events-none"
       style="background: linear-gradient(to top, rgba(0,0,0,0.4), rgba(0,0,0,0));"
     ></div>
 

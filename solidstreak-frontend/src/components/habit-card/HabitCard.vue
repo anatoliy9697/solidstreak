@@ -119,7 +119,7 @@ async function processHabitDeletion(): Promise<void> {
 
 <template>
 
-  <div :class="['bg-white rounded-md shadow-sm border border-gray-300 px-4 py-2 cursor-pointer', habit.archived ? 'opacity-50' : '']">
+  <div :class="['bg-white rounded-md shadow-sm border border-gray-200 px-4 py-2 cursor-pointer', habit.archived ? 'opacity-50' : '']">
 
   <div :class="['flex items-start justify-between', expanded && !habit.archived ? 'mb-2' : '']">
 

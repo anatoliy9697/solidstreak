@@ -4,14 +4,21 @@
   --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", "Liberation Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
 }
 
+:root {
+  color-scheme: light;
+}
+
 body {
-  @apply font-sans bg-gray-100 text-sm p-2 text-black;
+  @apply font-sans bg-gray-100 text-sm text-black;
 }
 
 a {
-  @apply underline cursor-pointer text-blue-600;
+  @apply underline cursor-pointer text-blue-800;
   text-underline-offset: .2rem;
-  text-decoration-color: #155dfc;
+  text-decoration-color: #1e40af;
+}
+a:hover {
+  text-decoration-line: none;
 }
 
 h1 {
@@ -20,6 +27,18 @@ h1 {
 
 h2 {
   @apply text-lg font-semibold;
+}
+
+#content {
+  @apply mx-auto w-full max-w-lg flex flex-col min-h-screen relative p-2;
+}
+
+#app {
+  flex: 1 0 auto;
+}
+
+#footer {
+  @apply w-full text-center text-xs text-gray-500 opacity-50;
 }
 
 .p-toast {
@@ -40,10 +59,10 @@ h2 {
 .p-inputtext, .p-textarea {
   background-color: #fff !important;
   color: #000 !important;
-  border-color: #99a1af !important;
+  border-color: #e2e8f0 !important;
 }
 .p-inputtext:focus, .p-textarea:focus {
-  border-color: #6a7282 !important;
+  border-color: #cbd5e1 !important;
 }
 
 .p-inputtext.p-invalid {
@@ -51,18 +70,53 @@ h2 {
   box-shadow: 0 0 0 2px rgba(211,47,47,0.15);
 }
 
-.p-datepicker .p-inputtext, .p-datepicker .p-datepicker:focus {
-  border: none !important;
-}
 .p-datepicker .p-inputtext {
   width: 7rem !important;
   text-align: center !important;
+  box-shadow: none !important;
+  border: none !important;
 }
 
-.p-button {
-  padding : 0.25rem 0.5rem !important;
+.p-button-text {
+  color: #1e40af !important;
 }
 
 .p-datepicker-buttonbar {
   justify-content: center !important;
+}
+
+.p-datepicker-prev-button:hover,
+.p-datepicker-next-button:hover,
+.p-datepicker-day:hover, 
+.p-datepicker-month:hover, 
+.p-datepicker-year:hover, 
+.p-datepicker-select-month:hover, 
+.p-datepicker-select-year:hover, 
+.p-datepicker-today-button:hover,
+.p-datepicker-today .p-datepicker-day:hover
+{
+  background-color: #eff6ff !important;
+}
+.p-datepicker-prev-button:active,
+.p-datepicker-next-button:active,
+.p-datepicker-day:active, 
+.p-datepicker-month:active, 
+.p-datepicker-year:active, 
+.p-datepicker-select-month:active, 
+.p-datepicker-select-year:active, 
+.p-datepicker-today-button:active,
+.p-datepicker-today .p-datepicker-day:active
+{
+  background-color: #dbeafe !important;
+}
+.p-datepicker-today .p-datepicker-day
+{
+  background-color: #bfdbfe !important;
+}
+.p-datepicker-day.p-datepicker-day-selected, 
+.p-datepicker-today .p-datepicker-day.p-datepicker-day-selected, 
+.p-datepicker-month.p-datepicker-month-selected, 
+.p-datepicker-year.p-datepicker-year-selected
+{
+  background-color: #2563eb !important;
 }

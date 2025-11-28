@@ -7,7 +7,7 @@ import { dateToLocalString } from './utils/date';
 import { ApiFetcher } from '@/api/request';
 import { useUserStore } from '@/stores/user';
 import { useHabitStore } from '@/stores/habit';
-import { type Color, PURPLE, generateColorGradient } from '@/models/color'
+import { type Color, BLUE, generateColorGradient } from '@/models/color'
 import ConfirmDialog from '@/components/confirm-dialog/ConfirmDialog.vue'
 import CalendarHeatmap from '@/components/calendar-heatmap/CalendarHeatmap.vue'
 import DatePicker from '@/components/date-picker/DatePicker.vue'
@@ -21,7 +21,7 @@ const userStore = useUserStore();
 const habitStore = useHabitStore();
 
 const selectedDate = ref<Date>(new Date());
-const mainHeatmapColor = ref<Color>(PURPLE)
+const mainHeatmapColor = ref<Color>(BLUE)
 
 const init = ref<boolean>(true);
 const initErrorMsg = ref<string | null>(null);
@@ -107,7 +107,7 @@ onMounted(async (): Promise<void> => {
       <div v-show="view === 'active'">
         <button
           @click="openHabitDialog()"
-          class="px-4 py-2 rounded-md border border-gray-300 bg-gray-100 text-gray-800 font-medium hover:bg-gray-200"
+          class="px-4 py-2 rounded-md border border-gray-300 bg-gray-100 text-blue-800 font-medium hover:bg-blue-100 hover:border-blue-100 active:bg-blue-200 active:border-blue-200"
         >+ New habit</button>
       </div>
 

@@ -12,11 +12,11 @@ import ConfirmDialog from 'primevue/confirmdialog';
             <div class="flex gap-2">
                 <button
                     @click="acceptCallback"
-                    class="w-1/2 px-4 py-2 rounded-md border border-gray-300 bg-gray-100 text-gray-800 font-medium hover:bg-gray-200"
+                    class="w-1/2 px-4 py-2 rounded-md border border-gray-300 bg-gray-100 text-gray-800 font-medium hover:bg-gray-200 active:bg-gray-300"
                 >Yes</button>
                 <button
                     @click="rejectCallback"
-                    class="w-1/2 px-4 py-2 rounded-md border border-gray-300 bg-gray-100 text-red-800 font-medium hover:bg-gray-200"
+                    class="w-1/2 px-4 py-2 rounded-md border border-gray-300 bg-gray-100 text-red-800 font-medium hover:bg-gray-200 active:bg-gray-300"
                 >No</button>
             </div>
         </template>

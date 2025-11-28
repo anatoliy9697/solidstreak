@@ -123,7 +123,7 @@ async function onColorSelected(selectedColor: Color): Promise<void> {
         <div>
           <i 
             @click="closeCallback"  
-            class="pi pi-times text-gray-400 hover:text-gray-500 cursor-pointer" 
+            class="pi pi-times text-gray-300 hover:text-gray-400 cursor-pointer" 
           ></i>
         </div>
       </div>
@@ -160,11 +160,11 @@ async function onColorSelected(selectedColor: Color): Promise<void> {
       <div class="flex gap-2">
         <button
             @click="closeCallback"
-            class="w-1/2 px-4 py-2 rounded-md border border-gray-300 bg-gray-100 text-gray-800 font-medium hover:bg-gray-200"
+            class="w-1/2 px-4 py-2 rounded-md border border-gray-300 bg-gray-100 text-gray-800 font-medium hover:bg-gray-200 active:bg-gray-300"
         >Cancel</button>
         <button
             @click="processHabitSaving"
-            class="w-1/2 px-4 py-2 rounded-md border border-green-700 bg-green-600 text-white font-medium hover:bg-green-700 hover:border-green-800"
+            class="w-1/2 px-4 py-2 rounded-md border border-green-700 bg-green-600 text-white font-medium hover:bg-green-700 hover:border-green-800 active:bg-green-800"
         >Save</button>
       </div>
 
