@@ -102,16 +102,17 @@ onMounted(async (): Promise<void> => {
     <div class="mb-2 flex items-center justify-between">
       <div class="flex h-10 items-center px-4">
         <span v-if="view === 'active'" class="text-lg font-semibold text-gray-500">Active</span>
-        <a v-else @click="view = 'active'">Active</a>
+        <a v-else @click="view = 'active'" title="Show active habits">Active</a>
         <span class="text-gray-500">&nbsp;/&nbsp;</span>
         <span v-if="view === 'archived'" class="text-lg font-semibold text-gray-500">Archived</span>
-        <a v-else @click="view = 'archived'">Archived</a>
+        <a v-else @click="view = 'archived'" title="Show archived habits">Archived</a>
       </div>
 
       <div v-show="view === 'active'">
         <button
           @click="openHabitDialog()"
           class="rounded-md border border-gray-300 bg-gray-100 px-4 py-2 font-medium text-blue-800 hover:border-blue-100 hover:bg-blue-100 active:border-blue-200 active:bg-blue-200"
+          title="Create a new habit"
         >
           + New habit
         </button>
@@ -123,10 +124,11 @@ onMounted(async (): Promise<void> => {
       v-for="habit in habitStore.activeHabits"
       :key="habit.id"
       :habit="habit"
-      :selectedDate="selectedDate"
+      :selected-date="selectedDate"
       :expanded="expandedHabitCardId === habit.id"
-      @click="expandedHabitCardId = habit.id"
       @edit-habit="openHabitDialog"
+      @expand-habit-card="expandedHabitCardId = $event"
+      @collapse-habit-card="expandedHabitCardId = null"
       class="mb-2"
     />
 
@@ -135,10 +137,11 @@ onMounted(async (): Promise<void> => {
       v-for="habit in habitStore.archivedHabits"
       :key="habit.id"
       :habit="habit"
-      :selectedDate="selectedDate"
+      :selected-date="selectedDate"
       :expanded="expandedHabitCardId === habit.id"
-      @click="expandedHabitCardId = habit.id"
       @edit-habit="openHabitDialog"
+      @expand-habit-card="expandedHabitCardId = $event"
+      @collapse-habit-card="expandedHabitCardId = null"
       class="mb-2"
     />
 
@@ -158,7 +161,7 @@ onMounted(async (): Promise<void> => {
     <DatePicker
       v-if="view === 'active'"
       :date="selectedDate"
-      @dateSelected="selectedDate = $event"
+      @date-selected="selectedDate = $event"
     />
   </template>
 
@@ -166,7 +169,7 @@ onMounted(async (): Promise<void> => {
     :visible="isHabitDialogVisible"
     :new-habit="editingHabitId === null"
     :habit="editingHabitId !== null ? habitStore.habitById(editingHabitId) : undefined"
-    @closeHabitDialog="isHabitDialogVisible = false"
+    @close-habit-dialog="isHabitDialogVisible = false"
   />
   <ConfirmDialog :style="{ borderRadius: '0.375rem' }"></ConfirmDialog>
   <Toast position="bottom-right" />

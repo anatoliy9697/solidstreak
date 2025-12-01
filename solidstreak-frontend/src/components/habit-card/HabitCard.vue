@@ -25,6 +25,8 @@ const props = defineProps<{
 // ─────────────────────────────────────────────
 const emit = defineEmits<{
   (e: 'editHabit', habitId: number): void
+  (e: 'expandHabitCard', habitId: number): void
+  (e: 'collapseHabitCard', habitId: number): void
 }>()
 
 // ─────────────────────────────────────────────
@@ -147,7 +149,14 @@ async function processHabitDeletion(): Promise<void> {
     ]"
   >
     <div :class="['flex items-start justify-between', expanded && !habit.archived ? 'mb-2' : '']">
-      <div :class="['mr-4 flex min-h-7', expanded ? 'flex-col' : 'items-center']">
+      <div
+        :class="['mr-4 flex min-h-7 flex-1', expanded ? 'flex-col' : 'items-center']"
+        @click.stop="
+          props.expanded
+            ? emit('collapseHabitCard', props.habit.id)
+            : emit('expandHabitCard', props.habit.id)
+        "
+      >
         <h2 :class="['leading-none', expanded && habit.description ? 'mb-2' : '']">
           {{ habit.title }}
         </h2>
@@ -202,6 +211,7 @@ async function processHabitDeletion(): Promise<void> {
                 ? ''
                 : 'border-gray-400 text-gray-400 hover:border-gray-500 hover:text-gray-500',
             ]"
+            title="Check habit for selected date"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"

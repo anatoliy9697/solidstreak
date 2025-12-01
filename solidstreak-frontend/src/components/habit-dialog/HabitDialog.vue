@@ -150,7 +150,7 @@ async function onColorSelected(selectedColor: Color): Promise<void> {
       <Textarea
         id="habit-description"
         v-model="habitDescription"
-        autoResize
+        auto-resize
         maxlength="256"
         rows="5"
         cols="30"

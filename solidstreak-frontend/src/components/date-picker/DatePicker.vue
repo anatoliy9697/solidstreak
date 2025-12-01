@@ -59,25 +59,28 @@ function processDateShift(diff: number): void {
   <div
     class="fixed bottom-8 left-1/2 z-50 flex h-14 -translate-x-1/2 items-center rounded-full border border-gray-200 bg-white p-2 shadow-sm"
   >
-    <ChevronLeft
-      :class="[
-        'h-10 w-10 rounded-full py-2',
-        isBeforeDay(minDate, selectedDate)
-          ? 'cursor-pointer text-blue-800 hover:bg-blue-50 active:bg-blue-100'
-          : 'cursor-not-allowed text-gray-400 opacity-50',
-      ]"
-      @click="processDateShift(-1)"
-    />
+    <span title="Previous day">
+      <ChevronLeft
+        :class="[
+          'h-10 w-10 rounded-full py-2',
+          isBeforeDay(minDate, selectedDate)
+            ? 'cursor-pointer text-blue-800 hover:bg-blue-50 active:bg-blue-100'
+            : 'cursor-not-allowed text-gray-400 opacity-50',
+        ]"
+        @click="processDateShift(-1)"
+      />
+    </span>
 
     <DatePicker
       v-model="selectedDate"
-      @dateSelect="emit('dateSelected', $event)"
-      dateFormat="dd/mm/yy"
-      :minDate="minDate"
-      :maxDate="maxDate"
-      :manualInput="false"
-      showButtonBar
+      @date-select="emit('dateSelected', $event)"
+      date-format="dd/mm/yy"
+      :min-date="minDate"
+      :max-date="maxDate"
+      :manual-input="false"
+      :show-button-bar="true"
       placeholder="Customized"
+      title="Select a date"
     >
       <template #buttonbar="{ todayCallback }">
         <button
@@ -90,15 +93,17 @@ function processDateShift(diff: number): void {
       </template>
     </DatePicker>
 
-    <ChevronRight
-      :class="[
-        'h-10 w-10 rounded-full py-2 text-blue-800',
-        isBeforeDay(selectedDate, maxDate)
-          ? 'cursor-pointer text-blue-800 hover:bg-blue-50 active:bg-blue-100'
-          : 'cursor-not-allowed text-gray-400 opacity-50',
-      ]"
-      @click="processDateShift(1)"
-    />
+    <span title="Next day">
+      <ChevronRight
+        :class="[
+          'h-10 w-10 rounded-full py-2 text-blue-800',
+          isBeforeDay(selectedDate, maxDate)
+            ? 'cursor-pointer text-blue-800 hover:bg-blue-50 active:bg-blue-100'
+            : 'cursor-not-allowed text-gray-400 opacity-50',
+        ]"
+        @click="processDateShift(1)"
+      />
+    </span>
   </div>
 
   <div
