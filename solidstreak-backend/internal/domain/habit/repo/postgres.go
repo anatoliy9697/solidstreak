@@ -90,19 +90,19 @@ func (r pgRepo) GetByOwnerIDAndStatus(ownerID int64, status hPkg.HabitStatus, re
 		FROM habits h
 		JOIN users_habits uh ON 
 			h.id = uh.habit_id 
-			AND uh.active = TRUE
+			AND uh.active IS TRUE
 		WHERE 
 			h.active IS TRUE
 			AND uh.user_id = $1
 	`
 	switch status {
 	case hPkg.Active:
-		sql += " AND h.archived = FALSE"
+		sql += " AND h.archived IS FALSE"
 	case hPkg.Archived:
-		sql += " AND h.archived = TRUE"
+		sql += " AND h.archived IS TRUE"
 	}
 	if !requestedByOwner {
-		sql += " AND uh.is_public = TRUE"
+		sql += " AND uh.is_public IS TRUE"
 	}
 
 	rows, err := r.p.Query(r.c, sql, ownerID)
@@ -149,12 +149,12 @@ func (r pgRepo) GetByIDAndOwnerID(id int64, ownerID int64, requestedByOwner bool
 		FROM habit h
 		JOIN users_habits uh ON 
 			h.id = uh.habit_id 
-			AND uh.active = TRUE
+			AND uh.active IS TRUE
 		WHERE 
 			uh.user_id = $2
 	`
 	if !requestedByOwner {
-		sql += " AND uh.is_public = TRUE"
+		sql += " AND uh.is_public IS TRUE"
 	}
 
 	h := &hPkg.Habit{}
@@ -214,7 +214,7 @@ func (r pgRepo) GetUserHabitsCompletedChecks(userID int64, habitIDs []int64, fro
 			AND habit_id = ANY($2)
 			AND check_date >= $3
 			AND check_date <= $4
-			AND completed = TRUE
+			AND completed IS TRUE
 		ORDER BY check_date ASC
 	`
 	rows, err := r.p.Query(
