@@ -6,7 +6,7 @@ import { dateToLocalString } from './utils/date'
 import { ApiFetcher } from '@/api/request'
 import { useUserStore } from '@/stores/user'
 import { useHabitStore } from '@/stores/habit'
-import { type Color, BLUE, generateColorGradient } from '@/models/color'
+import { type Color, ORANGE, generateColorGradient } from '@/models/color'
 import ConfirmDialog from '@/components/confirm-dialog/ConfirmDialog.vue'
 import CalendarHeatmap from '@/components/calendar-heatmap/CalendarHeatmap.vue'
 import DatePicker from '@/components/date-picker/DatePicker.vue'
@@ -20,7 +20,7 @@ const userStore = useUserStore()
 const habitStore = useHabitStore()
 
 const selectedDate = ref<Date>(new Date())
-const mainHeatmapColor = ref<Color>(BLUE)
+const mainHeatmapColor = ref<Color>(ORANGE)
 
 const init = ref<boolean>(true)
 const initErrorMsg = ref<string | null>(null)
@@ -91,7 +91,7 @@ onMounted(async (): Promise<void> => {
           habitStore.activeHabitsCount == 2
             ? mainHeatmapColor.value400hex
             : mainHeatmapColor.value200hex,
-          mainHeatmapColor.value800hex,
+          mainHeatmapColor.value600hex,
           habitStore.activeHabitsCount,
         ),
       ]"
