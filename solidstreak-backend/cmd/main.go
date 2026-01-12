@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"log/slog"
 	"os"
@@ -45,10 +44,6 @@ func main() {
 	if err != nil {
 		return
 	}
-	if os.Getenv("POSTGRES_CONN_STRING") == "" {
-		err = fmt.Errorf("POSTGRES_CONN_STRING is not set")
-		return
-	}
 
 	// Creating main context that will be cancelled on SIGINT or SIGTERM
 	mainCtx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
@@ -87,7 +82,13 @@ func main() {
 	}.Run(mainCtx, goroutineDoneCh)
 
 	// Running web server
-	webServer := http.Server{Addr: ":8080", Res: resources}
+	webServer := http.Server{
+		Env:          os.Getenv("ENV"),
+		CertFilePath: os.Getenv("CERT_FILE_PATH"),
+		KeyFilePath:  os.Getenv("KEY_FILE_PATH"),
+		Addr:         os.Getenv("SERVER_ADDR"),
+		Res:          resources,
+	}
 	go webServer.Run(mainCtx, goroutineDoneCh)
 
 	logger.Info("solid streak started")

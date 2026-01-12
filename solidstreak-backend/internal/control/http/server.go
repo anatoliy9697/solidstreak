@@ -15,9 +15,12 @@ import (
 )
 
 type Server struct {
-	Addr string
-	Res  resources.Resources
-	s    *http.Server
+	Env          string
+	CertFilePath string
+	KeyFilePath  string
+	Addr         string
+	Res          resources.Resources
+	s            *http.Server
 }
 
 func (s Server) Run(mainCtx context.Context, doneCh chan struct{}) {
@@ -68,7 +71,12 @@ func (s Server) Run(mainCtx context.Context, doneCh chan struct{}) {
 
 	errCh := make(chan error, 1)
 	go func() {
-		err := s.s.ListenAndServe()
+		var err error
+		if s.Env == "prod" {
+			err = s.s.ListenAndServeTLS(s.CertFilePath, s.KeyFilePath)
+		} else {
+			err = s.s.ListenAndServe()
+		}
 		if err == http.ErrServerClosed {
 			err = nil
 		}
