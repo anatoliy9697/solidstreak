@@ -150,21 +150,18 @@ async function processHabitDeletion(): Promise<void> {
   >
     <div :class="['flex items-start justify-between', expanded && !habit.archived ? 'mb-2' : '']">
       <div
-        :class="['mr-4 flex min-h-7 flex-1', expanded ? 'flex-col' : 'items-center']"
+        class="mr-4 flex min-h-7 flex-1 items-center"
         @click.stop="
           props.expanded
             ? emit('collapseHabitCard', props.habit.id)
             : emit('expandHabitCard', props.habit.id)
         "
       >
-        <h2 :class="['leading-none', expanded && habit.description ? 'mb-2' : '']">
-          {{ habit.title }}
-        </h2>
-        <p v-if="expanded && habit.description">{{ habit.description }}</p>
+        <h2 class="leading-none">{{ habit.title }}</h2>
       </div>
 
       <div class="flex items-center">
-        <div class="flex items-center" v-if="expanded">
+        <div v-if="expanded" class="flex items-center">
           <span title="Delete">
             <Trash2
               @click.stop="processHabitDeletion()"
@@ -226,6 +223,10 @@ async function processHabitDeletion(): Promise<void> {
           </button>
         </div>
       </div>
+    </div>
+
+    <div v-if="expanded && habit.description" class="mb-2">
+      <p>{{ habit.description }}</p>
     </div>
 
     <CalendarHeatmap

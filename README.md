@@ -1,3 +1,3 @@
 # Solid Streak
 
-Telegram blockchain habit tracker
+Telegram habit tracker
