@@ -148,7 +148,14 @@ async function processHabitDeletion(): Promise<void> {
       habit.archived ? 'opacity-50' : '',
     ]"
   >
-    <div :class="['flex items-start justify-between', expanded && !habit.archived ? 'mb-2' : '']">
+    <!-- <div :class="['flex items-start justify-between', expanded && !habit.archived ? 'mb-2' : '']"> -->
+    <div
+      :class="[
+        'flex justify-between',
+        expanded && !habit.archived ? 'mb-2' : '',
+        expanded ? 'items-start' : '',
+      ]"
+    >
       <div
         class="mr-4 flex min-h-7 flex-1 items-center"
         @click.stop="
@@ -157,7 +164,7 @@ async function processHabitDeletion(): Promise<void> {
             : emit('expandHabitCard', props.habit.id)
         "
       >
-        <h2 class="leading-none">{{ habit.title }}</h2>
+        <h2 class="leading-none" style="word-break: break-word">{{ habit.title }}</h2>
       </div>
 
       <div class="flex items-center">
@@ -226,7 +233,7 @@ async function processHabitDeletion(): Promise<void> {
     </div>
 
     <div v-if="expanded && habit.description" class="mb-2">
-      <p>{{ habit.description }}</p>
+      <p style="word-break: break-word; white-space: pre-wrap;">{{ habit.description }}</p>
     </div>
 
     <CalendarHeatmap
