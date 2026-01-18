@@ -148,7 +148,6 @@ async function processHabitDeletion(): Promise<void> {
       habit.archived ? 'opacity-50' : '',
     ]"
   >
-    <!-- <div :class="['flex items-start justify-between', expanded && !habit.archived ? 'mb-2' : '']"> -->
     <div
       :class="[
         'flex justify-between',
@@ -239,9 +238,9 @@ async function processHabitDeletion(): Promise<void> {
     <CalendarHeatmap
       v-if="expanded && !habit.archived"
       :values="checksArray"
-      :end-date="dateToLocalString(new Date())"
+      :endDate="dateToLocalString(new Date())"
       :max="1"
-      :range-color="[color.value100hex, color.value600hex]"
+      :rangeColor="[color.value100hex, color.value600hex]"
       :tooltip="false"
       :round="3"
     />

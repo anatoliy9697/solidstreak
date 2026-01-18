@@ -82,10 +82,10 @@ onMounted(async (): Promise<void> => {
     <CalendarHeatmap
       v-if="!init && !initErrorMsg"
       :values="habitStore.activities"
-      :end-date="dateToLocalString(new Date())"
+      :endDate="dateToLocalString(new Date())"
       :max="habitStore.activeHabitsCount"
-      tooltip-unit="checks"
-      :range-color="[
+      tooltipUnit="checks"
+      :rangeColor="[
         '#ffffff',
         ...generateColorGradient(
           habitStore.activeHabitsCount == 2
@@ -124,11 +124,11 @@ onMounted(async (): Promise<void> => {
       v-for="habit in habitStore.activeHabits"
       :key="habit.id"
       :habit="habit"
-      :selected-date="selectedDate"
+      :selectedDate="selectedDate"
       :expanded="expandedHabitCardId === habit.id"
-      @edit-habit="openHabitDialog"
-      @expand-habit-card="expandedHabitCardId = $event"
-      @collapse-habit-card="expandedHabitCardId = null"
+      @editHabit="openHabitDialog"
+      @expandHabitCard="expandedHabitCardId = $event"
+      @collapseHabitCard="expandedHabitCardId = null"
       class="mb-2"
     />
 
@@ -137,11 +137,11 @@ onMounted(async (): Promise<void> => {
       v-for="habit in habitStore.archivedHabits"
       :key="habit.id"
       :habit="habit"
-      :selected-date="selectedDate"
+      :selectedDate="selectedDate"
       :expanded="expandedHabitCardId === habit.id"
-      @edit-habit="openHabitDialog"
-      @expand-habit-card="expandedHabitCardId = $event"
-      @collapse-habit-card="expandedHabitCardId = null"
+      @editHabit="openHabitDialog"
+      @expandHabitCard="expandedHabitCardId = $event"
+      @collapseHabitCard="expandedHabitCardId = null"
       class="mb-2"
     />
 
@@ -161,15 +161,15 @@ onMounted(async (): Promise<void> => {
     <DatePicker
       v-if="view === 'active'"
       :date="selectedDate"
-      @date-selected="selectedDate = $event"
+      @dateSelected="selectedDate = $event"
     />
   </template>
 
   <HabitDialog
     :visible="isHabitDialogVisible"
-    :new-habit="editingHabitId === null"
+    :newHabit="editingHabitId === null"
     :habit="editingHabitId !== null ? habitStore.habitById(editingHabitId) : undefined"
-    @close-habit-dialog="isHabitDialogVisible = false"
+    @closeHabitDialog="isHabitDialogVisible = false"
   />
   <ConfirmDialog :style="{ borderRadius: '0.375rem' }"></ConfirmDialog>
   <Toast position="bottom-right" />

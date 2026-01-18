@@ -73,12 +73,12 @@ function processDateShift(diff: number): void {
 
     <DatePicker
       v-model="selectedDate"
-      @date-select="emit('dateSelected', $event)"
-      date-format="dd/mm/yy"
-      :min-date="minDate"
-      :max-date="maxDate"
-      :manual-input="false"
-      :show-button-bar="true"
+      @dateSelect="emit('dateSelected', $event)"
+      dateFormat="dd/mm/yy"
+      :minDate="minDate"
+      :maxDate="maxDate"
+      :manualInput="false"
+      :showButtonBar="true"
       placeholder="Customized"
       title="Select a date"
     >

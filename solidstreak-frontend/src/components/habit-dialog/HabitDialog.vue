@@ -150,11 +150,11 @@ async function onColorSelected(selectedColor: Color): Promise<void> {
       <Textarea
         id="habit-description"
         v-model="habitDescription"
-        auto-resize
+        autoResize
         maxlength="256"
         rows="5"
-        cols="30"
         class="w-full"
+        style="overflow-y: auto;"
       />
       <p class="text-right text-xs text-gray-400">{{ habitDescription.length }}/256</p>
 
