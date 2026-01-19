@@ -39,6 +39,8 @@ const toast = useToast()
 // ─────────────────────────────────────────────
 // Constants & reactive state
 // ─────────────────────────────────────────────
+const HABIT_TITLE_MAX_LENGTH = 64
+const HABIT_DESCRIPTION_MAX_LENGTH = 256
 const habitTitle = ref('')
 const titleValidationMessage = ref('')
 const habitDescription = ref('')
@@ -141,22 +143,55 @@ async function onColorSelected(selectedColor: Color): Promise<void> {
         id="habit-title"
         v-model="habitTitle"
         :placeholder="titleValidationMessage"
-        maxlength="64"
+        :maxlength="HABIT_TITLE_MAX_LENGTH"
         :class="['w-full', titleValidationMessage ? 'p-invalid' : '']"
       />
-      <p class="text-right text-xs text-gray-400">{{ habitTitle.length }}/64</p>
+      <div class="flex items-center justify-between">
+        <div class="mr-2 flex-1">
+          <p v-if="habitTitle.length > HABIT_TITLE_MAX_LENGTH" class="text-xs text-red-600">
+            Extra characters will be removed automatically
+          </p>
+        </div>
+        <p
+          :class="[
+            'text-xs',
+            habitTitle.length <= HABIT_TITLE_MAX_LENGTH ? 'text-gray-400' : 'text-red-600',
+          ]"
+        >
+          {{ habitTitle.length }}/{{ HABIT_TITLE_MAX_LENGTH }}
+        </p>
+      </div>
 
       <label for="habit-description" class="font-semibold">Description:</label>
       <Textarea
         id="habit-description"
         v-model="habitDescription"
         autoResize
-        maxlength="256"
+        :maxlength="HABIT_DESCRIPTION_MAX_LENGTH"
         rows="5"
         class="w-full"
-        style="overflow-y: auto;"
+        style="overflow-y: auto"
       />
-      <p class="text-right text-xs text-gray-400">{{ habitDescription.length }}/256</p>
+      <div class="flex items-center justify-between">
+        <div class="mr-2 flex-1">
+          <p
+            v-if="habitDescription.length > HABIT_DESCRIPTION_MAX_LENGTH"
+            class="text-xs text-red-600"
+          >
+            Extra characters will be removed automatically
+          </p>
+        </div>
+        <p
+          :class="[
+            'text-xs',
+            habitDescription.length <= HABIT_DESCRIPTION_MAX_LENGTH
+              ? 'text-gray-400'
+              : 'text-red-600',
+          ]"
+        >
+          {{ habitDescription.length }}/{{ HABIT_DESCRIPTION_MAX_LENGTH }}
+        </p>
+      </div>
 
       <div class="mb-4 flex flex-row items-start">
         <label class="mr-2 block font-semibold">Color:</label>

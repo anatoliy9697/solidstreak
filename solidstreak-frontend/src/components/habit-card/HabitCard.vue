@@ -232,7 +232,7 @@ async function processHabitDeletion(): Promise<void> {
     </div>
 
     <div v-if="expanded && habit.description" class="mb-2">
-      <p style="word-break: break-word; white-space: pre-wrap;">{{ habit.description }}</p>
+      <p style="word-break: break-word; white-space: pre-wrap">{{ habit.description }}</p>
     </div>
 
     <CalendarHeatmap
