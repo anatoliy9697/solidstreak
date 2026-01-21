@@ -62,7 +62,7 @@ func (r pgRepo) Update(u *usrPkg.User) error {
 			tg_lang_code = $4,
 			tg_is_bot = $5
 		WHERE tg_id = $6
-		RETURNING id
+		RETURNING id, created_at
 	`
 	err := r.pool.QueryRow(
 		r.ctx,
@@ -73,7 +73,10 @@ func (r pgRepo) Update(u *usrPkg.User) error {
 		u.TgLangCode,
 		u.TgIsBot,
 		u.TgID,
-	).Scan(&u.ID)
+	).Scan(
+		&u.ID,
+		&u.CreatedAt,
+	)
 
 	return err
 }

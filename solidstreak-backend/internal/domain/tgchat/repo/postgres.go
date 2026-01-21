@@ -9,8 +9,8 @@ import (
 )
 
 type pgRepo struct {
-	c context.Context
-	p *pgxpool.Pool
+	ctx  context.Context
+	pool *pgxpool.Pool
 }
 
 func initPGRepo(c context.Context, p *pgxpool.Pool) *pgRepo {
@@ -21,8 +21,8 @@ func (r pgRepo) IsExistsByTgID(tgID int64) (bool, error) {
 	exists := false
 
 	sql := `SELECT EXISTS(SELECT 1 FROM tg_chats WHERE tg_id = $1)`
-	err := r.p.QueryRow(
-		r.c,
+	err := r.pool.QueryRow(
+		r.ctx,
 		sql,
 		tgID,
 	).Scan(&exists)
@@ -35,8 +35,8 @@ func (r pgRepo) IsExistsByTgID(tgID int64) (bool, error) {
 
 func (r pgRepo) Create(tc *tcPkg.Chat) error {
 	sql := `INSERT INTO tg_chats (tg_id, user_id, created_at) VALUES ($1, $2, $3)`
-	_, err := r.p.Exec(
-		r.c,
+	_, err := r.pool.Exec(
+		r.ctx,
 		sql,
 		tc.TgID,
 		tc.UserID,
@@ -51,13 +51,14 @@ func (r pgRepo) Update(c *tcPkg.Chat) error {
 		UPDATE tg_chats SET
 			user_id = $1
 		WHERE tg_id = $2
+		RETURNING created_at
 	`
-	_, err := r.p.Exec(
-		r.c,
+	err := r.pool.QueryRow(
+		r.ctx,
 		sql,
 		c.UserID,
 		c.TgID,
-	)
+	).Scan(&c.CreatedAt)
 
 	return err
 }
