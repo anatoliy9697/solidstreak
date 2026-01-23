@@ -41,13 +41,18 @@ const openHabitDialog = (habitId?: number): void => {
 // Lifecycle
 // ─────────────────────────────────────────────
 onMounted(async (): Promise<void> => {
+  function finishInitialization(errorMsg: string | null = null): void {
+    initErrorMsg.value = errorMsg
+    init.value = false
+    window.Telegram?.WebApp?.ready()
+  }
+
   const initData = window.Telegram?.WebApp?.initData
   const user = window.Telegram?.WebApp?.initDataUnsafe?.user
   const chat = window.Telegram?.WebApp?.initDataUnsafe?.chat
 
   if (!initData || !user?.id) {
-    initErrorMsg.value = 'Initialization failed'
-    init.value = false
+    finishInitialization('Initialization failed')
     return
   }
 
@@ -56,22 +61,20 @@ onMounted(async (): Promise<void> => {
   userStore.init(apiFetcher)
   const userInfoResult = await userStore.upsertUserInfo(user, chat || { id: user.id }) // Use personal chat with user if no other chat info
   if (!userInfoResult.success) {
-    initErrorMsg.value = 'Initialization failed'
-    init.value = false
+    finishInitialization('Initialization failed')
     return
   }
 
   habitStore.init(apiFetcher)
   const habitsResult = await habitStore.fetchHabits(userStore.id)
   if (!habitsResult.success) {
-    initErrorMsg.value = 'Initialization failed'
-    init.value = false
+    finishInitialization('Initialization failed')
     return
   }
 
   userStore.setAvatarUrl(user.photo_url || '')
 
-  init.value = false
+  finishInitialization()
 })
 </script>
 

@@ -21,6 +21,7 @@ interface TelegramWebApp {
   initData: string
   initDataUnsafe: WebAppInitData
   onEvent(event: 'webAppReady', callback: () => void): void
+  ready(): void
 }
 
 interface Window {
