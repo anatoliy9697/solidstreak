@@ -31,18 +31,6 @@ h2 {
   @apply text-lg font-semibold;
 }
 
-#content {
-  @apply relative mx-auto flex min-h-screen w-full max-w-lg flex-col p-2;
-}
-
-#app {
-  flex: 1 0 auto;
-}
-
-#footer {
-  @apply w-full text-center text-xs text-gray-500 opacity-50;
-}
-
 .p-toast {
   box-sizing: border-box;
   max-width: calc(100vw - 40px);
@@ -118,5 +106,37 @@ h2 {
 .p-datepicker-today .p-datepicker-day.p-datepicker-day-selected,
 .p-datepicker-month.p-datepicker-month-selected,
 .p-datepicker-year.p-datepicker-year-selected {
+  background-color: #2563eb !important;
+}
+
+.p-select {
+  background-color: #e5e7eb !important; /* bg-gray-200 */
+  border-color: #d1d5db !important; /* border-gray-300 */
+}
+.p-select:hover {
+  background-color: #d1d5db !important; /* bg-gray-300 */
+}
+.p-select:active {
+  border-color: #9ca3af !important; /* border-gray-400 */
+  background-color: #9ca3af !important; /* bg-gray-400 */
+}
+.p-select-label {
+  font-size: 0.875rem !important;
+  padding: 0.25rem 0.25rem 0.25rem 0.5rem !important;
+}
+.p-select-dropdown {
+  width: auto !important;
+  color: #9ca3af !important; /* gray-400 */
+  padding: 0.25rem 0.5rem 0.25rem 0.25rem !important;
+}
+.p-select:active .p-select-dropdown {
+  color: #6b7280 !important; /* gray-500 */
+}
+.p-select-option.p-focus {
+  background-color: #eff6ff !important;
+}
+.p-select-option-selected,
+.p-select-option.p-select-option-selected.p-focus {
+  color: #fff !important;
   background-color: #2563eb !important;
 }

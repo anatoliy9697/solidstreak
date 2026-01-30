@@ -44,10 +44,20 @@ export const useUserStore = defineStore('user', {
         this.tgUsername = user.tgUsername || ''
         this.tgFirstName = user.tgFirstName
         this.tgLastName = user.tgLastName || ''
-        this.tgLangCode = user.tgLangCode || ''
+        this.tgLangCode = localStorage.getItem('lang') || user.tgLangCode || 'en'
       }
 
       return result
+    },
+
+    setLang(lang: string): void {
+      localStorage.setItem('lang', lang)
+    },
+  },
+
+  getters: {
+    lang: (state): string => {
+      return localStorage.getItem('lang') || state.tgLangCode || 'en'
     },
   },
 })
