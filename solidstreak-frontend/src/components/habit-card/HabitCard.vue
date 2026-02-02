@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useConfirm } from 'primevue/useconfirm'
 import { useToast } from 'primevue/usetoast'
 import { SquarePen, Package, PackageOpen, Trash2 } from 'lucide-vue-next'
@@ -32,6 +33,7 @@ const emit = defineEmits<{
 // ─────────────────────────────────────────────
 // Composables & stores
 // ─────────────────────────────────────────────
+const { t } = useI18n()
 const confirm = useConfirm()
 const toast = useToast()
 const userStore = useUserStore()
@@ -94,8 +96,8 @@ async function processCurrentDateCheck(): Promise<void> {
   } else {
     toast.add({
       severity: 'error',
-      summary: 'Error',
-      detail: 'Failed to ' + (check ? 'check' : 'uncheck') + ' habit',
+      summary: t('common.error', 'Error'),
+      detail: `${t('common.failedTo', 'Failed to')} ${check ? t('common.check', 'check') : t('common.uncheck', 'uncheck')} ${t('common.gcHabit', 'habit')}`,
       life: 3000,
     })
   }
@@ -104,16 +106,16 @@ async function processCurrentDateCheck(): Promise<void> {
 async function processHabitArchiving(): Promise<void> {
   confirm.require({
     group: 'headless',
-    message: `Are you sure you want to ${props.habit.archived ? 'unarchive' : 'archive'} this habit?`,
-    header: 'Confirm',
+    message: `${t('common.areYouSure', 'Are you sure you want to')} ${props.habit.archived ? t('common.unarchive', 'unarchive') : t('common.archive', 'archive')} ${t('common.acHabit', 'habit')}?`,
+    header: t('common.confirmation', 'Confirmation'),
     accept: async () => {
       const archive = !props.habit.archived
       const result = await habitStore.setHabitArchived(userStore.id, props.habit.id, archive)
       if (!result.success) {
         toast.add({
           severity: 'error',
-          summary: 'Error',
-          detail: `Failed to ${archive ? 'archive' : 'unarchive'} habit`,
+          summary: t('common.error', 'Error'),
+          detail: `${t('common.failedTo', 'Failed to')} ${archive ? t('common.archive', 'archive') : t('common.unarchive', 'unarchive')} ${t('common.acHabit', 'habit')}`,
           life: 3000,
         })
       }
@@ -124,15 +126,15 @@ async function processHabitArchiving(): Promise<void> {
 async function processHabitDeletion(): Promise<void> {
   confirm.require({
     group: 'headless',
-    message: `Are you sure you want to delete this habit?`,
-    header: 'Confirm',
+    message: `${t('common.areYouSure', 'Are you sure you want to')} ${t('common.delete', 'delete')} ${t('common.acHabit', 'habit')}?`,
+    header: t('common.confirmation', 'Confirmation'),
     accept: async () => {
       const result = await habitStore.deleteHabit(userStore.id, props.habit.id)
       if (!result.success) {
         toast.add({
           severity: 'error',
-          summary: 'Error',
-          detail: 'Failed to delete habit',
+          summary: t('common.error', 'Error'),
+          detail: `${t('common.failedTo', 'Failed to')} ${t('common.delete', 'delete')} ${t('common.acHabit', 'habit')}`,
           life: 3000,
         })
       }
@@ -168,25 +170,25 @@ async function processHabitDeletion(): Promise<void> {
 
       <div class="flex items-center">
         <div v-if="expanded" class="flex items-center">
-          <span title="Delete">
+          <span :title="t('common.upperDelete', 'Delete')">
             <Trash2
               @click.stop="processHabitDeletion()"
               class="mr-2 h-5 w-5 cursor-pointer text-gray-300 hover:text-gray-400"
             />
           </span>
-          <span title="Archive" v-if="!habit.archived">
+          <span :title="t('common.upperArchive', 'Archive')" v-if="!habit.archived">
             <Package
               @click.stop="processHabitArchiving()"
               class="mr-2 h-5 w-5 cursor-pointer text-gray-300 hover:text-gray-400"
             />
           </span>
-          <span title="Unarchive" v-else>
+          <span :title="t('common.upperUnarchive', 'Unarchive')" v-else>
             <PackageOpen
               @click.stop="processHabitArchiving()"
               class="mr-2 h-5 w-5 cursor-pointer text-gray-300 hover:text-gray-400"
             />
           </span>
-          <span title="Edit">
+          <span :title="t('common.upperEdit', 'Edit')">
             <SquarePen
               @click.stop="emit('editHabit', habit.id)"
               class="h-5 w-5 cursor-pointer text-gray-300 hover:text-gray-400"
@@ -214,7 +216,7 @@ async function processHabitDeletion(): Promise<void> {
                 ? ''
                 : 'border-gray-400 text-gray-400 hover:border-gray-500 hover:text-gray-500',
             ]"
-            title="Check habit for selected date"
+            :title="`${selectedDateChecked ? t('common.upperUncheck', 'Uncheck') : t('common.upperCheck', 'Check')} ${t('common.gcHabit', 'habit')} ${t('habitCard.forSelectedDate', 'for selected date')}`"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"

@@ -59,7 +59,7 @@ onMounted(async (): Promise<void> => {
   const chat = window.Telegram?.WebApp?.initDataUnsafe?.chat
 
   if (!initData || !user?.id) {
-    finishInitialization('Initialization failed')
+    finishInitialization(t('app.initFailed', 'Initialization failed'))
     return
   }
 
@@ -68,7 +68,7 @@ onMounted(async (): Promise<void> => {
   userStore.init(apiFetcher)
   const userInfoResult = await userStore.upsertUserInfo(user, chat || { id: user.id }) // Use personal chat with user if no other chat info
   if (!userInfoResult.success) {
-    finishInitialization('Initialization failed')
+    finishInitialization(t('app.initFailed', 'Initialization failed'))
     return
   }
 
@@ -77,7 +77,7 @@ onMounted(async (): Promise<void> => {
   habitStore.init(apiFetcher)
   const habitsResult = await habitStore.fetchHabits(userStore.id)
   if (!habitsResult.success) {
-    finishInitialization('Initialization failed')
+    finishInitialization(t('app.initFailed', 'Initialization failed'))
     return
   }
 

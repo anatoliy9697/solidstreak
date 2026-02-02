@@ -1,0 +1,17 @@
+{
+    "error": "Error",
+    "confirmation": "Confirmation",
+    "failedTo": "Failed to",
+    "check": "check",
+    "uncheck": "uncheck",
+    "acHabit": "habit",
+    "gcHabit": "habit",
+    "areYouSure": "Are you sure you want to",
+    "upperArchive": "Archive",
+    "archive": "archive",
+    "upperUnarchive": "Unarchive",
+    "unarchive": "unarchive",
+    "upperDelete": "Delete",
+    "delete": "delete",
+    "upperEdit": "Edit"
+}

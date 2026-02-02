@@ -1,4 +1,5 @@
 {
+    "initFailed": "Initialization failed",
     "active": "Active",
     "showActiveHabits": "Show active habits",
     "archived": "Archived",
