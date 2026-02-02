@@ -1,3 +1,14 @@
 {
-    "forSelectedDate": "for selected date"
+    "upperCheck": "Check",
+    "check": "check",
+    "upperUncheck": "Uncheck",
+    "uncheck": "uncheck",
+    "forSelectedDate": "for selected date",
+    "upperArchive": "Archive",
+    "archive": "archive",
+    "upperUnarchive": "Unarchive",
+    "unarchive": "unarchive",
+    "upperDelete": "Delete",
+    "delete": "delete",
+    "upperEdit": "Edit"
 }
