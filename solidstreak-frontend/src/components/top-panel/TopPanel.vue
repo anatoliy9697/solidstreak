@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { LANGS } from '@/i18n';
-import Select from 'primevue/select';
+import { LANGS } from '@/i18n'
+import Select from 'primevue/select'
 
 // ─────────────────────────────────────────────
 // Props
@@ -20,16 +20,15 @@ const emit = defineEmits<{
 // ─────────────────────────────────────────────
 // Constants & reactive state
 // ─────────────────────────────────────────────
-const selectedLang = ref('ru');
+const selectedLang = ref('ru')
 
 watch(
   () => props.lang,
   (newLang) => {
-    selectedLang.value = newLang;
+    selectedLang.value = newLang
   },
   { immediate: true },
 )
-
 </script>
 
 <template>

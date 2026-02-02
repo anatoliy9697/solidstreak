@@ -1,3 +1,12 @@
 {
-    "newHabit": "Создать"
+    "active": "Активные",
+    "showActiveHabits": "Показать активные привычки",
+    "archived": "Архивные",
+    "showArchivedHabits": "Показать архивные привычки",
+    "newHabit": "Создать",
+    "createHabit": "Создать новую привычку",
+    "noActiveHabits": "Нет активных привычек",
+    "createOne": "Создать",
+    "noArchivedHabits": "Нет архивных привычек",
+    "madeBy": "Разработал"
 }

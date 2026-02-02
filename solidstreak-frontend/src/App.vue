@@ -91,11 +91,8 @@ onMounted(async (): Promise<void> => {
   <p v-if="init">Loading...</p>
   <p v-else-if="initErrorMsg">{{ initErrorMsg }}</p>
   <template v-else>
-    <div class="mb-2 bg-gray-200 border-b border-gray-300">
-      <TopPanel
-        :lang="userStore.lang"
-        @langSelected="updateLocale"
-      />
+    <div class="mb-2 border-b border-gray-300 bg-gray-200">
+      <TopPanel :lang="userStore.lang" @langSelected="updateLocale" />
     </div>
 
     <div id="content" style="flex: 1 0 auto" class="mx-auto w-full max-w-lg px-2">
@@ -117,24 +114,36 @@ onMounted(async (): Promise<void> => {
         ]"
         :round="3"
         class="mb-2 px-2"
-      />
+      /><!-- TODO: добавить "checks" в переводы -->
 
       <div class="mb-2 flex items-center justify-between">
         <div class="flex h-10 items-center px-4">
-          <span v-if="view === 'active'" class="text-lg font-semibold text-gray-500">Active</span>
-          <a v-else @click="view = 'active'" title="Show active habits">Active</a>
-          <span class="text-gray-500">&nbsp;/&nbsp;</span>
-          <span v-if="view === 'archived'" class="text-lg font-semibold text-gray-500"
-            >Archived</span
+          <span v-if="view === 'active'" class="text-lg font-semibold text-gray-500">{{
+            t('app.active', 'Active')
+          }}</span>
+          <a
+            v-else
+            @click="view = 'active'"
+            :title="t('app.showActiveHabits', 'Show active habits')"
+            >{{ t('app.active', 'Active') }}</a
           >
-          <a v-else @click="view = 'archived'" title="Show archived habits">Archived</a>
+          <span class="text-gray-500">&nbsp;/&nbsp;</span>
+          <span v-if="view === 'archived'" class="text-lg font-semibold text-gray-500">{{
+            t('app.archived', 'Archived')
+          }}</span>
+          <a
+            v-else
+            @click="view = 'archived'"
+            :title="t('app.showArchivedHabits', 'Show archived habits')"
+            >{{ t('app.archived', 'Archived') }}</a
+          >
         </div>
 
         <div v-show="view === 'active'">
           <button
             @click="openHabitDialog()"
             class="rounded-md border border-gray-300 bg-gray-100 px-4 py-2 font-medium text-blue-800 hover:border-blue-100 hover:bg-blue-100 active:border-blue-200 active:bg-blue-200"
-            title="Create a new habit"
+            :title="t('app.createHabit', 'Create a new habit')"
           >
             + {{ t('app.newHabit', 'New habit') }}
           </button>
@@ -171,13 +180,17 @@ onMounted(async (): Promise<void> => {
         v-if="view === 'active' && habitStore.activeHabits.length === 0"
         class="text-center text-gray-500"
       >
-        No active habits. <a @click="openHabitDialog()">Create one</a>!
+        {{ t('app.noActiveHabits', 'No active habits') }}.
+        <a @click="openHabitDialog()" :title="t('app.createHabit', 'Create a new habit')">{{
+          t('app.createOne', 'Create one')
+        }}</a
+        >!
       </p>
       <p
         v-else-if="view === 'archived' && habitStore.archivedHabits.length === 0"
         class="text-center text-gray-500"
       >
-        No archived habits
+        {{ t('app.noArchivedHabits', 'No archived habits') }}
       </p>
 
       <DatePicker
@@ -188,7 +201,9 @@ onMounted(async (): Promise<void> => {
     </div>
 
     <div id="footer" class="mb-2 w-full text-center text-xs text-gray-500 opacity-50">
-      <span>Made by <a href="https://t.me/avasin_dev">@avasin_dev</a></span>
+      <span
+        >{{ t('app.madeBy', 'Made by') }} <a href="https://t.me/avasin_dev">@avasin_dev</a></span
+      >
     </div>
   </template>
 
