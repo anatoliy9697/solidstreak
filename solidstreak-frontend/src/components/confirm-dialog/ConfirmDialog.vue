@@ -1,5 +1,13 @@
 <script setup lang="ts">
+
+import { useI18n } from 'vue-i18n'
 import ConfirmDialog from 'primevue/confirmdialog'
+
+// ─────────────────────────────────────────────
+// Composables & stores
+// ─────────────────────────────────────────────
+const { t } = useI18n()
+
 </script>
 
 <template>
@@ -12,13 +20,13 @@ import ConfirmDialog from 'primevue/confirmdialog'
           @click="acceptCallback"
           class="w-1/2 rounded-md border border-gray-300 bg-gray-100 px-4 py-2 font-medium text-gray-800 hover:bg-gray-200 active:bg-gray-300"
         >
-          Yes
+          {{ t('common.yes', 'Yes') }}
         </button>
         <button
           @click="rejectCallback"
           class="w-1/2 rounded-md border border-gray-300 bg-gray-100 px-4 py-2 font-medium text-red-800 hover:bg-gray-200 active:bg-gray-300"
         >
-          No
+          {{ t('common.no', 'No') }}
         </button>
       </div>
     </template>

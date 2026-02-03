@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useToast } from 'primevue/usetoast'
 import 'primeicons/primeicons.css'
 import Dialog from 'primevue/dialog'
@@ -32,6 +33,7 @@ const emit = defineEmits<{
 // ─────────────────────────────────────────────
 // Composables & stores
 // ─────────────────────────────────────────────
+const { t } = useI18n()
 const userStore = useUserStore()
 const habitStore = useHabitStore()
 const toast = useToast()
@@ -78,7 +80,7 @@ const dialogVisible = computed({
 // ─────────────────────────────────────────────
 async function processHabitSaving(): Promise<void> {
   if (!habitTitle.value) {
-    titleValidationMessage.value = 'Title is required'
+    titleValidationMessage.value = t('habitDialog.titleRequired', 'Title is required')
     return
   }
 
@@ -99,7 +101,7 @@ async function processHabitSaving(): Promise<void> {
   }
 
   if (!result.success) {
-    toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to save habit', life: 3000 })
+    toast.add({ severity: 'error', summary: t('common.error', 'Error'), detail: `${t('common.failedTo', 'Failed to')} ${t('common.save', 'save')} ${t('common.acHabit', 'habit')}`, life: 3000 })
   } else {
     emit('closeHabitDialog')
   }
@@ -128,17 +130,18 @@ async function onColorSelected(selectedColor: Color): Promise<void> {
     <template #container="{ closeCallback }">
       <div class="mb-4 flex items-start justify-between">
         <div>
-          <h1>{{ props.newHabit ? 'New habit' : 'Edit habit' }}</h1>
+          <h1>{{ props.newHabit ? t('habitDialog.newHabit', 'New habit') : t('habitDialog.editHabit', 'Edit habit') }}</h1>
         </div>
         <div>
           <i
             @click="closeCallback"
             class="pi pi-times cursor-pointer text-gray-300 hover:text-gray-400"
+            :title="t('common.close', 'Close')"
           ></i>
         </div>
       </div>
 
-      <label for="habit-title" class="font-semibold">Title:</label>
+      <label for="habit-title" class="font-semibold">{{ t('common.title', 'Title') }}:</label>
       <InputText
         id="habit-title"
         v-model="habitTitle"
@@ -149,7 +152,7 @@ async function onColorSelected(selectedColor: Color): Promise<void> {
       <div class="flex items-center justify-between">
         <div class="mr-2 flex-1">
           <p v-if="habitTitle.length > HABIT_TITLE_MAX_LENGTH" class="text-xs text-red-600">
-            Extra characters will be removed automatically
+            {{ t('habitDialog.extraCharsRemoving', 'Extra characters will be removed automatically') }}
           </p>
         </div>
         <p
@@ -162,7 +165,7 @@ async function onColorSelected(selectedColor: Color): Promise<void> {
         </p>
       </div>
 
-      <label for="habit-description" class="font-semibold">Description:</label>
+      <label for="habit-description" class="font-semibold">{{ t('common.description', 'Description') }}:</label>
       <Textarea
         id="habit-description"
         v-model="habitDescription"
@@ -178,7 +181,7 @@ async function onColorSelected(selectedColor: Color): Promise<void> {
             v-if="habitDescription.length > HABIT_DESCRIPTION_MAX_LENGTH"
             class="text-xs text-red-600"
           >
-            Extra characters will be removed automatically
+            {{ t('habitDialog.extraCharsRemoving', 'Extra characters will be removed automatically') }}
           </p>
         </div>
         <p
@@ -194,7 +197,7 @@ async function onColorSelected(selectedColor: Color): Promise<void> {
       </div>
 
       <div class="mb-4 flex flex-row items-start">
-        <label class="mr-2 block font-semibold">Color:</label>
+        <label class="mr-2 block font-semibold">{{ t('common.color', 'Color') }}:</label>
         <ColorPicker :selectedColor="color" @colorSelected="onColorSelected" />
       </div>
 
@@ -203,13 +206,13 @@ async function onColorSelected(selectedColor: Color): Promise<void> {
           @click="closeCallback"
           class="w-1/2 rounded-md border border-gray-300 bg-gray-100 px-4 py-2 font-medium text-gray-800 hover:bg-gray-200 active:bg-gray-300"
         >
-          Cancel
+          {{ t('common.upperCancel', 'Cancel') }}
         </button>
         <button
           @click="processHabitSaving"
           class="w-1/2 rounded-md border border-green-700 bg-green-600 px-4 py-2 font-medium text-white hover:border-green-800 hover:bg-green-700 active:bg-green-800"
         >
-          Save
+          {{ t('common.upperSave', 'Save') }}
         </button>
       </div>
     </template>

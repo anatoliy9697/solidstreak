@@ -6,17 +6,21 @@ import enApp from './locales/en/app.json'
 import ruApp from './locales/ru/app.json'
 import enHabitCard from './locales/en/habit-card.json'
 import ruHabitCard from './locales/ru/habit-card.json'
+import enHabitDialog from './locales/en/habit-dialog.json'
+import ruHabitDialog from './locales/ru/habit-dialog.json'
 
 const messages = {
   en: {
     common: enCommon,
     app: enApp,
     habitCard: enHabitCard,
+    habitDialog: enHabitDialog,
   },
   ru: {
     common: ruCommon,
     app: ruApp,
     habitCard: ruHabitCard,
+    habitDialog: ruHabitDialog,
   },
 }
 

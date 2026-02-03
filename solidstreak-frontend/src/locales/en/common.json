@@ -4,5 +4,15 @@
     "failedTo": "Failed to",
     "acHabit": "habit",
     "gcHabit": "habit",
-    "areYouSure": "Are you sure you want to"
+    "areYouSure": "Are you sure you want to",
+    "yes": "Yes",
+    "no": "No",
+    "close": "Close",
+    "title": "Title",
+    "description": "Description",
+    "color": "Color",
+    "upperCancel": "Cancel",
+    "cancel": "cancel",
+    "upperSave": "Save",
+    "save": "save"
 }
