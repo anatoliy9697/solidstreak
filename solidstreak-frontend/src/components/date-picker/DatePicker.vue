@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import DatePicker from 'primevue/datepicker'
 import { ChevronLeft, ChevronRight } from 'lucide-vue-next'
 
@@ -18,6 +19,11 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'dateSelected', date: Date): void
 }>()
+
+// ─────────────────────────────────────────────
+// Composables & stores
+// ─────────────────────────────────────────────
+const { t } = useI18n()
 
 // ─────────────────────────────────────────────
 // Constants & reactive state
@@ -59,7 +65,7 @@ function processDateShift(diff: number): void {
   <div
     class="fixed bottom-8 left-1/2 z-50 flex h-14 -translate-x-1/2 items-center rounded-full border border-gray-200 bg-white p-2 shadow-sm"
   >
-    <span title="Previous day">
+    <span :title="t('datePicker.prevDay', 'Previous day')">
       <ChevronLeft
         :class="[
           'h-10 w-10 rounded-full py-2',
@@ -79,8 +85,7 @@ function processDateShift(diff: number): void {
       :maxDate="maxDate"
       :manualInput="false"
       :showButtonBar="true"
-      placeholder="Customized"
-      title="Select a date"
+      :title="t('datePicker.selectDate', 'Select a date')"
     >
       <template #buttonbar="{ todayCallback }">
         <button
@@ -88,12 +93,12 @@ function processDateShift(diff: number): void {
           type="button"
           class="p-button-text p-datepicker-today-button rounded-md px-2 py-1"
         >
-          <span class="p-button-label justify-center">Today</span>
+          <span class="p-button-label justify-center">{{ t('datePicker.today', 'Today') }}</span>
         </button>
       </template>
     </DatePicker>
 
-    <span title="Next day">
+    <span :title="t('datePicker.nextDay', 'Next day')">
       <ChevronRight
         :class="[
           'h-10 w-10 rounded-full py-2 text-blue-800',

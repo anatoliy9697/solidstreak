@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { LANGS } from '@/i18n'
 import Select from 'primevue/select'
 
@@ -16,6 +17,11 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'langSelected', lang: string): void
 }>()
+
+// ─────────────────────────────────────────────
+// Composables & stores
+// ─────────────────────────────────────────────
+const { t } = useI18n()
 
 // ─────────────────────────────────────────────
 // Constants & reactive state
@@ -39,6 +45,7 @@ watch(
       :options="LANGS"
       optionLabel="name"
       optionValue="code"
+      :title="t('topPanel.selectLang', 'Select language')"
     />
   </div>
 </template>
