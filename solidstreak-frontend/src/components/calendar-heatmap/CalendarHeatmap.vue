@@ -213,7 +213,7 @@ export default /*#__PURE__*/ defineComponent({
         } else if (props.noDataText) {
           return `${props.noDataText}`
         } else if (props.noDataText !== false) {
-          return `<b>No ${props.tooltipUnit}</b> ${lo.value.on} ${lo.value.months[day.date.getMonth()]} ${day.date.getDate()}, ${day.date.getFullYear()}`
+          return `<b>0 ${props.tooltipUnit}</b> ${lo.value.on} ${lo.value.months[day.date.getMonth()]} ${day.date.getDate()}, ${day.date.getFullYear()}`
         }
       }
       return undefined

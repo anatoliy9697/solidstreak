@@ -3,7 +3,8 @@ import { ref, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import Toast from 'primevue/toast'
 
-import { dateToLocalString } from './utils/date'
+import { getHeatmapLocale } from '@/i18n'
+import { dateToLocalString } from '@/utils/date'
 import { ApiFetcher } from '@/api/request'
 import { useUserStore } from '@/stores/user'
 import { useHabitStore } from '@/stores/habit'
@@ -101,7 +102,7 @@ onMounted(async (): Promise<void> => {
         :values="habitStore.activities"
         :endDate="dateToLocalString(new Date())"
         :max="habitStore.activeHabitsCount"
-        tooltipUnit="checks"
+        :tooltipUnit="t('calendarHeatmap.checks', 'checks')"
         :rangeColor="[
           '#ffffff',
           ...generateColorGradient(
@@ -112,9 +113,10 @@ onMounted(async (): Promise<void> => {
             habitStore.activeHabitsCount,
           ),
         ]"
+        :locale="getHeatmapLocale(t)"
         :round="3"
         class="mb-2 px-2"
-      /><!-- TODO: добавить "checks" в переводы -->
+      />
 
       <div class="mb-2 flex items-center justify-between">
         <div class="flex h-10 items-center px-4">

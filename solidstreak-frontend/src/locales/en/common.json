@@ -14,5 +14,33 @@
     "upperCancel": "Cancel",
     "cancel": "cancel",
     "upperSave": "Save",
-    "save": "save"
+    "save": "save",
+    "months": {
+        "jan": "Jan",
+        "feb": "Feb",
+        "mar": "Mar",
+        "apr": "Apr",
+        "may": "May",
+        "jun": "Jun",
+        "jul": "Jul",
+        "aug": "Aug",
+        "sep": "Sep",
+        "oct": "Oct",
+        "nov": "Nov",
+        "dec": "Dec"
+    },
+    "days": {
+        "sun": "Sun",
+        "mon": "Mon",
+        "tue": "Tue",
+        "wed": "Wed",
+        "thu": "Thu",
+        "fri": "Fri",
+        "sat": "Sat"
+    },
+    "on": "on",
+    "upperLess": "Less",
+    "less": "less",
+    "upperMore": "More",
+    "more": "more"
 }

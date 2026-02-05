@@ -5,6 +5,7 @@ import { useConfirm } from 'primevue/useconfirm'
 import { useToast } from 'primevue/usetoast'
 import { SquarePen, Package, PackageOpen, Trash2 } from 'lucide-vue-next'
 
+import { getHeatmapLocale } from '@/i18n'
 import { dateToLocalString } from '@/utils/date'
 import { useUserStore } from '@/stores/user'
 import { useHabitStore } from '@/stores/habit'
@@ -244,6 +245,7 @@ async function processHabitDeletion(): Promise<void> {
       :max="1"
       :rangeColor="[color.value100hex, color.value600hex]"
       :tooltip="false"
+      :locale="getHeatmapLocale(t)"
       :round="3"
     />
   </div>
