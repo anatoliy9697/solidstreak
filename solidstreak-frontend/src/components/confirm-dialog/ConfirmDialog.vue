@@ -1,5 +1,4 @@
 <script setup lang="ts">
-
 import { useI18n } from 'vue-i18n'
 import ConfirmDialog from 'primevue/confirmdialog'
 
@@ -7,7 +6,6 @@ import ConfirmDialog from 'primevue/confirmdialog'
 // Composables & stores
 // ─────────────────────────────────────────────
 const { t } = useI18n()
-
 </script>
 
 <template>

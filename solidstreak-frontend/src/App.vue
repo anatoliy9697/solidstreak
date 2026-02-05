@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { usePrimeVue } from 'primevue/config'
 import Toast from 'primevue/toast'
 
 import { getHeatmapLocale } from '@/i18n'
@@ -20,6 +21,7 @@ import HabitDialog from '@/components/habit-dialog/HabitDialog.vue'
 // States & stores
 // ─────────────────────────────────────────────
 const { t, locale } = useI18n()
+const primeVue = usePrimeVue()
 const userStore = useUserStore()
 const habitStore = useHabitStore()
 
@@ -35,9 +37,53 @@ const isHabitDialogVisible = ref(false)
 // ─────────────────────────────────────────────
 // Methods
 // ─────────────────────────────────────────────
+function setPrimeVueLocale(t: (key: string, defaultMsg?: string) => string) {
+  if (!primeVue?.config?.locale) {
+    return
+  }
+  primeVue.config.locale.dayNamesMin = [
+    t('common.daysMin.sun', 'Su'),
+    t('common.daysMin.mon', 'Mo'),
+    t('common.daysMin.tue', 'Tu'),
+    t('common.daysMin.wed', 'We'),
+    t('common.daysMin.thu', 'Th'),
+    t('common.daysMin.fri', 'Fr'),
+    t('common.daysMin.sat', 'Sa'),
+  ]
+  primeVue.config.locale.monthNames = [
+    t('common.months.jan', 'January'),
+    t('common.months.feb', 'February'),
+    t('common.months.mar', 'March'),
+    t('common.months.apr', 'April'),
+    t('common.months.may', 'May'),
+    t('common.months.jun', 'June'),
+    t('common.months.jul', 'July'),
+    t('common.months.aug', 'August'),
+    t('common.months.sep', 'September'),
+    t('common.months.oct', 'October'),
+    t('common.months.nov', 'November'),
+    t('common.months.dec', 'December'),
+  ]
+  primeVue.config.locale.monthNamesShort = [
+    t('common.monthsShort.jan', 'Jan'),
+    t('common.monthsShort.feb', 'Feb'),
+    t('common.monthsShort.mar', 'Mar'),
+    t('common.monthsShort.apr', 'Apr'),
+    t('common.monthsShort.may', 'May'),
+    t('common.monthsShort.jun', 'Jun'),
+    t('common.monthsShort.jul', 'Jul'),
+    t('common.monthsShort.aug', 'Aug'),
+    t('common.monthsShort.sep', 'Sep'),
+    t('common.monthsShort.oct', 'Oct'),
+    t('common.monthsShort.nov', 'Nov'),
+    t('common.monthsShort.dec', 'Dec'),
+  ]
+}
+
 function updateLocale(newLocale: string): void {
   userStore.setLang(newLocale)
   locale.value = newLocale
+  setPrimeVueLocale(t)
 }
 
 const openHabitDialog = (habitId?: number): void => {
@@ -74,6 +120,7 @@ onMounted(async (): Promise<void> => {
   }
 
   locale.value = userStore.lang
+  setPrimeVueLocale(t)
 
   habitStore.init(apiFetcher)
   const habitsResult = await habitStore.fetchHabits(userStore.id)

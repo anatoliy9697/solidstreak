@@ -101,7 +101,12 @@ async function processHabitSaving(): Promise<void> {
   }
 
   if (!result.success) {
-    toast.add({ severity: 'error', summary: t('common.error', 'Error'), detail: `${t('common.failedTo', 'Failed to')} ${t('common.save', 'save')} ${t('common.acHabit', 'habit')}`, life: 3000 })
+    toast.add({
+      severity: 'error',
+      summary: t('common.error', 'Error'),
+      detail: `${t('common.failedTo', 'Failed to')} ${t('common.save', 'save')} ${t('common.acHabit', 'habit')}`,
+      life: 3000,
+    })
   } else {
     emit('closeHabitDialog')
   }
@@ -130,7 +135,13 @@ async function onColorSelected(selectedColor: Color): Promise<void> {
     <template #container="{ closeCallback }">
       <div class="mb-4 flex items-start justify-between">
         <div>
-          <h1>{{ props.newHabit ? t('habitDialog.newHabit', 'New habit') : t('habitDialog.editHabit', 'Edit habit') }}</h1>
+          <h1>
+            {{
+              props.newHabit
+                ? t('habitDialog.newHabit', 'New habit')
+                : t('habitDialog.editHabit', 'Edit habit')
+            }}
+          </h1>
         </div>
         <div>
           <i
@@ -152,7 +163,9 @@ async function onColorSelected(selectedColor: Color): Promise<void> {
       <div class="flex items-center justify-between">
         <div class="mr-2 flex-1">
           <p v-if="habitTitle.length > HABIT_TITLE_MAX_LENGTH" class="text-xs text-red-600">
-            {{ t('habitDialog.extraCharsRemoving', 'Extra characters will be removed automatically') }}
+            {{
+              t('habitDialog.extraCharsRemoving', 'Extra characters will be removed automatically')
+            }}
           </p>
         </div>
         <p
@@ -165,7 +178,9 @@ async function onColorSelected(selectedColor: Color): Promise<void> {
         </p>
       </div>
 
-      <label for="habit-description" class="font-semibold">{{ t('common.description', 'Description') }}:</label>
+      <label for="habit-description" class="font-semibold"
+        >{{ t('common.description', 'Description') }}:</label
+      >
       <Textarea
         id="habit-description"
         v-model="habitDescription"
@@ -181,7 +196,9 @@ async function onColorSelected(selectedColor: Color): Promise<void> {
             v-if="habitDescription.length > HABIT_DESCRIPTION_MAX_LENGTH"
             class="text-xs text-red-600"
           >
-            {{ t('habitDialog.extraCharsRemoving', 'Extra characters will be removed automatically') }}
+            {{
+              t('habitDialog.extraCharsRemoving', 'Extra characters will be removed automatically')
+            }}
           </p>
         </div>
         <p

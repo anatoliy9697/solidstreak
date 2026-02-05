@@ -16,6 +16,20 @@
     "upperSave": "Save",
     "save": "save",
     "months": {
+        "jan": "January",
+        "feb": "February",
+        "mar": "March",
+        "apr": "April",
+        "may": "May",
+        "jun": "June",
+        "jul": "July",
+        "aug": "August",
+        "sep": "September",
+        "oct": "October",
+        "nov": "November",
+        "dec": "December"
+    },
+    "monthsShort": {
         "jan": "Jan",
         "feb": "Feb",
         "mar": "Mar",
@@ -30,6 +44,15 @@
         "dec": "Dec"
     },
     "days": {
+        "sun": "Sunday",
+        "mon": "Monday",
+        "tue": "Tuesday",
+        "wed": "Wednesday",
+        "thu": "Thursday",
+        "fri": "Friday",
+        "sat": "Saturday"
+    },
+    "daysShort": {
         "sun": "Sun",
         "mon": "Mon",
         "tue": "Tue",
@@ -38,6 +61,16 @@
         "fri": "Fri",
         "sat": "Sat"
     },
+    "daysMin": {
+        "sun": "Su",
+        "mon": "Mo",
+        "tue": "Tu",
+        "wed": "We",
+        "thu": "Th",
+        "fri": "Fr",
+        "sat": "Sa"
+    },
+    "today": "Today",
     "on": "on",
     "upperLess": "Less",
     "less": "less",
