@@ -122,6 +122,7 @@ func (s Server) postUserInfo(w http.ResponseWriter, r *http.Request) {
 		inputUser.TgFirstName,
 		inputUser.TgLastName,
 		inputUser.TgLangCode,
+		inputUser.TgLangCode,
 		inputUser.TgIsBot,
 	)
 

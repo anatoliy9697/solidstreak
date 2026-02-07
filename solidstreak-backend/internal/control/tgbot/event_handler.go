@@ -1,9 +1,11 @@
 package tgbot
 
 import (
+	"fmt"
+
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 
-	"github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/common/resources"
+	"github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/common"
 	tcPkg "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/tgchat"
 	usrPkg "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/user"
 	usecases "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/usecases/tgbot"
@@ -11,13 +13,14 @@ import (
 
 type EventHandler struct {
 	Code string
-	Res  resources.Resources
+	Res  common.Resources
 }
 
 func (eh EventHandler) Run(doneCh chan string, upd *tgbotapi.Update) {
 	var (
-		err error
-		tc  *tcPkg.Chat
+		err      error
+		tc       *tcPkg.Chat
+		langCode string = "en"
 	)
 
 	defer func() {
@@ -31,7 +34,7 @@ func (eh EventHandler) Run(doneCh chan string, upd *tgbotapi.Update) {
 			eh.Res.Logger.Error("event handler error", "error", err)
 		}
 		if !success && tc != nil {
-			_ = usecases.SendReplyMsg(eh.Res, tc, "Something went wrong\nPlease try again later")
+			_ = usecases.SendReplyMsg(eh.Res, tc, common.MESSAGES[langCode]["smthWrong"])
 		}
 		doneCh <- eh.Code
 	}()
@@ -44,12 +47,14 @@ func (eh EventHandler) Run(doneCh chan string, upd *tgbotapi.Update) {
 	}
 	eh.Res.Logger.Debug("user mapped to inner model and saved to DB", "user", usr)
 
+	langCode = usr.LangCode
+
 	if tc, err = usecases.MapTgChatToInnerAndSave(eh.Res, upd.FromChat(), usr); err != nil {
 		return
 	}
 	eh.Res.Logger.Debug("telegram chat mapped to inner model and saved to DB", "tgChat", tc)
 
-	if err = usecases.SendReplyMsg(eh.Res, tc, "Hello, "+usr.TgFirstName+"!\nPush \"Open\" button to start using bot"); err != nil {
+	if err = usecases.SendReplyMsg(eh.Res, tc, fmt.Sprintf(common.MESSAGES[langCode]["helloMsg"], usr.TgUsername)); err != nil {
 		return
 	}
 }

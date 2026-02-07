@@ -13,7 +13,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/spf13/viper"
 
-	"github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/common/resources"
+	"github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/common"
 	"github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/control/http"
 	"github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/control/tgbot"
 	hRepo "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/habit/repo"
@@ -62,7 +62,7 @@ func main() {
 	}
 	// tgBotAPI.Debug = true
 
-	resources := resources.Resources{
+	resources := common.Resources{
 		TgBotAPIToken: os.Getenv("TG_BOT_API_TOKEN"),
 		Logger:        logger,
 		TgBotAPI:      tgBotAPI,

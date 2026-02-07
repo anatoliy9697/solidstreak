@@ -3,7 +3,7 @@ package tgbot
 import (
 	"context"
 
-	"github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/common/resources"
+	"github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/common"
 	"github.com/google/uuid"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -13,7 +13,7 @@ type EventFetcher struct {
 	TgBotUpdsOffset  int
 	TgBotUpdsTimeout int
 	MaxEventHandlers int
-	Res              resources.Resources
+	Res              common.Resources
 }
 
 func (ef EventFetcher) Run(ctx context.Context, doneCh chan struct{}) {

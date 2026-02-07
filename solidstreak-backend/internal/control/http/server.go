@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/common/resources"
+	"github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/common"
 	"github.com/anatoliy9697/solidstreak/solidstreak-backend/pkg/date"
 	apperrors "github.com/anatoliy9697/solidstreak/solidstreak-backend/pkg/errors"
 	"github.com/go-chi/chi/v5"
@@ -19,7 +19,7 @@ type Server struct {
 	CertFilePath string
 	KeyFilePath  string
 	Addr         string
-	Res          resources.Resources
+	Res          common.Resources
 	s            *http.Server
 }
 

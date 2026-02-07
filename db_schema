@@ -6,6 +6,7 @@ CREATE TABLE users (
 	tg_last_name VARCHAR(64),
 	tg_lang_code VARCHAR(3) NOT NULL,
 	tg_is_bot BOOLEAN NOT NULL,
+	lang_code VARCHAR(3) NOT NULL DEFAULT 'en',
 	created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL
 );
 
@@ -92,3 +93,6 @@ FOR VALUES FROM ('2026-11-01') TO ('2026-11-30');
 
 CREATE TABLE user_habit_checks_y2026m12 PARTITION OF user_habit_checks
 FOR VALUES FROM ('2026-12-01') TO ('2026-12-31');
+
+ALTER TABLE users ADD COLUMN lang_code VARCHAR(3) NOT NULL DEFAULT 'en';
+UPDATE users SET lang_code = tg_lang_code;

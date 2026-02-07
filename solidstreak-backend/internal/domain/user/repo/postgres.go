@@ -34,8 +34,8 @@ func (r pgRepo) IsExists(u *usrPkg.User) (bool, error) {
 
 func (r pgRepo) Create(u *usrPkg.User) error {
 	sql := `
-		INSERT INTO users (tg_id, tg_username, tg_first_name, tg_last_name, tg_lang_code, tg_is_bot, created_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
+		INSERT INTO users (tg_id, tg_username, tg_first_name, tg_last_name, tg_lang_code, tg_is_bot, lang_code, created_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 		RETURNING id
 	`
 	err := r.pool.QueryRow(
@@ -47,6 +47,7 @@ func (r pgRepo) Create(u *usrPkg.User) error {
 		u.TgLastName,
 		u.TgLangCode,
 		u.TgIsBot,
+		u.LangCode,
 		u.CreatedAt,
 	).Scan(&u.ID)
 
@@ -62,7 +63,7 @@ func (r pgRepo) Update(u *usrPkg.User) error {
 			tg_lang_code = $4,
 			tg_is_bot = $5
 		WHERE tg_id = $6
-		RETURNING id, created_at
+		RETURNING id, lang_code, created_at
 	`
 	err := r.pool.QueryRow(
 		r.ctx,
@@ -75,6 +76,7 @@ func (r pgRepo) Update(u *usrPkg.User) error {
 		u.TgID,
 	).Scan(
 		&u.ID,
+		&u.LangCode,
 		&u.CreatedAt,
 	)
 
@@ -85,7 +87,7 @@ func (r pgRepo) GetByID(ID int64) (*usrPkg.User, error) {
 	u := &usrPkg.User{}
 
 	sql := `
-		SELECT id, tg_id, tg_username, tg_first_name, tg_last_name, tg_lang_code, tg_is_bot, created_at
+		SELECT id, tg_id, tg_username, tg_first_name, tg_last_name, tg_lang_code, tg_is_bot, lang_code, created_at
 		FROM users WHERE id = $1
 	`
 	err := r.pool.QueryRow(
@@ -100,6 +102,7 @@ func (r pgRepo) GetByID(ID int64) (*usrPkg.User, error) {
 		&u.TgLastName,
 		&u.TgLangCode,
 		&u.TgIsBot,
+		&u.LangCode,
 		&u.CreatedAt,
 	)
 	if err != nil {
@@ -116,7 +119,7 @@ func (r pgRepo) GetByTgID(tgID int64) (*usrPkg.User, error) {
 	u := &usrPkg.User{}
 
 	sql := `
-		SELECT id, tg_id, tg_username, tg_first_name, tg_last_name, tg_lang_code, tg_is_bot, created_at
+		SELECT id, tg_id, tg_username, tg_first_name, tg_last_name, tg_lang_code, tg_is_bot, lang_code, created_at
 		FROM users WHERE tg_id = $1
 	`
 	err := r.pool.QueryRow(
@@ -131,6 +134,7 @@ func (r pgRepo) GetByTgID(tgID int64) (*usrPkg.User, error) {
 		&u.TgLastName,
 		&u.TgLangCode,
 		&u.TgIsBot,
+		&u.LangCode,
 		&u.CreatedAt,
 	)
 	if err != nil {
