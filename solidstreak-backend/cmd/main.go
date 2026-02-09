@@ -8,9 +8,9 @@ import (
 	"os/signal"
 	"syscall"
 
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
+	tgbotapi "github.com/mymmrac/telego"
 	"github.com/spf13/viper"
 
 	"github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/common"
@@ -56,27 +56,24 @@ func main() {
 	}
 	defer pgPool.Close()
 
-	var tgBotAPI *tgbotapi.BotAPI
-	if tgBotAPI, err = tgbotapi.NewBotAPI(os.Getenv("TG_BOT_API_TOKEN")); err != nil {
+	var tgBotAPI *tgbotapi.Bot
+	if tgBotAPI, err = tgbotapi.NewBot(os.Getenv("TG_BOT_API_TOKEN")); err != nil {
 		return
 	}
-	// tgBotAPI.Debug = true
 
 	resources := common.Resources{
-		TgBotAPIToken: os.Getenv("TG_BOT_API_TOKEN"),
-		Logger:        logger,
-		TgBotAPI:      tgBotAPI,
-		UsrRepo:       usrRepo.Init(mainCtx, pgPool),
-		TCRepo:        tcRepo.Init(mainCtx, pgPool),
-		HabitRepo:     hRepo.Init(mainCtx, pgPool),
+		WebAppURL: os.Getenv("WEB_APP_URL"),
+		Logger:    logger,
+		TgBotAPI:  tgBotAPI,
+		UsrRepo:   usrRepo.Init(mainCtx, pgPool),
+		TCRepo:    tcRepo.Init(mainCtx, pgPool),
+		HabitRepo: hRepo.Init(mainCtx, pgPool),
 	}
 
 	goroutineDoneCh := make(chan struct{}, 2)
 
 	// Running event fetcher
 	go tgbot.EventFetcher{
-		TgBotUpdsOffset:  viper.GetInt("tg_bot_upds_offset"),
-		TgBotUpdsTimeout: viper.GetInt("tg_bot_upds_timeout"),
 		MaxEventHandlers: viper.GetInt("max_event_handlers"),
 		Res:              resources,
 	}.Run(mainCtx, goroutineDoneCh)

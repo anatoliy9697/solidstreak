@@ -53,8 +53,6 @@ type GetUserHabitsCompletedChecksResponse struct {
 	Data []*hPkg.HabitCheck `json:"data"`
 }
 
-// TODO: попробовать избавиться от дублирования кода
-
 func (s Server) postHabit(w http.ResponseWriter, r *http.Request) {
 	var err error
 

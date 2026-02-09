@@ -1,7 +1,7 @@
 package tgbot
 
 import (
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	tgbotapi "github.com/mymmrac/telego"
 
 	"github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/common"
 	usrPkg "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/user"
@@ -10,7 +10,7 @@ import (
 func mapUserToInner(u *tgbotapi.User) *usrPkg.User {
 	return usrPkg.NewUser(
 		u.ID,
-		u.UserName,
+		u.Username,
 		u.FirstName,
 		u.LastName,
 		u.LanguageCode,

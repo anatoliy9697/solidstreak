@@ -1,9 +1,9 @@
 package tgbot
 
 import (
-	"fmt"
+	"context"
 
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	tgbotapi "github.com/mymmrac/telego"
 
 	"github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/common"
 	tcPkg "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/tgchat"
@@ -16,11 +16,11 @@ type EventHandler struct {
 	Res  common.Resources
 }
 
-func (eh EventHandler) Run(doneCh chan string, upd *tgbotapi.Update) {
+func (eh EventHandler) Run(ctx context.Context, doneCh chan string, upd *tgbotapi.Update) {
 	var (
-		err      error
-		tc       *tcPkg.Chat
-		langCode string = "en"
+		err error
+		usr *usrPkg.User
+		tc  *tcPkg.Chat
 	)
 
 	defer func() {
@@ -34,27 +34,24 @@ func (eh EventHandler) Run(doneCh chan string, upd *tgbotapi.Update) {
 			eh.Res.Logger.Error("event handler error", "error", err)
 		}
 		if !success && tc != nil {
-			_ = usecases.SendReplyMsg(eh.Res, tc, common.MESSAGES[langCode]["smthWrong"])
+			_ = usecases.SendReplyMsg(ctx, eh.Res.TgBotAPI, usecases.GetErrorReplyMsg(eh.Res, tc, usr))
 		}
 		doneCh <- eh.Code
 	}()
 
 	eh.Res.Logger = eh.Res.Logger.With("handlerCode", eh.Code)
 
-	var usr *usrPkg.User
-	if usr, err = usecases.MapUserToInnerAndSave(eh.Res, upd.SentFrom()); err != nil {
+	if usr, err = usecases.MapUserToInnerAndSave(eh.Res, upd.Message.From); err != nil {
 		return
 	}
 	eh.Res.Logger.Debug("user mapped to inner model and saved to DB", "user", usr)
 
-	langCode = usr.LangCode
-
-	if tc, err = usecases.MapTgChatToInnerAndSave(eh.Res, upd.FromChat(), usr); err != nil {
+	if tc, err = usecases.MapTgChatToInnerAndSave(eh.Res, upd.Message.Chat, usr); err != nil {
 		return
 	}
 	eh.Res.Logger.Debug("telegram chat mapped to inner model and saved to DB", "tgChat", tc)
 
-	if err = usecases.SendReplyMsg(eh.Res, tc, fmt.Sprintf(common.MESSAGES[langCode]["helloMsg"], usr.TgUsername)); err != nil {
+	if err = usecases.SendReplyMsg(ctx, eh.Res.TgBotAPI, usecases.GetSuccessReplyMsg(eh.Res, tc, usr)); err != nil {
 		return
 	}
 }

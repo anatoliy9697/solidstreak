@@ -5,13 +5,9 @@ import (
 
 	"github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/common"
 	"github.com/google/uuid"
-
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 type EventFetcher struct {
-	TgBotUpdsOffset  int
-	TgBotUpdsTimeout int
 	MaxEventHandlers int
 	Res              common.Resources
 }
@@ -21,10 +17,7 @@ func (ef EventFetcher) Run(ctx context.Context, doneCh chan struct{}) {
 
 	ef.Res.Logger.Info("event fetcher started")
 
-	updConfig := tgbotapi.NewUpdate(ef.TgBotUpdsOffset)
-	updConfig.Timeout = ef.TgBotUpdsTimeout
-
-	upds := ef.Res.TgBotAPI.GetUpdatesChan(updConfig)
+	upds, _ := ef.Res.TgBotAPI.UpdatesViaLongPolling(ctx, nil)
 
 	handlers := make(map[string]struct{}, ef.MaxEventHandlers)
 	handlerDoneCh := make(chan string, ef.MaxEventHandlers)
@@ -62,7 +55,7 @@ loop:
 			go EventHandler{
 				Code: handlerCode,
 				Res:  ef.Res,
-			}.Run(handlerDoneCh, &upd)
+			}.Run(ctx, handlerDoneCh, &upd)
 		}
 	}
 

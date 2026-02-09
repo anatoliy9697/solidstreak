@@ -37,7 +37,7 @@ func (s Server) ValidateTelegramInitData() func(http.Handler) http.Handler {
 			}
 
 			var userTgID int64
-			if userTgID, err = validateAndGetUserTgID(initData, s.Res.TgBotAPI.Token); err != nil {
+			if userTgID, err = validateAndGetUserTgID(initData, s.Res.TgBotAPI.Token()); err != nil {
 				processError(w, logger, apperrors.ErrUnauthorized(err.Error()))
 				return
 			}
