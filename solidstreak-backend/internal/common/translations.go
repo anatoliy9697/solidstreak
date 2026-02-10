@@ -19,11 +19,19 @@ func GetDefaultLang() string {
 	return LANGS[0]
 }
 
-func ToLocalLang(langCode string) string {
+func IsSupportedLang(langCode string) bool {
 	for _, lang := range LANGS {
 		if langCode == lang {
-			return lang
+			return true
 		}
 	}
-	return GetDefaultLang()
+	return false
+}
+
+func ToLocalLang(langCode string) string {
+	if IsSupportedLang(langCode) {
+		return langCode
+	} else {
+		return GetDefaultLang()
+	}
 }

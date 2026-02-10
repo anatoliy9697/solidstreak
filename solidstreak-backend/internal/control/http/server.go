@@ -38,6 +38,7 @@ func (s Server) Run(mainCtx context.Context, doneCh chan struct{}) {
 
 	api.Post("/user-info/upsert", s.postUserInfo)
 	api.Get("/users/{userId}", s.getUser)
+	api.Patch("/users/{userID}", s.patchUser)
 
 	api.Post("/users/{userID}/habits", s.postHabit)
 	api.Put("/users/{userID}/habits/{habitID}", s.putHabit)

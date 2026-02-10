@@ -7,6 +7,7 @@ import (
 
 	apperrors "github.com/anatoliy9697/solidstreak/solidstreak-backend/pkg/errors"
 
+	"github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/common"
 	tcPkg "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/tgchat"
 	usrPkg "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/user"
 )
@@ -46,8 +47,16 @@ type PostUserInfoRequest struct {
 	Data *UserInfoData `json:"data"`
 }
 
-type GetUserResponse struct {
+type UserResponse struct {
 	Data *usrPkg.User `json:"data"`
+}
+
+type PatchUserData struct {
+	LangCode *string `json:"langCode,omitempty"`
+}
+
+type PatchUserRequest struct {
+	Data *PatchUserData `json:"data"`
 }
 
 func (s Server) postUserInfo(w http.ResponseWriter, r *http.Request) {
@@ -122,7 +131,7 @@ func (s Server) postUserInfo(w http.ResponseWriter, r *http.Request) {
 		inputUser.TgFirstName,
 		inputUser.TgLastName,
 		inputUser.TgLangCode,
-		inputUser.TgLangCode,
+		common.ToLocalLang(inputUser.TgLangCode),
 		inputUser.TgIsBot,
 	)
 
@@ -155,7 +164,7 @@ func (s Server) postUserInfo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	json.NewEncoder(w).Encode(GetUserResponse{Data: user})
+	json.NewEncoder(w).Encode(UserResponse{Data: user})
 }
 
 func (s Server) getUser(w http.ResponseWriter, r *http.Request) {
@@ -181,13 +190,13 @@ func (s Server) getUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var userId int64
-	if userId, err = getInt64FromURLParams(r, "userId", true); err != nil {
+	var userID int64
+	if userID, err = getInt64FromURLParams(r, "userId", true); err != nil {
 		return
 	}
 
 	var user *usrPkg.User
-	if user, err = s.Res.UsrRepo.GetByID(userId); err != nil {
+	if user, err = s.Res.UsrRepo.GetByID(userID); err != nil {
 		return
 	}
 
@@ -197,7 +206,7 @@ func (s Server) getUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	json.NewEncoder(w).Encode(GetUserResponse{Data: user})
+	json.NewEncoder(w).Encode(UserResponse{Data: user})
 }
 
 func getUserAndChatFromInitData(initData string) (*InitDataUser, *InitDataTgChat, error) {
@@ -228,4 +237,72 @@ func getUserAndChatFromInitData(initData string) (*InitDataUser, *InitDataTgChat
 	}
 
 	return user, chat, nil
+}
+
+func (s Server) patchUser(w http.ResponseWriter, r *http.Request) {
+	var err error
+
+	logger := s.Res.Logger
+
+	// Adding request ID to request context
+	reqID, _ := r.Context().Value(ctxKeyRequestID{}).(string)
+	if reqID != "" {
+		logger = logger.With("requestId", reqID)
+	}
+
+	defer func() {
+		if err != nil {
+			processError(w, logger, err)
+		}
+	}()
+
+	userTgID, ok := r.Context().Value(ctxKeyUserTgID{}).(int64)
+	if !ok {
+		err = apperrors.ErrUnauthorized("couldn't identify user")
+		return
+	}
+
+	var userID int64
+	userID, err = getInt64FromURLParams(r, "userID", true)
+	if err != nil {
+		return
+	}
+
+	var user *usrPkg.User
+	if user, err = s.Res.UsrRepo.GetByID(userID); err != nil {
+		return
+	}
+
+	if user.TgID != userTgID {
+		err = apperrors.ErrUnauthorized("couldn't update info for another user")
+		return
+	}
+
+	var req PatchUserRequest
+
+	decoder := json.NewDecoder(r.Body)
+	if err = decoder.Decode(&req); err != nil {
+		err = apperrors.ErrBadRequest("invalid request payload")
+		return
+	}
+
+	if req.Data == nil {
+		err = apperrors.ErrBadRequest("request data is required")
+		return
+	}
+
+	if req.Data.LangCode != nil {
+		if !common.IsSupportedLang(*req.Data.LangCode) {
+			err = apperrors.ErrBadRequest("unsupported language")
+			return
+		}
+
+		if err = s.Res.UsrRepo.UpdateLangCode(user.TgID, *req.Data.LangCode); err != nil {
+			return
+		}
+
+		user.LangCode = *req.Data.LangCode
+	}
+
+	json.NewEncoder(w).Encode(UserResponse{Data: user})
 }

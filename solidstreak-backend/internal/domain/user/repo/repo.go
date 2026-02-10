@@ -11,6 +11,7 @@ type Repo interface {
 	IsExists(*usrPkg.User) (bool, error)
 	Create(*usrPkg.User) error
 	Update(*usrPkg.User) error
+	UpdateLangCode(tgID int64, langCode string) error
 	GetByID(int64) (*usrPkg.User, error)
 	GetByTgID(int64) (*usrPkg.User, error)
 }

@@ -83,6 +83,20 @@ func (r pgRepo) Update(u *usrPkg.User) error {
 	return err
 }
 
+func (r pgRepo) UpdateLangCode(tgID int64, langCode string) error {
+	sql := `
+		UPDATE users SET lang_code = $1 WHERE tg_id = $2
+	`
+	_, err := r.pool.Exec(
+		r.ctx,
+		sql,
+		langCode,
+		tgID,
+	)
+
+	return err
+}
+
 func (r pgRepo) GetByID(ID int64) (*usrPkg.User, error) {
 	u := &usrPkg.User{}
 
