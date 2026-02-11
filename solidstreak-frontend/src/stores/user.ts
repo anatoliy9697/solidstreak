@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 
+import { toLocalLang } from '@/i18n'
 import { ApiFetcher, type RequestResult } from '@/api/request'
 import type { User } from '@/models/user'
 
@@ -12,6 +13,7 @@ export const useUserStore = defineStore('user', {
     tgFirstName: '' as string,
     tgLastName: '' as string,
     tgLangCode: '' as string,
+    langCode: toLocalLang(localStorage.getItem('lang')) as string,
     avatarUrl: '' as string,
   }),
 
@@ -31,6 +33,7 @@ export const useUserStore = defineStore('user', {
         tgFirstName: webAppUser.first_name,
         tgLastName: webAppUser.last_name,
         tgLangCode: webAppUser.language_code,
+        langCode: toLocalLang(localStorage.getItem('lang') || webAppUser.language_code),
         tgIsBot: webAppUser.is_bot,
       } as User
 
@@ -44,20 +47,36 @@ export const useUserStore = defineStore('user', {
         this.tgUsername = user.tgUsername || ''
         this.tgFirstName = user.tgFirstName
         this.tgLastName = user.tgLastName || ''
-        this.tgLangCode = localStorage.getItem('lang') || user.tgLangCode || 'en'
+        this.tgLangCode = user.tgLangCode || ''
+        this.langCode = toLocalLang(
+          user.langCode || localStorage.getItem('lang') || user.tgLangCode,
+        )
+        localStorage.setItem('lang', this.langCode)
       }
 
       return result
     },
 
-    setLang(lang: string): void {
+    async setLang(lang: string): Promise<RequestResult> {
+      const prevLang = this.langCode
+
+      this.langCode = lang
       localStorage.setItem('lang', lang)
+
+      const result = await this.apiFetcher!.patchUser(this.id, lang)
+
+      if (!result.success) {
+        this.langCode = prevLang
+        localStorage.setItem('lang', prevLang)
+      }
+
+      return result
     },
   },
 
   getters: {
     lang: (state): string => {
-      return localStorage.getItem('lang') || state.tgLangCode || 'en'
+      return toLocalLang(state.langCode || localStorage.getItem('lang') || state.tgLangCode)
     },
   },
 })

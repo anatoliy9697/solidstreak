@@ -1,4 +1,6 @@
 {
+    "loading": "Loading",
+    "langChangeFailed": "Failed to change language",
     "initFailed": "Initialization failed",
     "active": "Active",
     "showActiveHabits": "Show active habits",

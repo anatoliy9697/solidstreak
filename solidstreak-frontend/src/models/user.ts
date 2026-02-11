@@ -5,5 +5,6 @@ export interface User {
   tgFirstName: string
   tgLastName?: string
   tgLangCode?: string
+  langCode?: string
   tgIsBot?: boolean
 }

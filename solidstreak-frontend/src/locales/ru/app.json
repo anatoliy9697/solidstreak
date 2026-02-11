@@ -1,4 +1,6 @@
 {
+    "loading": "Загрузка",
+    "langChangeFailed": "Не удалось изменить язык",
     "initFailed": "Ошибка инициализации",
     "active": "Активные",
     "showActiveHabits": "Показать активные привычки",

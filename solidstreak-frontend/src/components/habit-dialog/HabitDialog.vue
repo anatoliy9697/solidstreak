@@ -34,9 +34,9 @@ const emit = defineEmits<{
 // Composables & stores
 // ─────────────────────────────────────────────
 const { t } = useI18n()
+const toast = useToast()
 const userStore = useUserStore()
 const habitStore = useHabitStore()
-const toast = useToast()
 
 // ─────────────────────────────────────────────
 // Constants & reactive state

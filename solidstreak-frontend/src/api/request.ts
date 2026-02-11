@@ -23,6 +23,13 @@ export interface PostUserInfoRequest {
   data: UserInfoData
   meta?: Metadata
 }
+export interface PatchUserData {
+  langCode?: string
+}
+export interface PatchUserRequest {
+  data: PatchUserData
+  meta?: Metadata
+}
 export interface PostPutHabitRequest {
   data: Habit
   meta?: Metadata
@@ -37,11 +44,12 @@ export interface PostHabitCheckRequest {
 
 type ApiRequest =
   | PostUserInfoRequest
+  | PatchUserRequest
   | PostPutHabitRequest
   | DeleteHabitRequest
   | PostHabitCheckRequest
 
-export interface PostUserInfoResponse {
+export interface UserResponse {
   data: User
   errors?: Error[]
 }
@@ -63,7 +71,7 @@ export interface PostHabitCheckResponse {
 }
 
 type ApiResponse =
-  | PostUserInfoResponse
+  | UserResponse
   | PutHabitResponse
   | DeleteHabitResponse
   | GetHabitsResponse
@@ -78,7 +86,7 @@ export interface RequestResult {
 }
 
 async function performRequest(
-  method: 'post' | 'put' | 'delete' | 'get',
+  method: 'post' | 'put' | 'patch' | 'delete' | 'get',
   url: string,
   initData: string,
   data?: ApiRequest,
@@ -137,6 +145,14 @@ export class ApiFetcher {
       payload.meta = { username: this.username } as Metadata
     }
     return await performRequest('post', `/api/v1/user-info/upsert`, this.initData, payload)
+  }
+
+  async patchUser(userId: number, langCode: string): Promise<RequestResult> {
+    const payload: PatchUserRequest = { data: { langCode } }
+    if (this.username) {
+      payload.meta = { username: this.username } as Metadata
+    }
+    return await performRequest('patch', `/api/v1/users/${userId}`, this.initData, payload)
   }
 
   async fetchHabits(userId: number): Promise<RequestResult> {

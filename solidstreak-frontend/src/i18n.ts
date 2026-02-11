@@ -38,8 +38,8 @@ const messages = {
 
 export const i18n = createI18n({
   legacy: false,
-  locale: 'en',
-  fallbackLocale: 'en',
+  locale: getDefaultLang(),
+  fallbackLocale: getDefaultLang(),
   messages,
 })
 
@@ -47,6 +47,18 @@ export const LANGS = [
   { code: 'en', name: 'Eng' },
   { code: 'ru', name: 'Рус' },
 ]
+
+export function isSupportedLang(lang: string): boolean {
+  return LANGS.some((l) => l.code === lang)
+}
+
+export function getDefaultLang(): string {
+  return 'en'
+}
+
+export function toLocalLang(lang: string | null | undefined): string {
+  return !lang || !isSupportedLang(lang) ? getDefaultLang() : lang
+}
 
 export function getHeatmapLocale(t: (key: string, defaultMsg?: string) => string) {
   return {

@@ -2,6 +2,7 @@
 import { ref, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { usePrimeVue } from 'primevue/config'
+import { useToast } from 'primevue/usetoast'
 import Toast from 'primevue/toast'
 
 import { getHeatmapLocale } from '@/i18n'
@@ -22,6 +23,7 @@ import HabitDialog from '@/components/habit-dialog/HabitDialog.vue'
 // ─────────────────────────────────────────────
 const { t, locale } = useI18n()
 const primeVue = usePrimeVue()
+const toast = useToast()
 const userStore = useUserStore()
 const habitStore = useHabitStore()
 
@@ -80,10 +82,27 @@ function setPrimeVueLocale(t: (key: string, defaultMsg?: string) => string) {
   ]
 }
 
-function updateLocale(newLocale: string): void {
-  userStore.setLang(newLocale)
-  locale.value = newLocale
+async function updateLang(newLang: string): Promise<void> {
+  const prevLang = userStore.lang
+
+  if (newLang === prevLang) {
+    return
+  }
+
+  locale.value = newLang
   setPrimeVueLocale(t)
+
+  const result = await userStore.setLang(newLang)
+  if (!result.success) {
+    locale.value = prevLang
+    setPrimeVueLocale(t)
+    toast.add({
+      severity: 'error',
+      summary: t('app.error', 'Error'),
+      detail: t('app.langChangeFailed', 'Failed to change language'),
+      life: 3000,
+    })
+  }
 }
 
 const openHabitDialog = (habitId?: number): void => {
@@ -101,6 +120,9 @@ onMounted(async (): Promise<void> => {
     window.Telegram?.WebApp?.ready()
   }
 
+  locale.value = userStore.lang
+  setPrimeVueLocale(t)
+
   const initData = window.Telegram?.WebApp?.initData
   const user = window.Telegram?.WebApp?.initDataUnsafe?.user
   const chat = window.Telegram?.WebApp?.initDataUnsafe?.chat
@@ -113,8 +135,8 @@ onMounted(async (): Promise<void> => {
   const apiFetcher = new ApiFetcher(initData, user.username)
 
   userStore.init(apiFetcher)
-  const userInfoResult = await userStore.upsertUserInfo(user, chat || { id: user.id }) // Use personal chat with user if no other chat info
-  if (!userInfoResult.success) {
+  const upsertUserInfoResult = await userStore.upsertUserInfo(user, chat || { id: user.id }) // Use personal chat with user if no other chat info
+  if (!upsertUserInfoResult.success) {
     finishInitialization(t('app.initFailed', 'Initialization failed'))
     return
   }
@@ -136,11 +158,11 @@ onMounted(async (): Promise<void> => {
 </script>
 
 <template>
-  <p v-if="init">Loading...</p>
+  <p v-if="init">{{ t('app.loading', 'Loading') }}...</p>
   <p v-else-if="initErrorMsg">{{ initErrorMsg }}</p>
   <template v-else>
     <div class="mb-2 border-b border-gray-300 bg-gray-200">
-      <TopPanel :lang="userStore.lang" @langSelected="updateLocale" />
+      <TopPanel :lang="userStore.lang" @langSelected="updateLang" />
     </div>
 
     <div id="content" style="flex: 1 0 auto" class="mx-auto w-full max-w-lg px-2">

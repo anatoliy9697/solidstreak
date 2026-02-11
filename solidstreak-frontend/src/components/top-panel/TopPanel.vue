@@ -3,7 +3,7 @@ import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import Select from 'primevue/select'
 
-import { LANGS } from '@/i18n'
+import { LANGS, getDefaultLang } from '@/i18n'
 
 // ─────────────────────────────────────────────
 // Props
@@ -27,7 +27,7 @@ const { t } = useI18n()
 // ─────────────────────────────────────────────
 // Constants & reactive state
 // ─────────────────────────────────────────────
-const selectedLang = ref('ru')
+const selectedLang = ref(getDefaultLang())
 
 watch(
   () => props.lang,
