@@ -162,7 +162,12 @@ onMounted(async (): Promise<void> => {
   <p v-else-if="initErrorMsg">{{ initErrorMsg }}</p>
   <template v-else>
     <div class="mb-2 border-b border-gray-300 bg-gray-200">
-      <TopPanel :lang="userStore.lang" @langSelected="updateLang" />
+      <TopPanel
+        :lang="userStore.lang"
+        :theme="userStore.theme"
+        @langSelected="updateLang"
+        @themeToggled="userStore.setTheme"
+      />
     </div>
 
     <div id="content" style="flex: 1 0 auto" class="mx-auto w-full max-w-lg px-2">

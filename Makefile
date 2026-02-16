@@ -5,5 +5,5 @@ run:
 
 build:
 	cd solidstreak-frontend && npm install && npm run build
-	go mod tidy 
+	go mod tidy
 	cd solidstreak-backend && go build -o bin/$(name) cmd/main.go

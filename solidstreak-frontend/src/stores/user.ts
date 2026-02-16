@@ -3,6 +3,7 @@ import { defineStore } from 'pinia'
 import { toLocalLang } from '@/i18n'
 import { ApiFetcher, type RequestResult } from '@/api/request'
 import type { User } from '@/models/user'
+import { type Theme, getDefaultTheme, toLocalTheme } from '@/models/theme'
 
 export const useUserStore = defineStore('user', {
   state: () => ({
@@ -15,6 +16,7 @@ export const useUserStore = defineStore('user', {
     tgLangCode: '' as string,
     langCode: toLocalLang(localStorage.getItem('lang')) as string,
     avatarUrl: '' as string,
+    _theme: toLocalTheme(localStorage.getItem('theme')) as Theme,
   }),
 
   actions: {
@@ -72,11 +74,23 @@ export const useUserStore = defineStore('user', {
 
       return result
     },
+
+    setTheme(theme: Theme): void {
+      this._theme = theme
+      localStorage.setItem('theme', theme)
+    }
   },
 
   getters: {
     lang: (state): string => {
       return toLocalLang(state.langCode || localStorage.getItem('lang') || state.tgLangCode)
+    },
+
+    theme: (state): Theme => {
+      if (!localStorage.getItem('theme')) {
+        localStorage.setItem('theme', state._theme || getDefaultTheme())
+      }
+      return toLocalTheme(state._theme || localStorage.getItem('theme'))
     },
   },
 })
