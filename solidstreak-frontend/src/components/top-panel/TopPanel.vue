@@ -49,7 +49,6 @@ watch(
 watch(
   () => props.theme,
   (newTheme) => {
-    console.log('Theme changed to:', newTheme)
     selectedTheme.value = newTheme
   },
   { immediate: true },

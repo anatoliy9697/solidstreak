@@ -1,14 +1,30 @@
 import './style.css'
 import { createApp } from 'vue'
-import { i18n } from './i18n'
 import { createPinia } from 'pinia'
 import PrimeVue from 'primevue/config'
 import Aura from '@primeuix/themes/aura'
 import ToastService from 'primevue/toastservice'
 import ConfirmationService from 'primevue/confirmationservice'
+import { i18n } from '@/i18n'
+import { type Theme, THEMES, toLocalTheme } from '@/models/theme'
 
 import App from './App.vue'
 // import router from './router'
+
+export function applyTheme(theme: Theme) {
+  const root = document.documentElement
+  const themeVars = THEMES[theme]
+  Object.entries(themeVars).forEach(([key, value]) => {
+    root.style.setProperty(key, value)
+  })
+  if (theme === 'dark') {
+    root.classList.add('dark')
+  } else {
+    root.classList.remove('dark')
+  }
+}
+
+applyTheme(toLocalTheme(localStorage.getItem('theme')))
 
 const app = createApp(App)
 

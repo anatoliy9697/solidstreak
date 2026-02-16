@@ -5,7 +5,9 @@ import { usePrimeVue } from 'primevue/config'
 import { useToast } from 'primevue/usetoast'
 import Toast from 'primevue/toast'
 
+import { applyTheme } from '@/main'
 import { getHeatmapLocale } from '@/i18n'
+import { type Theme } from '@/models/theme'
 import { dateToLocalString } from '@/utils/date'
 import { ApiFetcher } from '@/api/request'
 import { useUserStore } from '@/stores/user'
@@ -105,6 +107,11 @@ async function updateLang(newLang: string): Promise<void> {
   }
 }
 
+function updateTheme(newTheme: Theme): void {
+  userStore.setTheme(newTheme)
+  applyTheme(newTheme)
+}
+
 const openHabitDialog = (habitId?: number): void => {
   editingHabitId.value = habitId || null
   isHabitDialogVisible.value = true
@@ -141,6 +148,8 @@ onMounted(async (): Promise<void> => {
     return
   }
 
+  applyTheme(userStore.theme)
+
   locale.value = userStore.lang
   setPrimeVueLocale(t)
 
@@ -166,7 +175,7 @@ onMounted(async (): Promise<void> => {
         :lang="userStore.lang"
         :theme="userStore.theme"
         @langSelected="updateLang"
-        @themeToggled="userStore.setTheme"
+        @themeToggled="updateTheme"
       />
     </div>
 
