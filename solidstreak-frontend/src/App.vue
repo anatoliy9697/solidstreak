@@ -170,7 +170,7 @@ onMounted(async (): Promise<void> => {
   <p v-if="init">{{ t('app.loading', 'Loading') }}...</p>
   <p v-else-if="initErrorMsg">{{ initErrorMsg }}</p>
   <template v-else>
-    <div class="mb-2 border-b border-gray-300 bg-gray-200">
+    <div class="mb-2 border-b border-gray-300 bg-gray-200 dark:border-gray-700 dark:bg-gray-800">
       <TopPanel
         :lang="userStore.lang"
         :theme="userStore.theme"
@@ -227,7 +227,7 @@ onMounted(async (): Promise<void> => {
         <div v-show="view === 'active'">
           <button
             @click="openHabitDialog()"
-            class="rounded-md border border-gray-300 bg-gray-100 px-4 py-2 font-medium text-blue-800 hover:border-blue-100 hover:bg-blue-100 active:border-blue-200 active:bg-blue-200"
+            class="cursor-pointer rounded-md border border-gray-300 bg-gray-100 px-4 py-2 font-medium text-blue-800 hover:border-blue-100 hover:bg-blue-100 active:border-blue-200 active:bg-blue-200"
             :title="t('app.createHabit', 'Create a new habit')"
           >
             + {{ t('app.newHabit', 'New habit') }}

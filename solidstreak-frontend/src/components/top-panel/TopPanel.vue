@@ -59,9 +59,14 @@ watch(
   <div class="mx-auto w-full max-w-lg px-2 py-2 text-right">
     <Button
       id="theme-toggle"
-      :icon="selectedTheme === 'light' ? 'pi pi-moon' : 'pi pi-sun'"
+      :icon="selectedTheme !== 'dark' ? 'pi pi-moon' : 'pi pi-sun'"
       class="mr-2"
       @click="toggleTheme"
+      :title="
+        selectedTheme !== 'dark'
+          ? t('topPanel.darkTheme', 'Turn on dark theme')
+          : t('topPanel.lightTheme', 'Turn on light theme')
+      "
     />
     <Select
       v-model="selectedLang"

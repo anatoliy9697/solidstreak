@@ -78,7 +78,7 @@ export const useUserStore = defineStore('user', {
     setTheme(theme: Theme): void {
       this._theme = theme
       localStorage.setItem('theme', theme)
-    }
+    },
   },
 
   getters: {

@@ -112,62 +112,84 @@ h2 {
 }
 
 #theme-toggle.p-button {
-  background-color: #e5e7eb !important; /* bg-gray-200 */
-  border-color: #d1d5db !important; /* border-gray-300 */
+  background-color: var(--theme-toggle-p-button-bg, #e5e7eb) !important; /* bg-gray-200 */
+  border-color: var(--theme-toggle-p-button-border-color, #d1d5db) !important; /* border-gray-300 */
   padding: 0 !important;
   vertical-align: middle !important;
-  box-shadow: 0 0 #0000,0 0 #0000,0 1px 2px 0 rgba(18,18,23,0.05) !important;
+  box-shadow: var(
+    --p-box-shadow,
+    0 0 #0000,
+    0 0 #0000,
+    0 1px 2px 0 rgba(18, 18, 23, 0.05)
+  ) !important;
 }
 #theme-toggle.p-button:hover {
-  background-color: #d1d5db !important; /* bg-gray-300 */
+  background-color: var(--theme-toggle-p-button-hover-bg, #d1d5db) !important; /* bg-gray-300 */
 }
 #theme-toggle.p-button:active {
-  border-color: #9ca3af !important; /* border-gray-400 */
-  background-color: #9ca3af !important; /* bg-gray-400 */
+  border-color: var(
+    --theme-toggle-p-button-border-active-color,
+    #9ca3af
+  ) !important; /* border-gray-400 */
+  background-color: var(--theme-toggle-p-button-active-bg, #9ca3af) !important; /* bg-gray-400 */
 }
 #theme-toggle.p-button:active .p-button-icon {
-  color: #4b5563 !important; /* gray-600 */
+  color: var(--theme-toggle-p-button-active-icon-color, #4b5563) !important; /* gray-600 */
 }
 #theme-toggle.p-button-icon-only {
   width: 2rem !important;
   height: 2rem !important;
 }
 #theme-toggle .p-button-icon {
-  color: #6b7280 !important; /* gray-500 */
+  color: var(--theme-toggle-p-button-icon-color, #6b7280) !important; /* gray-500 */
   font-size: 0.875rem !important;
 }
 
 .p-select {
   height: 2rem !important;
-  background-color: #e5e7eb !important; /* bg-gray-200 */
-  border-color: #d1d5db !important; /* border-gray-300 */
+  background-color: var(--lang-select-p-select-bg, #e5e7eb) !important; /* bg-gray-200 */
+  border-color: var(--lang-select-p-select-border-color, #d1d5db) !important; /* border-gray-300 */
   vertical-align: middle !important;
-  box-sizing: 0 #0000,0 0 #0000,0 1px 2px 0 rgba(18,18,23,0.05) !important;
+  box-shadow: var(
+    --p-box-shadow,
+    0 0 #0000,
+    0 0 #0000,
+    0 1px 2px 0 rgba(18, 18, 23, 0.05)
+  ) !important;
 }
 .p-select:hover {
-  background-color: #d1d5db !important; /* bg-gray-300 */
+  background-color: var(--lang-select-p-select-hover-bg, #d1d5db) !important; /* bg-gray-300 */
 }
 .p-select:active {
-  border-color: #9ca3af !important; /* border-gray-400 */
-  background-color: #9ca3af !important; /* bg-gray-400 */
+  background-color: var(--lang-select-p-select-active-bg, #9ca3af) !important; /* bg-gray-400 */
+  border-color: var(--lang-select-p-select-active-border-color, #9ca3af) !important; /* border-gray-400 */
 }
 .p-select-label {
+  color: var(--lang-select-p-select-label-color, #4b5563) !important; /* gray-600 */
   font-size: 0.875rem !important;
   padding: 0.25rem 0.25rem 0.25rem 0.5rem !important;
 }
+.p-select-overlay {
+  background-color: var(--lang-select-p-select-overlay-bg, #fff) !important; /* white */
+  border-color: var(--lang-select-p-select-overlay-border-color, #d1d5db) !important; /* border-color-200 */
+}
 .p-select-dropdown {
   width: auto !important;
-  color: #6b7280 !important; /* gray-500 */
+  color: var(--lang-select-p-select-dropdown-color, #6b7280) !important; /* gray-500 */
   padding: 0.25rem 0.5rem 0.25rem 0.25rem !important;
 }
 .p-select:active .p-select-dropdown {
-  color: #4b5563 !important; /* gray-600 */
+  color: var(--lang-select-p-select-active-dropdown-color, #4b5563) !important; /* gray-600 */
 }
+.p-select-option {
+  color: var(--lang-select-p-select-option-color, #6b7280) !important; /* gray-500 */
+}
+.p-select-option:not(.p-select-option-selected):not(.p-disabled):hover,
 .p-select-option.p-focus {
-  background-color: #eff6ff !important;
+  background-color: var(--lang-select-p-select-option-focus-bg, #eff6ff) !important; /* bg-blue-50 */
 }
 .p-select-option-selected,
 .p-select-option.p-select-option-selected.p-focus {
-  color: #fff !important;
-  background-color: #2563eb !important;
+  color: var(--lang-select-p-select-option-selected-color, #fff) !important; /* white */
+  background-color: var(--lang-select-p-select-option-selected-bg, #2563eb) !important; /* bg-blue-600 */
 }
