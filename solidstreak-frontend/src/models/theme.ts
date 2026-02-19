@@ -19,6 +19,7 @@ export const THEMES: Record<Theme, { [key: string]: string }> = {
     '--theme-toggle-p-button-border-color': '#d1d5db', // border-gray-300
     '--p-box-shadow': '0 0 #0000, 0 0 #0000, 0 1px 2px 0 rgba(18, 18, 23, 0.05)',
     '--theme-toggle-p-button-hover-bg': '#d1d5db', // bg-gray-300
+    '--theme-toggle-p-button-hover-border-color': '#d1d5db', // border-gray-300
     '--theme-toggle-p-button-active-border-color': '#9ca3af', // border-gray-400
     '--theme-toggle-p-button-active-bg': '#9ca3af', // bg-gray-400
     '--theme-toggle-p-button-active-icon-color': '#6b7280', // gray-500
@@ -36,7 +37,7 @@ export const THEMES: Record<Theme, { [key: string]: string }> = {
     '--lang-select-p-select-option-color': '#6b7280', // gray-500
     '--lang-select-p-select-option-focus-bg': '#eff6ff', // bg-blue-50
     '--lang-select-p-select-option-selected-color': '#fff', // white
-    '--lang-select-p-select-option-selected-bg': '#2563eb' // bg-blue-600
+    '--lang-select-p-select-option-selected-bg': '#2563eb', // bg-blue-600
   },
   dark: {
     '--a-text-decoration-color': '#60a5fa', // blue-400
@@ -44,6 +45,7 @@ export const THEMES: Record<Theme, { [key: string]: string }> = {
     '--theme-toggle-p-button-border-color': '#374151', // border-gray-700
     '--p-box-shadow': 'none',
     '--theme-toggle-p-button-hover-bg': '#1f2937', // bg-gray-800
+    '--theme-toggle-p-button-hover-border-color': '#374151', // border-gray-700
     '--theme-toggle-p-button-active-border-color': '#374151', // border-gray-700
     '--theme-toggle-p-button-active-bg': '#374151', // bg-gray-700
     '--theme-toggle-p-button-active-icon-color': '#9ca3af', // gray-400
@@ -61,6 +63,6 @@ export const THEMES: Record<Theme, { [key: string]: string }> = {
     '--lang-select-p-select-option-color': '#d1d5db', // gray-300
     '--lang-select-p-select-option-focus-bg': '#4b5563', // bg-gray-600
     '--lang-select-p-select-option-selected-color': '#fff', // white
-    '--lang-select-p-select-option-selected-bg': '#2563eb' // bg-blue-600
+    '--lang-select-p-select-option-selected-bg': '#2563eb', // bg-blue-600
   },
 }

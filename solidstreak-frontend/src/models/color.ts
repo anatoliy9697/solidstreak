@@ -12,6 +12,8 @@ export interface Color {
   value500hex: string
   value600: string
   value600hex: string
+  value700: string
+  value700hex: string
   value800: string
   value800hex: string
 }
@@ -30,6 +32,8 @@ export const RED: Color = {
   value500hex: '#ef4444',
   value600: 'red-600',
   value600hex: '#dc2626',
+  value700: 'red-700',
+  value700hex: '#b91c1c',
   value800: 'red-800',
   value800hex: '#991b1b',
 }
@@ -47,6 +51,8 @@ export const ORANGE: Color = {
   value500hex: '#f97316',
   value600: 'orange-600',
   value600hex: '#ea580c',
+  value700: 'orange-700',
+  value700hex: '#c2410c',
   value800: 'orange-800',
   value800hex: '#9a3412',
 }
@@ -64,6 +70,8 @@ export const YELLOW: Color = {
   value500hex: '#eab308',
   value600: 'yellow-600',
   value600hex: '#ca8a04',
+  value700: 'yellow-700',
+  value700hex: '#a16207',
   value800: 'yellow-800',
   value800hex: '#854d0e',
 }
@@ -81,6 +89,8 @@ export const LIME: Color = {
   value500hex: '#84cc16',
   value600: 'lime-600',
   value600hex: '#65a30d',
+  value700: 'lime-700',
+  value700hex: '#4d7c0f',
   value800: 'lime-800',
   value800hex: '#365314',
 }
@@ -98,6 +108,8 @@ export const GREEN: Color = {
   value500hex: '#22c55e',
   value600: 'green-600',
   value600hex: '#16a34a',
+  value700: 'green-700',
+  value700hex: '#15803d',
   value800: 'green-800',
   value800hex: '#166534',
 }
@@ -115,6 +127,8 @@ export const BLUE: Color = {
   value500hex: '#3b82f6',
   value600: 'blue-600',
   value600hex: '#2563eb',
+  value700: 'blue-700',
+  value700hex: '#1d4ed8',
   value800: 'blue-800',
   value800hex: '#1e40af',
 }
@@ -132,6 +146,8 @@ export const PURPLE: Color = {
   value500hex: '#8b5cf6',
   value600: 'purple-600',
   value600hex: '#7c3aed',
+  value700: 'purple-700',
+  value700hex: '#6d28d9',
   value800: 'purple-800',
   value800hex: '#6d28d9',
 }

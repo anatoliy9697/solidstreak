@@ -6,10 +6,11 @@ import { useToast } from 'primevue/usetoast'
 import { SquarePen, Package, PackageOpen, Trash2 } from 'lucide-vue-next'
 
 import { getHeatmapLocale } from '@/i18n'
+import { type Theme, toLocalTheme } from '@/models/theme'
 import { dateToLocalString } from '@/utils/date'
 import { useUserStore } from '@/stores/user'
 import { useHabitStore } from '@/stores/habit'
-import { COLORS, GREEN } from '@/models/color'
+import { type Color, COLORS, GREEN } from '@/models/color'
 import type { Habit, HabitCheck } from '@/models/habit'
 import CalendarHeatmap from '@/components/calendar-heatmap/CalendarHeatmap.vue'
 
@@ -20,6 +21,7 @@ const props = defineProps<{
   habit: Habit
   selectedDate: Date
   expanded?: boolean
+  theme?: Theme
 }>()
 
 // ─────────────────────────────────────────────
@@ -142,12 +144,32 @@ async function processHabitDeletion(): Promise<void> {
     },
   })
 }
+
+function getCheckButtonStyleObj(checked: boolean, hovered: boolean, color: Color, theme: Theme): Record<string, string> {
+  if (!checked) return {}
+
+  let borderColor = color.value500hex
+  let backgroundColor = color.value400hex
+
+  if (hovered && theme !== 'dark') {
+    borderColor = color.value500hex
+    backgroundColor = color.value400hex
+  } else if (!hovered) {
+    borderColor = color.value600hex
+    backgroundColor = color.value500hex
+  } else if (hovered && theme === 'dark') {
+    borderColor = color.value700hex
+    backgroundColor = color.value600hex
+  }
+
+  return { borderColor, backgroundColor, color: '#fff' }
+}
 </script>
 
 <template>
   <div
     :class="[
-      'cursor-pointer rounded-md border border-gray-200 bg-white px-4 py-2 shadow-sm',
+      'cursor-pointer rounded-md border border-gray-200 bg-white px-4 py-2 shadow-sm dark:border-gray-600 dark:bg-gray-700',
       habit.archived ? 'opacity-50' : '',
     ]"
   >
@@ -174,25 +196,25 @@ async function processHabitDeletion(): Promise<void> {
           <span :title="t('habitCard.upperDelete', 'Delete')">
             <Trash2
               @click.stop="processHabitDeletion()"
-              class="mr-2 h-5 w-5 cursor-pointer text-gray-300 hover:text-gray-400"
+              class="mr-2 h-5 w-5 cursor-pointer text-gray-300 dark:text-gray-500 hover:text-gray-400 dark:hover:text-gray-400"
             />
           </span>
           <span :title="t('habitCard.upperArchive', 'Archive')" v-if="!habit.archived">
             <Package
               @click.stop="processHabitArchiving()"
-              class="mr-2 h-5 w-5 cursor-pointer text-gray-300 hover:text-gray-400"
+              class="mr-2 h-5 w-5 cursor-pointer text-gray-300 dark:text-gray-500 hover:text-gray-400 dark:hover:text-gray-400"
             />
           </span>
           <span :title="t('habitCard.upperUnarchive', 'Unarchive')" v-else>
             <PackageOpen
               @click.stop="processHabitArchiving()"
-              class="mr-2 h-5 w-5 cursor-pointer text-gray-300 hover:text-gray-400"
+              class="mr-2 h-5 w-5 cursor-pointer text-gray-300 dark:text-gray-500 hover:text-gray-400 dark:hover:text-gray-400"
             />
           </span>
           <span :title="t('habitCard.upperEdit', 'Edit')">
             <SquarePen
               @click.stop="emit('editHabit', habit.id)"
-              class="h-5 w-5 cursor-pointer text-gray-300 hover:text-gray-400"
+              class="h-5 w-5 cursor-pointer text-gray-300 dark:text-gray-500 hover:text-gray-400 dark:hover:text-gray-400"
             />
           </span>
         </div>
@@ -202,20 +224,12 @@ async function processHabitDeletion(): Promise<void> {
             @click.stop="processCurrentDateCheck()"
             @mouseover="isCheckButtonHovered = true"
             @mouseleave="isCheckButtonHovered = false"
-            :style="
-              selectedDateChecked
-                ? {
-                    borderColor: isCheckButtonHovered ? color.value500hex : color.value600hex,
-                    backgroundColor: isCheckButtonHovered ? color.value400hex : color.value500hex,
-                    color: '#fff',
-                  }
-                : {}
-            "
+            :style="getCheckButtonStyleObj(selectedDateChecked, isCheckButtonHovered, color, toLocalTheme(props.theme))"
             :class="[
               'flex h-7 w-7 cursor-pointer items-center justify-center rounded-lg border',
               selectedDateChecked
                 ? ''
-                : 'border-gray-400 text-gray-400 hover:border-gray-500 hover:text-gray-500',
+                : 'border-gray-400 text-gray-400 hover:border-gray-500 dark:hover:border-gray-300 hover:text-gray-500 dark:hover:text-gray-300',
             ]"
             :title="`${selectedDateChecked ? t('habitCard.upperUncheck', 'Uncheck') : t('habitCard.upperCheck', 'Check')} ${t('common.gcHabit', 'habit')} ${t('habitCard.forSelectedDate', 'for selected date')}`"
           >

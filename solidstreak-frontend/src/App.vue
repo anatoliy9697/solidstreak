@@ -203,9 +203,11 @@ onMounted(async (): Promise<void> => {
 
       <div class="mb-2 flex items-center justify-between">
         <div class="flex h-10 items-center px-4">
-          <span v-if="view === 'active'" class="text-lg font-semibold text-gray-500 dark:text-gray-400">{{
-            t('app.active', 'Active')
-          }}</span>
+          <span
+            v-if="view === 'active'"
+            class="text-lg font-semibold text-gray-500 dark:text-gray-400"
+            >{{ t('app.active', 'Active') }}</span
+          >
           <a
             v-else
             @click="view = 'active'"
@@ -213,9 +215,11 @@ onMounted(async (): Promise<void> => {
             >{{ t('app.active', 'Active') }}</a
           >
           <span class="text-gray-500 dark:text-gray-400">&nbsp;/&nbsp;</span>
-          <span v-if="view === 'archived'" class="text-lg font-semibold text-gray-500 dark:text-gray-400">{{
-            t('app.archived', 'Archived')
-          }}</span>
+          <span
+            v-if="view === 'archived'"
+            class="text-lg font-semibold text-gray-500 dark:text-gray-400"
+            >{{ t('app.archived', 'Archived') }}</span
+          >
           <a
             v-else
             @click="view = 'archived'"
@@ -227,7 +231,7 @@ onMounted(async (): Promise<void> => {
         <div v-show="view === 'active'">
           <button
             @click="openHabitDialog()"
-            class="cursor-pointer rounded-md border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 px-4 py-2 font-medium text-blue-800 dark:text-blue-400 hover:border-blue-100 dark:hover:border-gray-700 hover:bg-blue-100 dark:hover:bg-gray-700 active:border-blue-200 dark:active:border-gray-600 active:bg-blue-200 dark:active:bg-gray-600"
+            class="cursor-pointer rounded-md border border-gray-300 bg-gray-100 px-4 py-2 font-medium text-blue-800 hover:border-blue-100 hover:bg-blue-100 active:border-blue-200 active:bg-blue-200 dark:border-gray-700 dark:bg-gray-800 dark:text-blue-400 dark:hover:border-gray-700 dark:hover:bg-gray-700 dark:active:border-gray-600 dark:active:bg-gray-600"
             :title="t('app.createHabit', 'Create a new habit')"
           >
             + {{ t('app.newHabit', 'New habit') }}
@@ -242,6 +246,7 @@ onMounted(async (): Promise<void> => {
         :habit="habit"
         :selectedDate="selectedDate"
         :expanded="expandedHabitCardId === habit.id"
+        :theme="userStore.theme"
         @editHabit="openHabitDialog"
         @expandHabitCard="expandedHabitCardId = $event"
         @collapseHabitCard="expandedHabitCardId = null"
@@ -255,6 +260,7 @@ onMounted(async (): Promise<void> => {
         :habit="habit"
         :selectedDate="selectedDate"
         :expanded="expandedHabitCardId === habit.id"
+        :theme="userStore.theme"
         @editHabit="openHabitDialog"
         @expandHabitCard="expandedHabitCardId = $event"
         @collapseHabitCard="expandedHabitCardId = null"
@@ -285,7 +291,10 @@ onMounted(async (): Promise<void> => {
       />
     </div>
 
-    <div id="footer" class="mb-2 w-full text-center text-xs text-gray-500 dark:text-gray-400 opacity-50">
+    <div
+      id="footer"
+      class="mb-2 w-full text-center text-xs text-gray-500 opacity-50 dark:text-gray-400"
+    >
       <span
         >{{ t('app.madeBy', 'Made by') }} <a href="https://t.me/avasin_dev">@avasin_dev</a></span
       >

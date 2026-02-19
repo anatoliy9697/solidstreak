@@ -13,11 +13,11 @@
 }
 
 body {
-  @apply bg-gray-100 dark:bg-gray-800 font-sans text-sm text-black dark:text-white;
+  @apply bg-gray-100 font-sans text-sm text-black dark:bg-gray-800 dark:text-white;
 }
 
 a {
-  @apply cursor-pointer text-blue-800 dark:text-blue-400 underline;
+  @apply cursor-pointer text-blue-800 underline dark:text-blue-400;
   text-underline-offset: 0.2rem;
   text-decoration-color: var(--a-text-decoration-color);
 }
@@ -125,6 +125,7 @@ h2 {
 }
 #theme-toggle.p-button:hover {
   background-color: var(--theme-toggle-p-button-hover-bg, #d1d5db) !important; /* bg-gray-300 */
+  border-color: var(--theme-toggle-p-button-hover-border-color, #9ca3af) !important; /* border-gray-400 */
 }
 #theme-toggle.p-button:active {
   border-color: var(
@@ -162,7 +163,10 @@ h2 {
 }
 .p-select:active {
   background-color: var(--lang-select-p-select-active-bg, #9ca3af) !important; /* bg-gray-400 */
-  border-color: var(--lang-select-p-select-active-border-color, #9ca3af) !important; /* border-gray-400 */
+  border-color: var(
+    --lang-select-p-select-active-border-color,
+    #9ca3af
+  ) !important; /* border-gray-400 */
 }
 .p-select-label {
   color: var(--lang-select-p-select-label-color, #4b5563) !important; /* gray-600 */
@@ -171,7 +175,10 @@ h2 {
 }
 .p-select-overlay {
   background-color: var(--lang-select-p-select-overlay-bg, #fff) !important; /* white */
-  border-color: var(--lang-select-p-select-overlay-border-color, #d1d5db) !important; /* border-color-200 */
+  border-color: var(
+    --lang-select-p-select-overlay-border-color,
+    #d1d5db
+  ) !important; /* border-color-200 */
 }
 .p-select-dropdown {
   width: auto !important;
@@ -186,10 +193,16 @@ h2 {
 }
 .p-select-option:not(.p-select-option-selected):not(.p-disabled):hover,
 .p-select-option.p-focus {
-  background-color: var(--lang-select-p-select-option-focus-bg, #eff6ff) !important; /* bg-blue-50 */
+  background-color: var(
+    --lang-select-p-select-option-focus-bg,
+    #eff6ff
+  ) !important; /* bg-blue-50 */
 }
 .p-select-option-selected,
 .p-select-option.p-select-option-selected.p-focus {
   color: var(--lang-select-p-select-option-selected-color, #fff) !important; /* white */
-  background-color: var(--lang-select-p-select-option-selected-bg, #2563eb) !important; /* bg-blue-600 */
+  background-color: var(
+    --lang-select-p-select-option-selected-bg,
+    #2563eb
+  ) !important; /* bg-blue-600 */
 }
