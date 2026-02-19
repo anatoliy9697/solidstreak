@@ -13,13 +13,13 @@
 }
 
 body {
-  @apply bg-gray-100 font-sans text-sm text-black;
+  @apply bg-gray-100 dark:bg-gray-800 font-sans text-sm text-black dark:text-white;
 }
 
 a {
-  @apply cursor-pointer text-blue-800 underline;
+  @apply cursor-pointer text-blue-800 dark:text-blue-400 underline;
   text-underline-offset: 0.2rem;
-  text-decoration-color: #1e40af;
+  text-decoration-color: var(--a-text-decoration-color);
 }
 a:hover {
   text-decoration-line: none;
@@ -128,7 +128,7 @@ h2 {
 }
 #theme-toggle.p-button:active {
   border-color: var(
-    --theme-toggle-p-button-border-active-color,
+    --theme-toggle-p-button-active-border-color,
     #9ca3af
   ) !important; /* border-gray-400 */
   background-color: var(--theme-toggle-p-button-active-bg, #9ca3af) !important; /* bg-gray-400 */

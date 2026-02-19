@@ -100,7 +100,7 @@ async function updateLang(newLang: string): Promise<void> {
     setPrimeVueLocale(t)
     toast.add({
       severity: 'error',
-      summary: t('app.error', 'Error'),
+      summary: t('common.error', 'Error'),
       detail: t('app.langChangeFailed', 'Failed to change language'),
       life: 3000,
     })
@@ -170,7 +170,7 @@ onMounted(async (): Promise<void> => {
   <p v-if="init">{{ t('app.loading', 'Loading') }}...</p>
   <p v-else-if="initErrorMsg">{{ initErrorMsg }}</p>
   <template v-else>
-    <div class="mb-2 border-b border-gray-300 bg-gray-200 dark:border-gray-700 dark:bg-gray-800">
+    <div class="mb-2 border-b border-gray-300 bg-gray-200 dark:border-gray-700 dark:bg-gray-900">
       <TopPanel
         :lang="userStore.lang"
         :theme="userStore.theme"
@@ -203,7 +203,7 @@ onMounted(async (): Promise<void> => {
 
       <div class="mb-2 flex items-center justify-between">
         <div class="flex h-10 items-center px-4">
-          <span v-if="view === 'active'" class="text-lg font-semibold text-gray-500">{{
+          <span v-if="view === 'active'" class="text-lg font-semibold text-gray-500 dark:text-gray-400">{{
             t('app.active', 'Active')
           }}</span>
           <a
@@ -212,8 +212,8 @@ onMounted(async (): Promise<void> => {
             :title="t('app.showActiveHabits', 'Show active habits')"
             >{{ t('app.active', 'Active') }}</a
           >
-          <span class="text-gray-500">&nbsp;/&nbsp;</span>
-          <span v-if="view === 'archived'" class="text-lg font-semibold text-gray-500">{{
+          <span class="text-gray-500 dark:text-gray-400">&nbsp;/&nbsp;</span>
+          <span v-if="view === 'archived'" class="text-lg font-semibold text-gray-500 dark:text-gray-400">{{
             t('app.archived', 'Archived')
           }}</span>
           <a
@@ -227,7 +227,7 @@ onMounted(async (): Promise<void> => {
         <div v-show="view === 'active'">
           <button
             @click="openHabitDialog()"
-            class="cursor-pointer rounded-md border border-gray-300 bg-gray-100 px-4 py-2 font-medium text-blue-800 hover:border-blue-100 hover:bg-blue-100 active:border-blue-200 active:bg-blue-200"
+            class="cursor-pointer rounded-md border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 px-4 py-2 font-medium text-blue-800 dark:text-blue-400 hover:border-blue-100 dark:hover:border-gray-700 hover:bg-blue-100 dark:hover:bg-gray-700 active:border-blue-200 dark:active:border-gray-600 active:bg-blue-200 dark:active:bg-gray-600"
             :title="t('app.createHabit', 'Create a new habit')"
           >
             + {{ t('app.newHabit', 'New habit') }}
@@ -263,7 +263,7 @@ onMounted(async (): Promise<void> => {
 
       <p
         v-if="view === 'active' && habitStore.activeHabits.length === 0"
-        class="text-center text-gray-500"
+        class="text-center text-gray-500 dark:text-gray-400"
       >
         {{ t('app.noActiveHabits', 'No active habits') }}.
         <a @click="openHabitDialog()" :title="t('app.createHabit', 'Create a new habit')">{{
@@ -273,7 +273,7 @@ onMounted(async (): Promise<void> => {
       </p>
       <p
         v-else-if="view === 'archived' && habitStore.archivedHabits.length === 0"
-        class="text-center text-gray-500"
+        class="text-center text-gray-500 dark:text-gray-400"
       >
         {{ t('app.noArchivedHabits', 'No archived habits') }}
       </p>
@@ -285,7 +285,7 @@ onMounted(async (): Promise<void> => {
       />
     </div>
 
-    <div id="footer" class="mb-2 w-full text-center text-xs text-gray-500 opacity-50">
+    <div id="footer" class="mb-2 w-full text-center text-xs text-gray-500 dark:text-gray-400 opacity-50">
       <span
         >{{ t('app.madeBy', 'Made by') }} <a href="https://t.me/avasin_dev">@avasin_dev</a></span
       >
