@@ -15,6 +15,9 @@ export function getNextTheme(theme: Theme): Theme {
 export const THEMES: Record<Theme, { [key: string]: string }> = {
   light: {
     '--a-text-decoration-color': '#1e40af', // blue-800
+    '--p-dialog-color': '#000', // black
+    '--p-dialog-bg': '#fff', // white
+    '--p-dialog-border-color': '#e5e7eb', // gray-200
     '--theme-toggle-p-button-bg': '#e5e7eb', // gray-200
     '--theme-toggle-p-button-border-color': '#d1d5db', // gray-300
     '--p-box-shadow': '0 0 #0000, 0 0 #0000, 0 1px 2px 0 rgba(18, 18, 23, 0.05)',
@@ -54,6 +57,9 @@ export const THEMES: Record<Theme, { [key: string]: string }> = {
   },
   dark: {
     '--a-text-decoration-color': '#60a5fa', // blue-400
+    '--p-dialog-color': '#fff', // white
+    '--p-dialog-bg': '#374151', // gray-700
+    '--p-dialog-border-color': '#4b5563', // gray-600
     '--theme-toggle-p-button-bg': '#111827', // gray-900
     '--theme-toggle-p-button-border-color': '#374151', // gray-700
     '--p-box-shadow': 'none',

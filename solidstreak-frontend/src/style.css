@@ -43,9 +43,9 @@ h2 {
 }
 
 .p-dialog {
-  background-color: #fff !important; /* white */
-  color: #000 !important; /* black */
-  border: none !important;
+  color: var(--p-dialog-color, #000) !important; /* black */
+  background-color: var(--p-dialog-bg, #fff) !important; /* white */
+  border: 1px solid var(--p-dialog-border-color, #e5e7eb) !important; /* gray-200 */
 }
 
 #theme-toggle.p-button {
