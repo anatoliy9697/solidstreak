@@ -145,7 +145,12 @@ async function processHabitDeletion(): Promise<void> {
   })
 }
 
-function getCheckButtonStyleObj(checked: boolean, hovered: boolean, color: Color, theme: Theme): Record<string, string> {
+function getCheckButtonStyleObj(
+  checked: boolean,
+  hovered: boolean,
+  color: Color,
+  theme: Theme,
+): Record<string, string> {
   if (!checked) return {}
 
   let borderColor = color.value500hex
@@ -176,8 +181,8 @@ function getCheckButtonStyleObj(checked: boolean, hovered: boolean, color: Color
     <div
       :class="[
         'flex justify-between',
-        expanded && !habit.archived ? 'mb-2' : '',
         expanded ? 'items-start' : '',
+        expanded && (!habit.archived || (habit.archived && habit.description)) ? 'mb-2' : '',
       ]"
     >
       <div
@@ -192,29 +197,32 @@ function getCheckButtonStyleObj(checked: boolean, hovered: boolean, color: Color
       </div>
 
       <div class="flex items-center">
-        <div v-if="expanded" class="flex items-center">
+        <div
+          v-if="expanded"
+          :class="['flex items-center', habit.archived && expanded ? 'mt-1' : '']"
+        >
           <span :title="t('habitCard.upperDelete', 'Delete')">
             <Trash2
               @click.stop="processHabitDeletion()"
-              class="mr-2 h-5 w-5 cursor-pointer text-gray-300 dark:text-gray-500 hover:text-gray-400 dark:hover:text-gray-400"
+              class="mr-2 h-5 w-5 cursor-pointer text-gray-300 hover:text-gray-400 dark:text-gray-500 dark:hover:text-gray-400"
             />
           </span>
           <span :title="t('habitCard.upperArchive', 'Archive')" v-if="!habit.archived">
             <Package
               @click.stop="processHabitArchiving()"
-              class="mr-2 h-5 w-5 cursor-pointer text-gray-300 dark:text-gray-500 hover:text-gray-400 dark:hover:text-gray-400"
+              class="mr-2 h-5 w-5 cursor-pointer text-gray-300 hover:text-gray-400 dark:text-gray-500 dark:hover:text-gray-400"
             />
           </span>
           <span :title="t('habitCard.upperUnarchive', 'Unarchive')" v-else>
             <PackageOpen
               @click.stop="processHabitArchiving()"
-              class="mr-2 h-5 w-5 cursor-pointer text-gray-300 dark:text-gray-500 hover:text-gray-400 dark:hover:text-gray-400"
+              class="mr-2 h-5 w-5 cursor-pointer text-gray-300 hover:text-gray-400 dark:text-gray-500 dark:hover:text-gray-400"
             />
           </span>
           <span :title="t('habitCard.upperEdit', 'Edit')">
             <SquarePen
               @click.stop="emit('editHabit', habit.id)"
-              class="h-5 w-5 cursor-pointer text-gray-300 dark:text-gray-500 hover:text-gray-400 dark:hover:text-gray-400"
+              class="h-5 w-5 cursor-pointer text-gray-300 hover:text-gray-400 dark:text-gray-500 dark:hover:text-gray-400"
             />
           </span>
         </div>
@@ -224,12 +232,19 @@ function getCheckButtonStyleObj(checked: boolean, hovered: boolean, color: Color
             @click.stop="processCurrentDateCheck()"
             @mouseover="isCheckButtonHovered = true"
             @mouseleave="isCheckButtonHovered = false"
-            :style="getCheckButtonStyleObj(selectedDateChecked, isCheckButtonHovered, color, toLocalTheme(props.theme))"
+            :style="
+              getCheckButtonStyleObj(
+                selectedDateChecked,
+                isCheckButtonHovered,
+                color,
+                toLocalTheme(props.theme),
+              )
+            "
             :class="[
               'flex h-7 w-7 cursor-pointer items-center justify-center rounded-lg border',
               selectedDateChecked
                 ? ''
-                : 'border-gray-400 text-gray-400 hover:border-gray-500 dark:hover:border-gray-300 hover:text-gray-500 dark:hover:text-gray-300',
+                : 'border-gray-400 text-gray-400 hover:border-gray-500 hover:text-gray-500 dark:hover:border-gray-300 dark:hover:text-gray-300',
             ]"
             :title="`${selectedDateChecked ? t('habitCard.upperUncheck', 'Uncheck') : t('habitCard.upperCheck', 'Check')} ${t('common.gcHabit', 'habit')} ${t('habitCard.forSelectedDate', 'for selected date')}`"
           >
@@ -248,7 +263,7 @@ function getCheckButtonStyleObj(checked: boolean, hovered: boolean, color: Color
       </div>
     </div>
 
-    <div v-if="expanded && habit.description" class="mb-2">
+    <div v-if="expanded && habit.description" :class="expanded && !habit.archived ? 'mb-2' : ''">
       <p style="word-break: break-word; white-space: pre-wrap">{{ habit.description }}</p>
     </div>
 

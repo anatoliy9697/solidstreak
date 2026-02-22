@@ -63,15 +63,15 @@ function processDateShift(diff: number): void {
 
 <template>
   <div
-    class="fixed bottom-8 left-1/2 z-50 flex h-14 -translate-x-1/2 items-center rounded-full border border-gray-200 bg-white p-2 shadow-sm"
+    class="fixed bottom-8 left-1/2 z-50 flex h-14 -translate-x-1/2 items-center rounded-full border border-gray-200 bg-white p-2 shadow-sm dark:border-gray-600 dark:bg-gray-700"
   >
     <span :title="t('datePicker.prevDay', 'Previous day')">
       <ChevronLeft
         :class="[
           'h-10 w-10 rounded-full py-2',
           isBeforeDay(minDate, selectedDate)
-            ? 'cursor-pointer text-blue-800 hover:bg-blue-50 active:bg-blue-100'
-            : 'cursor-not-allowed text-gray-400 opacity-50',
+            ? 'cursor-pointer text-blue-800 hover:bg-blue-50 active:bg-blue-100 dark:text-blue-400 dark:hover:bg-gray-600 dark:active:bg-gray-500'
+            : 'cursor-not-allowed text-gray-400 opacity-50 dark:text-gray-500',
         ]"
         @click="processDateShift(-1)"
       />
@@ -103,8 +103,8 @@ function processDateShift(diff: number): void {
         :class="[
           'h-10 w-10 rounded-full py-2 text-blue-800',
           isBeforeDay(selectedDate, maxDate)
-            ? 'cursor-pointer text-blue-800 hover:bg-blue-50 active:bg-blue-100'
-            : 'cursor-not-allowed text-gray-400 opacity-50',
+            ? 'cursor-pointer text-blue-800 hover:bg-blue-50 active:bg-blue-100 dark:text-blue-400 dark:hover:bg-gray-600 dark:active:bg-gray-500'
+            : 'cursor-not-allowed text-gray-400 opacity-50 dark:text-gray-500',
         ]"
         @click="processDateShift(1)"
       />
