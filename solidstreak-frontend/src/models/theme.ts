@@ -54,6 +54,8 @@ export const THEMES: Record<Theme, { [key: string]: string }> = {
     '--p-datepicker-day-today-bg': '#bfdbfe', // blue-200
     '--p-datepicker-item-selected-bg': '#2563eb', // blue-600
     '--p-datepicker-item-selected-color': '#fff', // white
+    '--main-calendar-heatmap-vch-label-color': '#9ca3af', // gray-400
+    '--calendar-heatmap-vch-label-color': '#9ca3af', // gray-400
   },
   dark: {
     '--a-text-decoration-color': '#60a5fa', // blue-400
@@ -96,5 +98,7 @@ export const THEMES: Record<Theme, { [key: string]: string }> = {
     '--p-datepicker-day-today-bg': '#3b82f6', // blue-500
     '--p-datepicker-item-selected-bg': '#2563eb', // blue-600
     '--p-datepicker-item-selected-color': '#fff', // white
+    '--main-calendar-heatmap-vch-label-color': '#6b7280', // gray-500
+    '--calendar-heatmap-vch-label-color': '#9ca3af', // gray-400
   },
 }

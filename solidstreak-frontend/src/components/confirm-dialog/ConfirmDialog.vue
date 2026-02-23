@@ -16,13 +16,13 @@ const { t } = useI18n()
       <div class="flex gap-2">
         <button
           @click="acceptCallback"
-          class="w-1/2 rounded-md border border-gray-300 dark:border-gray-500 bg-gray-100 dark:bg-gray-700 px-4 py-2 font-medium text-gray-800 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 active:bg-gray-300 dark:active:bg-gray-500"
+          class="w-1/2 rounded-md border border-gray-300 bg-gray-100 px-4 py-2 font-medium text-gray-800 hover:bg-gray-200 active:bg-gray-300 dark:border-gray-500 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 dark:active:bg-gray-500"
         >
           {{ t('common.yes', 'Yes') }}
         </button>
         <button
           @click="rejectCallback"
-          class="w-1/2 rounded-md border border-gray-300 dark:border-gray-500 bg-gray-100 dark:bg-gray-700 px-4 py-2 font-medium text-red-800 dark:text-red-400 hover:bg-gray-200 dark:hover:bg-gray-600 active:bg-gray-300 dark:active:bg-gray-500"
+          class="w-1/2 rounded-md border border-gray-300 bg-gray-100 px-4 py-2 font-medium text-red-800 hover:bg-gray-200 active:bg-gray-300 dark:border-gray-500 dark:bg-gray-700 dark:text-red-400 dark:hover:bg-gray-600 dark:active:bg-gray-500"
         >
           {{ t('common.no', 'No') }}
         </button>

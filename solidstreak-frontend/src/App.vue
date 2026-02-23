@@ -12,7 +12,7 @@ import { dateToLocalString } from '@/utils/date'
 import { ApiFetcher } from '@/api/request'
 import { useUserStore } from '@/stores/user'
 import { useHabitStore } from '@/stores/habit'
-import { type Color, ORANGE, generateColorGradient } from '@/models/color'
+import { type Color, GRAY, ORANGE, generateColorGradient } from '@/models/color'
 import ConfirmDialog from '@/components/confirm-dialog/ConfirmDialog.vue'
 import TopPanel from '@/components/top-panel/TopPanel.vue'
 import CalendarHeatmap from '@/components/calendar-heatmap/CalendarHeatmap.vue'
@@ -112,6 +112,32 @@ function updateTheme(newTheme: Theme): void {
   applyTheme(newTheme)
 }
 
+function getCalendarHeatmapColorRange(
+  activeHabitsCount: number,
+  color: Color,
+  theme: Theme,
+): string[] {
+  if (theme === 'dark') {
+    return [
+      GRAY.value700hex,
+      ...generateColorGradient(
+        generateColorGradient(GRAY.value700hex, color.value700hex, 5)[1]!,
+        color.value600hex,
+        activeHabitsCount,
+      ),
+    ]
+  } else {
+    return [
+      '#fff',
+      ...generateColorGradient(
+        activeHabitsCount === 2 ? color.value400hex : color.value200hex,
+        color.value600hex,
+        activeHabitsCount,
+      ),
+    ]
+  }
+}
+
 const openHabitDialog = (habitId?: number): void => {
   editingHabitId.value = habitId || null
   isHabitDialogVisible.value = true
@@ -181,21 +207,19 @@ onMounted(async (): Promise<void> => {
 
     <div id="content" style="flex: 1 0 auto" class="mx-auto w-full max-w-lg px-2">
       <CalendarHeatmap
+        id="main-calendar-heatmap"
         v-if="!init && !initErrorMsg"
         :values="habitStore.activities"
         :endDate="dateToLocalString(new Date())"
         :max="habitStore.activeHabitsCount"
         :tooltipUnit="t('calendarHeatmap.checks', 'checks')"
-        :rangeColor="[
-          '#ffffff',
-          ...generateColorGradient(
-            habitStore.activeHabitsCount == 2
-              ? mainHeatmapColor.value400hex
-              : mainHeatmapColor.value200hex,
-            mainHeatmapColor.value600hex,
+        :rangeColor="
+          getCalendarHeatmapColorRange(
             habitStore.activeHabitsCount,
-          ),
-        ]"
+            mainHeatmapColor,
+            userStore.theme,
+          )
+        "
         :locale="getHeatmapLocale(t)"
         :round="3"
         class="mb-2 px-2"

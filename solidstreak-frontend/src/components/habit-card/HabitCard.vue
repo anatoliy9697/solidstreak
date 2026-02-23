@@ -10,7 +10,7 @@ import { type Theme, toLocalTheme } from '@/models/theme'
 import { dateToLocalString } from '@/utils/date'
 import { useUserStore } from '@/stores/user'
 import { useHabitStore } from '@/stores/habit'
-import { type Color, COLORS, GREEN } from '@/models/color'
+import { type Color, COLORS, generateColorGradient, GRAY, GREEN } from '@/models/color'
 import type { Habit, HabitCheck } from '@/models/habit'
 import CalendarHeatmap from '@/components/calendar-heatmap/CalendarHeatmap.vue'
 
@@ -145,6 +145,14 @@ async function processHabitDeletion(): Promise<void> {
   })
 }
 
+function getCalendarHeatmapColorRange(color: Color, theme: Theme): string[] {
+  if (theme === 'dark') {
+    return [generateColorGradient(GRAY.value600hex, color.value600hex, 11)[1]!, color.value500hex]
+  } else {
+    return [color.value100hex, color.value600hex]
+  }
+}
+
 function getCheckButtonStyleObj(
   checked: boolean,
   hovered: boolean,
@@ -174,7 +182,7 @@ function getCheckButtonStyleObj(
 <template>
   <div
     :class="[
-      'cursor-pointer rounded-md border border-gray-200 bg-white px-4 py-2 shadow-sm dark:border-gray-600 dark:bg-gray-700',
+      'cursor-pointer rounded-md border border-gray-200 bg-white px-4 py-2 shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:shadow-none',
       habit.archived ? 'opacity-50' : '',
     ]"
   >
@@ -268,11 +276,12 @@ function getCheckButtonStyleObj(
     </div>
 
     <CalendarHeatmap
+      class="calendar-heatmap"
       v-if="expanded && !habit.archived"
       :values="checksArray"
       :endDate="dateToLocalString(new Date())"
       :max="1"
-      :rangeColor="[color.value100hex, color.value600hex]"
+      :rangeColor="getCalendarHeatmapColorRange(color, toLocalTheme(props.theme))"
       :tooltip="false"
       :locale="getHeatmapLocale(t)"
       :round="3"

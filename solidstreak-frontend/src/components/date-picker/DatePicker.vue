@@ -63,7 +63,7 @@ function processDateShift(diff: number): void {
 
 <template>
   <div
-    class="fixed bottom-8 left-1/2 z-50 flex h-14 -translate-x-1/2 items-center rounded-full border border-gray-200 bg-white p-2 shadow-sm dark:border-gray-600 dark:bg-gray-700"
+    class="fixed bottom-8 left-1/2 z-50 flex h-14 -translate-x-1/2 items-center rounded-full border border-gray-200 bg-white p-2 shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:shadow-none"
   >
     <span :title="t('datePicker.prevDay', 'Previous day')">
       <ChevronLeft

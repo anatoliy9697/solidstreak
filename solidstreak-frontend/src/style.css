@@ -217,3 +217,12 @@ h2 {
   color: var(--p-datepicker-item-selected-color, #fff) !important; /* white */
   background-color: var(--p-datepicker-item-selected-bg, #2563eb) !important; /* blue-600 */
 }
+
+#main-calendar-heatmap .vch__day__label,
+#main-calendar-heatmap .vch__month__label {
+  fill: var(--main-calendar-heatmap-vch-label-color, #9ca3af) !important; /* gray-400 */
+}
+.calendar-heatmap .vch__day__label,
+.calendar-heatmap .vch__month__label {
+  fill: var(--calendar-heatmap-vch-label-color, #9ca3af) !important; /* gray-400 */
+}

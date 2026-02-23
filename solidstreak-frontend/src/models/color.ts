@@ -18,6 +18,25 @@ export interface Color {
   value800hex: string
 }
 
+export const GRAY: Color = {
+  name: 'gray',
+  value50: 'gray-50',
+  value50hex: '#f9fafb',
+  value100: 'gray-100',
+  value100hex: '#f3f4f6',
+  value200: 'gray-200',
+  value200hex: '#e5e7eb',
+  value400: 'gray-400',
+  value400hex: '#9ca3af',
+  value500: 'gray-500',
+  value500hex: '#6b7280',
+  value600: 'gray-600',
+  value600hex: '#4b5563',
+  value700: 'gray-700',
+  value700hex: '#374151',
+  value800: 'gray-800',
+  value800hex: '#1f2937',
+}
 export const RED: Color = {
   name: 'red',
   value50: 'red-50',
