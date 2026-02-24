@@ -137,6 +137,7 @@ h2 {
   background-color: var(--p-inputtext-textarea-bg, #fff) !important; /* white */
   color: var(--p-inputtext-textarea-color, #000) !important; /* black */
   border-color: var(--p-inputtext-textarea-border-color, #e5e7eb) !important; /* gray-200 */
+  box-shadow: none !important;
 }
 .p-inputtext:focus,
 .p-textarea:focus {
@@ -144,7 +145,7 @@ h2 {
 }
 
 .p-inputtext.p-invalid {
-  border-color: #d32f2f !important; /* red-700 */
+  border-color: var(--p-inputtext-invalid-border-color, #e53935) !important; /* red-600 */
   box-shadow: 0 0 0 2px rgba(211, 47, 47, 0.15);
 }
 

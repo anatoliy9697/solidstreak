@@ -146,7 +146,7 @@ async function onColorSelected(selectedColor: Color): Promise<void> {
         <div>
           <i
             @click="closeCallback"
-            class="pi pi-times cursor-pointer text-gray-300 hover:text-gray-400"
+            class="pi pi-times cursor-pointer text-gray-300 hover:text-gray-400 dark:text-gray-500 dark:hover:text-gray-400"
             :title="t('common.close', 'Close')"
           ></i>
         </div>
@@ -162,7 +162,10 @@ async function onColorSelected(selectedColor: Color): Promise<void> {
       />
       <div class="flex items-center justify-between">
         <div class="mr-2 flex-1">
-          <p v-if="habitTitle.length > HABIT_TITLE_MAX_LENGTH" class="text-xs text-red-600">
+          <p
+            v-if="habitTitle.length > HABIT_TITLE_MAX_LENGTH"
+            class="text-xs text-red-600 dark:text-red-500"
+          >
             {{
               t('habitDialog.extraCharsRemoving', 'Extra characters will be removed automatically')
             }}
@@ -171,7 +174,9 @@ async function onColorSelected(selectedColor: Color): Promise<void> {
         <p
           :class="[
             'text-xs',
-            habitTitle.length <= HABIT_TITLE_MAX_LENGTH ? 'text-gray-400' : 'text-red-600',
+            habitTitle.length <= HABIT_TITLE_MAX_LENGTH
+              ? 'text-gray-400 dark:text-gray-500'
+              : 'text-red-600 dark:text-red-500',
           ]"
         >
           {{ habitTitle.length }}/{{ HABIT_TITLE_MAX_LENGTH }}
@@ -194,7 +199,7 @@ async function onColorSelected(selectedColor: Color): Promise<void> {
         <div class="mr-2 flex-1">
           <p
             v-if="habitDescription.length > HABIT_DESCRIPTION_MAX_LENGTH"
-            class="text-xs text-red-600"
+            class="text-xs text-red-600 dark:text-red-500"
           >
             {{
               t('habitDialog.extraCharsRemoving', 'Extra characters will be removed automatically')
@@ -205,8 +210,8 @@ async function onColorSelected(selectedColor: Color): Promise<void> {
           :class="[
             'text-xs',
             habitDescription.length <= HABIT_DESCRIPTION_MAX_LENGTH
-              ? 'text-gray-400'
-              : 'text-red-600',
+              ? 'text-gray-400 dark:text-gray-500'
+              : 'text-red-600 dark:text-red-500',
           ]"
         >
           {{ habitDescription.length }}/{{ HABIT_DESCRIPTION_MAX_LENGTH }}
@@ -221,13 +226,13 @@ async function onColorSelected(selectedColor: Color): Promise<void> {
       <div class="flex gap-2">
         <button
           @click="closeCallback"
-          class="w-1/2 rounded-md border border-gray-300 bg-gray-100 px-4 py-2 font-medium text-gray-800 hover:bg-gray-200 active:bg-gray-300"
+          class="w-1/2 rounded-md border border-gray-200 bg-gray-100 px-4 py-2 font-medium text-gray-800 hover:border-gray-300 hover:bg-gray-200 active:bg-gray-300 dark:border-gray-500 dark:bg-gray-600 dark:text-white dark:hover:border-gray-400 dark:hover:bg-gray-500 dark:active:bg-gray-400"
         >
           {{ t('common.upperCancel', 'Cancel') }}
         </button>
         <button
           @click="processHabitSaving"
-          class="w-1/2 rounded-md border border-green-700 bg-green-600 px-4 py-2 font-medium text-white hover:border-green-800 hover:bg-green-700 active:bg-green-800"
+          class="w-1/2 rounded-md border border-green-700 bg-green-600 px-4 py-2 font-medium text-white hover:border-green-800 hover:bg-green-700 active:bg-green-800 dark:border-green-600 dark:bg-green-700 dark:hover:border-green-500 dark:hover:bg-green-600 dark:active:bg-green-500"
         >
           {{ t('common.upperSave', 'Save') }}
         </button>
