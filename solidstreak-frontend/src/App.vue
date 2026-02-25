@@ -238,7 +238,7 @@ onMounted(async (): Promise<void> => {
             :title="t('app.showActiveHabits', 'Show active habits')"
             >{{ t('app.active', 'Active') }}</a
           >
-          <span class="text-gray-500 dark:text-gray-400">&nbsp;/&nbsp;</span>
+          <span class="text-lg font-semibold text-gray-500 dark:text-gray-400">&nbsp;/&nbsp;</span>
           <span
             v-if="view === 'archived'"
             class="text-lg font-semibold text-gray-500 dark:text-gray-400"

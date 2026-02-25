@@ -37,9 +37,25 @@ h2 {
   box-sizing: border-box;
   max-width: calc(100vw - 40px);
 }
-
+.p-toast-message-error {
+  color: var(--p-toast-message-error-color, #e53935) !important; /* red-600 */
+  background-color: var(--p-toast-message-error-bg, #fef3f2) !important; /* red-100 */
+  border-color: var(--p-toast-message-error-border-color, #f87171) !important; /* red-400 */
+}
+.p-toast-message-error .p-toast-close-button:hover {
+  background-color: var(
+    --p-toast-message-error-close-button-hover-bg,
+    #fecaca
+  ) !important; /* red-200 */
+}
+.p-toast-message-error .p-toast-close-button:active {
+  background-color: var(
+    --p-toast-message-error-close-button-active-bg,
+    #fca5a5
+  ) !important; /* red-300 */
+}
 .p-toast-detail {
-  color: #000 !important;
+  color: var(--p-toast-detail-color, #000) !important; /* black */
 }
 
 .p-dialog {
@@ -226,4 +242,17 @@ h2 {
 .calendar-heatmap .vch__day__label,
 .calendar-heatmap .vch__month__label {
   fill: var(--calendar-heatmap-vch-label-color, #9ca3af) !important; /* gray-400 */
+}
+
+#main-calendar-heatmap .vch__day__square:hover {
+  stroke: var(
+    --calendar-heatmap-vch-day-square-hover-stroke-color,
+    #9ca3af
+  ) !important; /* gray-400 */
+  stroke-width: 2px !important;
+  paint-order: stroke !important;
+}
+.calendar-heatmap .vch__day__square:hover {
+  stroke: none !important;
+  stroke-width: 0px !important;
 }

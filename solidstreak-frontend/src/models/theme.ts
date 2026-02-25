@@ -16,6 +16,12 @@ export const THEMES: Record<Theme, { [key: string]: string }> = {
   light: {
     '--a-text-decoration-color': '#1e40af', // blue-800
     '--p-inputtext-invalid-border-color': '#e53935', // red-600
+    '--p-toast-message-error-color': '#e53935', // red-600
+    '--p-toast-message-error-bg': '#fef3f2', // red-100
+    '--p-toast-message-error-border-color': '#f87171', // red-400
+    '--p-toast-message-error-close-button-hover-bg': '#fecaca', // red-200
+    '--p-toast-message-error-close-button-active-bg': '#fca5a5', // red-300
+    '--p-toast-detail-color': '#000', // black
     '--p-dialog-color': '#000', // black
     '--p-dialog-bg': '#fff', // white
     '--p-dialog-border-color': '#e5e7eb', // gray-200
@@ -57,10 +63,17 @@ export const THEMES: Record<Theme, { [key: string]: string }> = {
     '--p-datepicker-item-selected-color': '#fff', // white
     '--main-calendar-heatmap-vch-label-color': '#9ca3af', // gray-400
     '--calendar-heatmap-vch-label-color': '#9ca3af', // gray-400
+    '--calendar-heatmap-vch-day-square-hover-stroke-color': '#6b7280', // gray-500
   },
   dark: {
     '--a-text-decoration-color': '#60a5fa', // blue-400
     '--p-inputtext-invalid-border-color': '#d32f2f', // red-700
+    '--p-toast-message-error-color': '#fca5a5', // red-300
+    '--p-toast-message-error-bg': '#853840', // gray-red-700
+    '--p-toast-message-error-border-color': '#f87171', // red-400
+    '--p-toast-message-error-close-button-hover-bg': '#98474c', // gray-red-600
+    '--p-toast-message-error-close-button-active-bg': '#b05b5b', // gray-red-500
+    '--p-toast-detail-color': '#fff', // white
     '--p-dialog-color': '#fff', // white
     '--p-dialog-bg': '#374151', // gray-700
     '--p-dialog-border-color': '#4b5563', // gray-600
@@ -102,5 +115,6 @@ export const THEMES: Record<Theme, { [key: string]: string }> = {
     '--p-datepicker-item-selected-color': '#fff', // white
     '--main-calendar-heatmap-vch-label-color': '#6b7280', // gray-500
     '--calendar-heatmap-vch-label-color': '#9ca3af', // gray-400
+    '--calendar-heatmap-vch-day-square-hover-stroke-color': '#9ca3af', // gray-400
   },
 }
