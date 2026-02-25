@@ -16,7 +16,7 @@ export const useUserStore = defineStore('user', {
     tgLangCode: '' as string,
     langCode: toLocalLang(localStorage.getItem('lang')) as string,
     avatarUrl: '' as string,
-    _theme: toLocalTheme(localStorage.getItem('theme')) as Theme,
+    _theme: toLocalTheme(localStorage.getItem('theme') || getDefaultTheme()) as Theme,
   }),
 
   actions: {
@@ -90,7 +90,7 @@ export const useUserStore = defineStore('user', {
       if (!localStorage.getItem('theme')) {
         localStorage.setItem('theme', state._theme || getDefaultTheme())
       }
-      return toLocalTheme(state._theme || localStorage.getItem('theme'))
+      return toLocalTheme(state._theme || localStorage.getItem('theme') || getDefaultTheme())
     },
   },
 })

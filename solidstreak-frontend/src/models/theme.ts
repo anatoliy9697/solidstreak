@@ -1,7 +1,7 @@
 export type Theme = 'light' | 'dark'
 
 export function getDefaultTheme(): Theme {
-  return 'light'
+  return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
 }
 
 export function toLocalTheme(theme: string | null | undefined): Theme {

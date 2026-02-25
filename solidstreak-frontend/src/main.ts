@@ -6,7 +6,7 @@ import Aura from '@primeuix/themes/aura'
 import ToastService from 'primevue/toastservice'
 import ConfirmationService from 'primevue/confirmationservice'
 import { i18n } from '@/i18n'
-import { type Theme, THEMES, toLocalTheme } from '@/models/theme'
+import { type Theme, THEMES, toLocalTheme, getDefaultTheme } from '@/models/theme'
 
 import App from './App.vue'
 // import router from './router'
@@ -23,8 +23,7 @@ export function applyTheme(theme: Theme) {
     root.classList.remove('dark')
   }
 }
-
-applyTheme(toLocalTheme(localStorage.getItem('theme')))
+applyTheme(toLocalTheme(localStorage.getItem('theme') || getDefaultTheme()))
 
 const app = createApp(App)
 
