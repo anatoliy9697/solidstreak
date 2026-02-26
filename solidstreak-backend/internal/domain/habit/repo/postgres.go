@@ -27,7 +27,7 @@ func (r pgRepo) Create(h *hPkg.Habit) error {
 			VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 			RETURNING id, creator_id
 		)
-		INSERT INTO users_habits (active, user_id, habit_id, is_public)
+		INSERT INTO user_habits (active, user_id, habit_id, is_public)
 		SELECT TRUE, habit.creator_id, habit.id, $9 FROM habit
 		RETURNING habit_id
 	`
@@ -61,12 +61,12 @@ func (r pgRepo) Update(h *hPkg.Habit) error {
 			WHERE id = $7
 			RETURNING id, creator_id
 		)
-		UPDATE users_habits SET
+		UPDATE user_habits SET
 			is_public = $8
 		FROM habit h
 		WHERE 
-			users_habits.habit_id = h.id
-			AND users_habits.user_id = h.creator_id
+			user_habits.habit_id = h.id
+			AND user_habits.user_id = h.creator_id
 	`
 	_, err := r.p.Exec(
 		r.c,
@@ -88,7 +88,7 @@ func (r pgRepo) GetByOwnerIDAndStatus(ownerID int64, status hPkg.HabitStatus, re
 	sql := `
 		SELECT h.id, h.active, h.archived, h.title, h.description, h.color, h.creator_id, uh.is_public, h.created_at, h.updated_at
 		FROM habits h
-		JOIN users_habits uh ON 
+		JOIN user_habits uh ON 
 			h.id = uh.habit_id 
 			AND uh.active IS TRUE
 		WHERE 
@@ -147,7 +147,7 @@ func (r pgRepo) GetByIDAndOwnerID(id int64, ownerID int64, requestedByOwner bool
 		)
 		SELECT h.id, h.active, h.archived, h.title, h.description, h.color, h.creator_id, uh.is_public, h.created_at, h.updated_at
 		FROM habit h
-		JOIN users_habits uh ON 
+		JOIN user_habits uh ON 
 			h.id = uh.habit_id 
 			AND uh.active IS TRUE
 		WHERE 
