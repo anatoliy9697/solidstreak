@@ -98,3 +98,13 @@ ALTER TABLE users ADD COLUMN lang_code VARCHAR(3) NOT NULL DEFAULT 'en';
 UPDATE users SET lang_code = tg_lang_code;
 
 users_habits -> user_habits
+
+CREATE TABLE user_subscriptions (
+	id BIGSERIAL PRIMARY KEY UNIQUE NOT NULL,
+	active BOOLEAN NOT NULL DEFAULT TRUE,
+	user_id INTEGER NOT NULL REFERENCES users(id),
+	plan_code VARCHAR(32) NOT NULL,
+	start_dt TIMESTAMP NOT NULL,
+	finish_dt TIMESTAMP,
+	created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL
+);
