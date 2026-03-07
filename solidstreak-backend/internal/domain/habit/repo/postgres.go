@@ -177,7 +177,7 @@ func (r pgRepo) GetByIDAndOwnerID(id int64, ownerID int64, requestedByOwner bool
 	)
 	if err != nil {
 		if err == pgx.ErrNoRows {
-			return nil, apperrors.ErrNotFound("couldn't find habit for specified user")
+			return nil, apperrors.NewNotFoundErr("couldn't find habit for specified user")
 		}
 		return nil, err
 	}

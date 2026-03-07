@@ -72,7 +72,7 @@ func (s Server) postHabit(w http.ResponseWriter, r *http.Request) {
 
 	userTgID, ok := r.Context().Value(ctxKeyUserTgID{}).(int64)
 	if !ok {
-		err = apperrors.ErrUnauthorized("couldn't identify user")
+		err = apperrors.NewUnauthorizedErr("couldn't identify user")
 		return
 	}
 
@@ -86,23 +86,23 @@ func (s Server) postHabit(w http.ResponseWriter, r *http.Request) {
 
 	decoder := json.NewDecoder(r.Body)
 	if err = decoder.Decode(&req); err != nil {
-		err = apperrors.ErrBadRequest("invalid request payload")
+		err = apperrors.NewBadRequestErr("invalid request payload")
 		return
 	}
 
 	if req.Data == nil {
-		err = apperrors.ErrBadRequest("habit data is required")
+		err = apperrors.NewBadRequestErr("habit data is required")
 		return
 	}
 	if req.Data.Title == nil {
-		err = apperrors.ErrBadRequest("habit title is required")
+		err = apperrors.NewBadRequestErr("habit title is required")
 		return
 	}
 	var color hPkg.Color
 	if req.Data.Color != nil {
 		var ok bool
 		if color, ok = hPkg.ColorMapping[*req.Data.Color]; !ok {
-			err = apperrors.ErrBadRequest("invalid habit color")
+			err = apperrors.NewBadRequestErr("invalid habit color")
 			return
 		}
 	}
@@ -110,17 +110,17 @@ func (s Server) postHabit(w http.ResponseWriter, r *http.Request) {
 		color = hPkg.Green
 	}
 	if req.Data.IsPublic == nil {
-		err = apperrors.ErrBadRequest("habit public status is required")
+		err = apperrors.NewBadRequestErr("habit public status is required")
 		return
 	}
 
 	var user *usrPkg.User
-	if user, err = s.Res.UsrRepo.GetByTgID(userTgID); err != nil {
+	if user, err = s.Res.UsrRepo.GetByID(userID); err != nil {
 		return
 	}
 
-	if userID != user.ID {
-		err = apperrors.ErrForbidden("couldn't create habit for another user")
+	if user.TgID != userTgID {
+		err = apperrors.NewForbiddenErr("couldn't create habit for another user")
 		return
 	}
 
@@ -154,7 +154,7 @@ func (s Server) putHabit(w http.ResponseWriter, r *http.Request) {
 
 	userTgID, ok := r.Context().Value(ctxKeyUserTgID{}).(int64)
 	if !ok {
-		err = apperrors.ErrUnauthorized("couldn't identify user")
+		err = apperrors.NewUnauthorizedErr("couldn't identify user")
 		return
 	}
 
@@ -168,27 +168,27 @@ func (s Server) putHabit(w http.ResponseWriter, r *http.Request) {
 
 	decoder := json.NewDecoder(r.Body)
 	if err = decoder.Decode(&req); err != nil {
-		err = apperrors.ErrBadRequest("invalid request payload")
+		err = apperrors.NewBadRequestErr("invalid request payload")
 		return
 	}
 
 	if req.Data == nil {
-		err = apperrors.ErrBadRequest("habit data is required")
+		err = apperrors.NewBadRequestErr("habit data is required")
 		return
 	}
 	if req.Data.Archived == nil {
-		err = apperrors.ErrBadRequest("habit archived status is required")
+		err = apperrors.NewBadRequestErr("habit archived status is required")
 		return
 	}
 	if req.Data.Title == nil {
-		err = apperrors.ErrBadRequest("habit title is required")
+		err = apperrors.NewBadRequestErr("habit title is required")
 		return
 	}
 	var color hPkg.Color
 	if req.Data.Color != nil {
 		var ok bool
 		if color, ok = hPkg.ColorMapping[*req.Data.Color]; !ok {
-			err = apperrors.ErrBadRequest("invalid habit color")
+			err = apperrors.NewBadRequestErr("invalid habit color")
 			return
 		}
 	}
@@ -196,18 +196,18 @@ func (s Server) putHabit(w http.ResponseWriter, r *http.Request) {
 		color = hPkg.Green
 	}
 	if req.Data.IsPublic == nil {
-		err = apperrors.ErrBadRequest("habit public status is required")
+		err = apperrors.NewBadRequestErr("habit public status is required")
 		return
 	}
 
 	var user *usrPkg.User
-	if user, err = s.Res.UsrRepo.GetByTgID(userTgID); err != nil {
+	if user, err = s.Res.UsrRepo.GetByID(userID); err != nil {
 		return
 	}
 
-	requestedByOwner := userID == user.ID
+	requestedByOwner := user.TgID == userTgID
 	if !requestedByOwner {
-		err = apperrors.ErrForbidden("couldn't update habit for another user")
+		err = apperrors.NewForbiddenErr("couldn't update habit for another user")
 		return
 	}
 
@@ -255,7 +255,7 @@ func (s Server) deleteHabit(w http.ResponseWriter, r *http.Request) {
 
 	userTgID, ok := r.Context().Value(ctxKeyUserTgID{}).(int64)
 	if !ok {
-		err = apperrors.ErrUnauthorized("couldn't identify user")
+		err = apperrors.NewUnauthorizedErr("couldn't identify user")
 		return
 	}
 
@@ -266,13 +266,13 @@ func (s Server) deleteHabit(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var user *usrPkg.User
-	if user, err = s.Res.UsrRepo.GetByTgID(userTgID); err != nil {
+	if user, err = s.Res.UsrRepo.GetByID(userID); err != nil {
 		return
 	}
 
-	requestedByOwner := userID == user.ID
+	requestedByOwner := user.TgID == userTgID
 	if !requestedByOwner {
-		err = apperrors.ErrForbidden("couldn't delete habit for another user")
+		err = apperrors.NewForbiddenErr("couldn't delete habit for another user")
 		return
 	}
 
@@ -312,7 +312,7 @@ func (s Server) getHabit(w http.ResponseWriter, r *http.Request) {
 
 	userTgID, ok := r.Context().Value(ctxKeyUserTgID{}).(int64)
 	if !ok {
-		err = apperrors.ErrUnauthorized("couldn't identify user")
+		err = apperrors.NewUnauthorizedErr("couldn't identify user")
 		return
 	}
 
@@ -337,12 +337,12 @@ func (s Server) getHabit(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var user *usrPkg.User
-	if user, err = s.Res.UsrRepo.GetByTgID(userTgID); err != nil {
+	if user, err = s.Res.UsrRepo.GetByID(userID); err != nil {
 		return
 	}
 
 	var (
-		requestedByOwner bool = userID == user.ID
+		requestedByOwner bool = user.TgID == userTgID
 		habit            *hPkg.Habit
 	)
 	if habit, err = s.Res.HabitRepo.GetByIDAndOwnerID(habitID, userID, requestedByOwner); err != nil {
@@ -381,7 +381,7 @@ func (s Server) getHabits(w http.ResponseWriter, r *http.Request) {
 
 	userTgID, ok := r.Context().Value(ctxKeyUserTgID{}).(int64)
 	if !ok {
-		err = apperrors.ErrUnauthorized("couldn't identify user")
+		err = apperrors.NewUnauthorizedErr("couldn't identify user")
 		return
 	}
 
@@ -412,12 +412,12 @@ func (s Server) getHabits(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var user *usrPkg.User
-	if user, err = s.Res.UsrRepo.GetByTgID(userTgID); err != nil {
+	if user, err = s.Res.UsrRepo.GetByID(userID); err != nil {
 		return
 	}
 
 	var (
-		requestedByOwner bool = userID == user.ID
+		requestedByOwner bool = user.TgID == userTgID
 		habits           []*hPkg.Habit
 	)
 	if habits, err = s.Res.HabitRepo.GetByOwnerIDAndStatus(userID, status, requestedByOwner); err != nil {
@@ -466,7 +466,7 @@ func (s Server) postUserHabitCheck(w http.ResponseWriter, r *http.Request) {
 
 	userTgID, ok := r.Context().Value(ctxKeyUserTgID{}).(int64)
 	if !ok {
-		err = apperrors.ErrUnauthorized("couldn't identify user")
+		err = apperrors.NewUnauthorizedErr("couldn't identify user")
 		return
 	}
 
@@ -486,31 +486,31 @@ func (s Server) postUserHabitCheck(w http.ResponseWriter, r *http.Request) {
 
 	decoder := json.NewDecoder(r.Body)
 	if err = decoder.Decode(&req); err != nil {
-		err = apperrors.ErrBadRequest("invalid request payload")
+		err = apperrors.NewBadRequestErr("invalid request payload")
 		return
 	}
 
 	if req.Data == nil {
-		err = apperrors.ErrBadRequest("request data is required")
+		err = apperrors.NewBadRequestErr("request data is required")
 		return
 	}
 	if req.Data.CheckDate == nil {
-		err = apperrors.ErrBadRequest("habit check date is required")
+		err = apperrors.NewBadRequestErr("habit check date is required")
 		return
 	}
 	if req.Data.Completed == nil {
-		err = apperrors.ErrBadRequest("habit completion status is required")
+		err = apperrors.NewBadRequestErr("habit completion status is required")
 		return
 	}
 
 	var user *usrPkg.User
-	if user, err = s.Res.UsrRepo.GetByTgID(userTgID); err != nil {
+	if user, err = s.Res.UsrRepo.GetByID(userID); err != nil {
 		return
 	}
 
-	requestedByOwner := userID == user.ID
+	requestedByOwner := user.TgID == userTgID
 	if !requestedByOwner {
-		err = apperrors.ErrForbidden("couldn't check habit for another user")
+		err = apperrors.NewForbiddenErr("couldn't check habit for another user")
 		return
 	}
 
@@ -556,7 +556,7 @@ func (s Server) getUserHabitCompletedChecks(w http.ResponseWriter, r *http.Reque
 
 	userTgID, ok := r.Context().Value(ctxKeyUserTgID{}).(int64)
 	if !ok {
-		err = apperrors.ErrUnauthorized("couldn't identify user")
+		err = apperrors.NewUnauthorizedErr("couldn't identify user")
 		return
 	}
 
@@ -573,12 +573,12 @@ func (s Server) getUserHabitCompletedChecks(w http.ResponseWriter, r *http.Reque
 	}
 
 	var user *usrPkg.User
-	if user, err = s.Res.UsrRepo.GetByTgID(userTgID); err != nil {
+	if user, err = s.Res.UsrRepo.GetByID(userID); err != nil {
 		return
 	}
 
 	var (
-		requestedByOwner bool = userID == user.ID
+		requestedByOwner bool = user.TgID == userTgID
 		habit            *hPkg.Habit
 	)
 	if habit, err = s.Res.HabitRepo.GetByIDAndOwnerID(habitID, userID, requestedByOwner); err != nil {
@@ -652,7 +652,7 @@ func getHabitStatusFromURLQuery(r *http.Request) (hPkg.HabitStatus, error) {
 		ok     bool
 	)
 	if status, ok = hPkg.HabitStatusMapping[statusStr]; !ok {
-		return hPkg.Any, apperrors.ErrBadRequest("invalid habit status \"" + statusStr + "\" in URL query")
+		return hPkg.Any, apperrors.NewBadRequestErr("invalid habit status \"" + statusStr + "\" in URL query")
 	}
 
 	return status, nil

@@ -2,6 +2,7 @@ package http
 
 import (
 	"encoding/json"
+	"errors"
 	"log/slog"
 	"net/http"
 
@@ -9,24 +10,24 @@ import (
 )
 
 type ErrorResponse struct {
-	Errors []apperrors.Error `json:"errors"`
+	Errors []*apperrors.Error `json:"errors"`
 }
 
 func writeError(w http.ResponseWriter, err error) {
-	apperror, ok := err.(apperrors.Error)
-	if !ok {
-		apperror = apperrors.ErrInternal(err.Error())
+	var apperror *apperrors.Error
+	if !errors.As(err, &apperror) {
+		apperror = apperrors.NewInternalErr(err.Error())
 	}
 
 	w.WriteHeader(apperror.HTTPCode)
-	response := ErrorResponse{Errors: []apperrors.Error{apperror}}
+	response := ErrorResponse{Errors: []*apperrors.Error{apperror}}
 	json.NewEncoder(w).Encode(response)
 }
 
 func processError(w http.ResponseWriter, logger *slog.Logger, err error) {
-	apperror, ok := err.(apperrors.Error)
-	if !ok {
-		apperror = apperrors.ErrInternal(err.Error())
+	var apperror *apperrors.Error
+	if !errors.As(err, &apperror) {
+		apperror = apperrors.NewInternalErr(err.Error())
 	}
 
 	logger.Error("error occurred", "error", err)

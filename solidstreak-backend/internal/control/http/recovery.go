@@ -32,7 +32,7 @@ func (s Server) Recovery() func(http.Handler) http.Handler {
 			defer func() {
 				if r := recover(); r != nil {
 					logger.Error("panic recovered", "panic", r)
-					writeError(w, apperrors.ErrInternal(r.(string)))
+					writeError(w, apperrors.NewInternalErr(r.(string)))
 				}
 			}()
 

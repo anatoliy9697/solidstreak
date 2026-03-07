@@ -121,7 +121,7 @@ func (r pgRepo) GetByID(ID int64) (*usrPkg.User, error) {
 	)
 	if err != nil {
 		if err == pgx.ErrNoRows {
-			return nil, apperrors.ErrNotFound("couldn't find user")
+			return nil, apperrors.NewNotFoundErr("couldn't find user")
 		}
 		return nil, err
 	}
@@ -153,7 +153,7 @@ func (r pgRepo) GetByTgID(tgID int64) (*usrPkg.User, error) {
 	)
 	if err != nil {
 		if err == pgx.ErrNoRows {
-			return nil, apperrors.ErrNotFound("couldn't find user")
+			return nil, apperrors.NewNotFoundErr("couldn't find user")
 		}
 		return nil, err
 	}

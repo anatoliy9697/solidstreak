@@ -1,4 +1,4 @@
-package tgbot
+package usecases
 
 import (
 	tgbotapi "github.com/mymmrac/telego"

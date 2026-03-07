@@ -8,7 +8,7 @@ import (
 	"github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/common"
 	tcPkg "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/tgchat"
 	usrPkg "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/user"
-	usecases "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/usecases/tgbot"
+	usecases "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/usecases"
 )
 
 type EventHandler struct {

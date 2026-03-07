@@ -47,7 +47,7 @@ func (r pgRepo) GetActiveByUserID(userID int64) (*subPkg.Subscription, error) {
 	)
 	if err != nil {
 		if err == pgx.ErrNoRows {
-			return nil, apperrors.ErrNotFound("couldn't find user subscription")
+			return nil, apperrors.NewNotFoundErr("couldn't find user subscription")
 		}
 		return nil, err
 	}

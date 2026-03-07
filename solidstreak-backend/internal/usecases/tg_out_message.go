@@ -1,4 +1,4 @@
-package tgbot
+package usecases
 
 import (
 	"context"

@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"log"
 	"log/slog"
 	"os"
@@ -17,6 +18,8 @@ import (
 	"github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/control/http"
 	"github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/control/tgbot"
 	hRepo "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/habit/repo"
+	subPkg "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/subscription"
+	subRepo "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/subscription/repo"
 	tcRepo "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/tgchat/repo"
 	usrRepo "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/user/repo"
 )
@@ -27,6 +30,9 @@ func main() {
 	viper.SetConfigFile("./pkg/config/config.yaml")
 	if err = viper.ReadInConfig(); err != nil {
 		log.Fatal("error reading config file: " + err.Error())
+	}
+	if err = validateConfigParams(); err != nil {
+		log.Fatal("invalid config parameter: " + err.Error())
 	}
 
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.Level(viper.GetInt("log_level"))}))
@@ -43,6 +49,9 @@ func main() {
 	err = godotenv.Load("./pkg/config/.env")
 	if err != nil {
 		return
+	}
+	if err = validateEnvParams(); err != nil {
+		log.Fatal("invalid env parameter: " + err.Error())
 	}
 
 	// Creating main context that will be cancelled on SIGINT or SIGTERM
@@ -66,6 +75,13 @@ func main() {
 		Logger:    logger,
 		TgBotAPI:  tgBotAPI,
 		UsrRepo:   usrRepo.Init(mainCtx, pgPool),
+		SubRepo: subRepo.Init(mainCtx, pgPool, subPkg.GetSubscriptionPlans(
+			viper.GetInt("basic_sub_plan_active_habits_limit"),
+			viper.GetInt("premium_sub_plan_active_habits_limit"),
+			viper.GetInt("premium_sub_plan_price_stars_per_month"),
+			viper.GetInt("premium_sub_plan_price_stars_per_year"),
+			viper.GetInt("premium_sub_plan_price_stars_forever"),
+		)),
 		TCRepo:    tcRepo.Init(mainCtx, pgPool),
 		HabitRepo: hRepo.Init(mainCtx, pgPool),
 	}
@@ -98,4 +114,47 @@ func main() {
 	<-goroutineDoneCh
 
 	logger.Info("solid streak stopped")
+}
+
+func validateConfigParams() error {
+	if viper.GetInt("max_event_handlers") <= 0 {
+		return errors.New("max_event_handlers should be greater than 0")
+	}
+	if viper.GetInt("basic_sub_plan_active_habits_limit") <= 0 {
+		return errors.New("basic_sub_plan_active_habits_limit should be greater than 0")
+	}
+	if viper.GetInt("premium_sub_plan_active_habits_limit") <= 0 {
+		return errors.New("premium_sub_plan_active_habits_limit should be greater than 0")
+	}
+	if viper.GetInt("premium_sub_plan_price_stars_per_month") <= 0 {
+		return errors.New("premium_sub_plan_price_stars_per_month should be greater than 0")
+	}
+	if viper.GetInt("premium_sub_plan_price_stars_per_year") <= 0 {
+		return errors.New("premium_sub_plan_price_stars_per_year should be greater than 0")
+	}
+	if viper.GetInt("premium_sub_plan_price_stars_forever") <= 0 {
+		return errors.New("premium_sub_plan_price_stars_forever should be greater than 0")
+	}
+
+	return nil
+}
+
+func validateEnvParams() error {
+	if os.Getenv("POSTGRES_CONN_STRING") == "" {
+		return errors.New("POSTGRES_CONN_STRING env variable is not set")
+	}
+	if os.Getenv("TG_BOT_API_TOKEN") == "" {
+		return errors.New("TG_BOT_API_TOKEN env variable is not set")
+	}
+	if os.Getenv("WEB_APP_URL") == "" {
+		return errors.New("WEB_APP_URL env variable is not set")
+	}
+	if os.Getenv("ENV") != "prod" && os.Getenv("ENV") != "dev" {
+		return errors.New("ENV env variable should be either 'prod' or 'dev'")
+	}
+	if os.Getenv("SERVER_ADDR") == "" {
+		return errors.New("SERVER_ADDR env variable is not set")
+	}
+
+	return nil
 }

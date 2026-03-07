@@ -1,17 +1,22 @@
 package user
 
-import "time"
+import (
+	"time"
+
+	subPkg "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/subscription"
+)
 
 type User struct {
-	ID          int64     `json:"id"`
-	TgID        int64     `json:"tgId"`
-	TgUsername  string    `json:"tgUsername"`
-	TgFirstName string    `json:"tgFirstName"`
-	TgLastName  string    `json:"tgLastName"`
-	TgLangCode  string    `json:"tgLangCode"`
-	LangCode    string    `json:"langCode"`
-	TgIsBot     bool      `json:"tgIsBot"`
-	CreatedAt   time.Time `json:"createdAt"`
+	ID           int64                `json:"id"`
+	TgID         int64                `json:"tgId"`
+	TgUsername   string               `json:"tgUsername"`
+	TgFirstName  string               `json:"tgFirstName"`
+	TgLastName   string               `json:"tgLastName"`
+	TgLangCode   string               `json:"tgLangCode"`
+	LangCode     string               `json:"langCode"`
+	TgIsBot      bool                 `json:"tgIsBot"`
+	CreatedAt    time.Time            `json:"createdAt"`
+	Subscription *subPkg.Subscription `json:"subscription,omitempty"`
 }
 
 func NewUser(tgID int64, tgUsername, tgFirstName, tgLastName, tgLangCode, langCode string, tgIsBot bool) *User {

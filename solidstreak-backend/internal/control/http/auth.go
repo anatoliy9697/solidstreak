@@ -32,13 +32,13 @@ func (s Server) ValidateTelegramInitData() func(http.Handler) http.Handler {
 
 			initData := r.Header.Get("X-Telegram-InitData")
 			if initData == "" {
-				processError(w, logger, apperrors.ErrUnauthorized("missing telegram initData"))
+				processError(w, logger, apperrors.NewUnauthorizedErr("missing telegram initData"))
 				return
 			}
 
 			var userTgID int64
 			if userTgID, err = validateAndGetUserTgID(initData, s.Res.TgBotAPI.Token()); err != nil {
-				processError(w, logger, apperrors.ErrUnauthorized(err.Error()))
+				processError(w, logger, apperrors.NewUnauthorizedErr(err.Error()))
 				return
 			}
 

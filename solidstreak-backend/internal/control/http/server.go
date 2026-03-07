@@ -105,14 +105,14 @@ func getInt64FromURLParams(r *http.Request, key string, required bool) (int64, e
 	strValue := chi.URLParam(r, key)
 	if strValue == "" {
 		if required {
-			return 0, apperrors.ErrBadRequest("missing \"" + key + "\" in URL params")
+			return 0, apperrors.NewBadRequestErr("missing \"" + key + "\" in URL params")
 		}
 		return 0, nil
 	}
 
 	value, err := strconv.ParseInt(strValue, 10, 64)
 	if err != nil {
-		return 0, apperrors.ErrBadRequest("invalid \"" + key + "\" in URL params")
+		return 0, apperrors.NewBadRequestErr("invalid \"" + key + "\" in URL params")
 	}
 
 	return value, nil
@@ -123,14 +123,14 @@ func getInt64FromURLParams(r *http.Request, key string, required bool) (int64, e
 
 // 	if strValue == "" {
 // 		if required {
-// 			return 0, apperrors.ErrBadRequest("missing \"" + key + "\" in URL query")
+// 			return 0, apperrors.NewBadRequestErr("missing \"" + key + "\" in URL query")
 // 		}
 // 		return 0, nil
 // 	}
 
 // 	value, err := strconv.ParseInt(strValue, 10, 64)
 // 	if err != nil {
-// 		return 0, apperrors.ErrBadRequest("invalid \"" + key + "\" in URL query")
+// 		return 0, apperrors.NewBadRequestErr("invalid \"" + key + "\" in URL query")
 // 	}
 
 // 	return value, nil
@@ -141,14 +141,14 @@ func getDateFromURLQuery(r *http.Request, key string, required bool) (*date.Date
 
 	if dateStr == "" {
 		if required {
-			return nil, apperrors.ErrBadRequest("missing \"" + key + "\" date in URL query")
+			return nil, apperrors.NewBadRequestErr("missing \"" + key + "\" date in URL query")
 		}
 		return nil, nil
 	}
 
 	d, err := date.Parse(dateStr)
 	if err != nil {
-		return nil, apperrors.ErrBadRequest("invalid \"" + key + "\" date in URL query")
+		return nil, apperrors.NewBadRequestErr("invalid \"" + key + "\" date in URL query")
 	}
 
 	return &d, nil
@@ -158,14 +158,14 @@ func getBoolFromURLQuery(r *http.Request, key string, required bool) (bool, erro
 	strValue := r.URL.Query().Get(key)
 	if strValue == "" {
 		if required {
-			return false, apperrors.ErrBadRequest("missing \"" + key + "\" in URL query")
+			return false, apperrors.NewBadRequestErr("missing \"" + key + "\" in URL query")
 		}
 		return false, nil
 	}
 
 	value, err := strconv.ParseBool(strValue)
 	if err != nil {
-		return false, apperrors.ErrBadRequest("invalid \"" + key + "\" in URL query")
+		return false, apperrors.NewBadRequestErr("invalid \"" + key + "\" in URL query")
 	}
 
 	return value, nil

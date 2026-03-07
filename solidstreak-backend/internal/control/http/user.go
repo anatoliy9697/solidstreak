@@ -10,6 +10,7 @@ import (
 	"github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/common"
 	tcPkg "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/tgchat"
 	usrPkg "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/user"
+	"github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/usecases"
 )
 
 type InitDataUser struct {
@@ -80,24 +81,24 @@ func (s Server) postUserInfo(w http.ResponseWriter, r *http.Request) {
 
 	decoder := json.NewDecoder(r.Body)
 	if err = decoder.Decode(&req); err != nil {
-		err = apperrors.ErrBadRequest("invalid request payload")
+		err = apperrors.NewBadRequestErr("invalid request payload")
 		return
 	}
 
 	if req.Data == nil {
-		err = apperrors.ErrBadRequest("request data is required")
+		err = apperrors.NewBadRequestErr("request data is required")
 		return
 	}
 
 	inputUser := req.Data.User
 	if inputUser == nil {
-		err = apperrors.ErrBadRequest("user data is required")
+		err = apperrors.NewBadRequestErr("user data is required")
 		return
 	}
 
 	inputTgChat := req.Data.TgChat
 	if inputTgChat == nil {
-		err = apperrors.ErrBadRequest("chat data is required")
+		err = apperrors.NewBadRequestErr("chat data is required")
 		return
 	}
 
@@ -116,12 +117,12 @@ func (s Server) postUserInfo(w http.ResponseWriter, r *http.Request) {
 	if initDataUser.TgID != inputUser.TgID || initDataUser.TgUsername != inputUser.TgUsername ||
 		initDataUser.TgFirstName != inputUser.TgFirstName || initDataUser.TgLastName != inputUser.TgLastName ||
 		initDataUser.TgLangCode != inputUser.TgLangCode || initDataUser.TgIsBot != inputUser.TgIsBot {
-		err = apperrors.ErrBadRequest("user data does not match init data")
+		err = apperrors.NewBadRequestErr("user data does not match init data")
 		return
 	}
 
 	if initDataTgChat.TgID != inputTgChat.TgID {
-		err = apperrors.ErrBadRequest("telegram chat data does not match init data")
+		err = apperrors.NewBadRequestErr("telegram chat data does not match init data")
 		return
 	}
 
@@ -145,6 +146,10 @@ func (s Server) postUserInfo(w http.ResponseWriter, r *http.Request) {
 		err = s.Res.UsrRepo.Create(user)
 	}
 	if err != nil {
+		return
+	}
+
+	if user.Subscription, err = usecases.GetUserSubscription(s.Res, user); err != nil {
 		return
 	}
 
@@ -186,7 +191,7 @@ func (s Server) getUser(w http.ResponseWriter, r *http.Request) {
 
 	userTgID, ok := r.Context().Value(ctxKeyUserTgID{}).(int64)
 	if !ok {
-		err = apperrors.ErrUnauthorized("couldn't identify user")
+		err = apperrors.NewUnauthorizedErr("couldn't identify user")
 		return
 	}
 
@@ -202,7 +207,11 @@ func (s Server) getUser(w http.ResponseWriter, r *http.Request) {
 
 	// Временное ограничение. Как появится возможность просмтатривать карточки чужих юзеров, убрать это условие
 	if user.TgID != userTgID {
-		err = apperrors.ErrUnauthorized("couldn't get user info for another user")
+		err = apperrors.NewUnauthorizedErr("couldn't get user info for another user")
+		return
+	}
+
+	if user.Subscription, err = usecases.GetUserSubscription(s.Res, user); err != nil {
 		return
 	}
 
@@ -258,7 +267,7 @@ func (s Server) patchUser(w http.ResponseWriter, r *http.Request) {
 
 	userTgID, ok := r.Context().Value(ctxKeyUserTgID{}).(int64)
 	if !ok {
-		err = apperrors.ErrUnauthorized("couldn't identify user")
+		err = apperrors.NewUnauthorizedErr("couldn't identify user")
 		return
 	}
 
@@ -274,7 +283,11 @@ func (s Server) patchUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if user.TgID != userTgID {
-		err = apperrors.ErrUnauthorized("couldn't update info for another user")
+		err = apperrors.NewUnauthorizedErr("couldn't update info for another user")
+		return
+	}
+
+	if user.Subscription, err = usecases.GetUserSubscription(s.Res, user); err != nil {
 		return
 	}
 
@@ -282,18 +295,18 @@ func (s Server) patchUser(w http.ResponseWriter, r *http.Request) {
 
 	decoder := json.NewDecoder(r.Body)
 	if err = decoder.Decode(&req); err != nil {
-		err = apperrors.ErrBadRequest("invalid request payload")
+		err = apperrors.NewBadRequestErr("invalid request payload")
 		return
 	}
 
 	if req.Data == nil {
-		err = apperrors.ErrBadRequest("request data is required")
+		err = apperrors.NewBadRequestErr("request data is required")
 		return
 	}
 
 	if req.Data.LangCode != nil {
 		if !common.IsSupportedLang(*req.Data.LangCode) {
-			err = apperrors.ErrBadRequest("unsupported language")
+			err = apperrors.NewBadRequestErr("unsupported language")
 			return
 		}
 
