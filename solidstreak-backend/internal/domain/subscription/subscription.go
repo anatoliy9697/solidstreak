@@ -5,15 +5,15 @@ import (
 )
 
 type Pricing struct {
-	TgStarsPerMonth int `json:"tgStarsPerMonth"`
-	TgStarsPerYear  int `json:"tgStarsPerYear"`
-	TgStarsForever  int `json:"tgStarsForever"`
+	TgStarsPerMonth int64 `json:"tgStarsPerMonth"`
+	TgStarsPerYear  int64 `json:"tgStarsPerYear"`
+	TgStarsForever  int64 `json:"tgStarsForever"`
 }
 
 type Plan struct {
 	Code              string  `json:"code"`
 	Price             Pricing `json:"price"`
-	ActiveHabitsLimit int     `json:"activeHabitsLimit"`
+	ActiveHabitsLimit int64   `json:"activeHabitsLimit"`
 	ShowAds           bool    `json:"showAds"`
 }
 
@@ -28,11 +28,11 @@ type Subscription struct {
 }
 
 func GetSubscriptionPlans(
-	basicPlanActiveHabitsLimit int,
-	premiumPlanActiveHabitsLimit int,
-	premiumPlanPriceStarsPerMonth int,
-	premiumPlanPriceStarsPerYear int,
-	premiumPlanPriceStarsForever int,
+	basicPlanActiveHabitsLimit int64,
+	premiumPlanActiveHabitsLimit int64,
+	premiumPlanPriceStarsPerMonth int64,
+	premiumPlanPriceStarsPerYear int64,
+	premiumPlanPriceStarsForever int64,
 ) map[string]*Plan {
 	basicPlan := &Plan{
 		Code: "basic",

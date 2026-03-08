@@ -24,7 +24,7 @@ func (r pgRepo) GetActiveByUserID(userID int64) (*subPkg.Subscription, error) {
 	s := &subPkg.Subscription{}
 
 	sql := `
-		SELECT id, active, user_id, plan_code, start_dt, finish_dt, created_at
+		SELECT id, active, plan_code, start_dt, finish_dt, created_at
 		FROM user_subscriptions 
 		WHERE 
 			active IS TRUE

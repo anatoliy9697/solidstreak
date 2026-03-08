@@ -10,6 +10,8 @@ import (
 
 	hPkg "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/habit"
 	usrPkg "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/user"
+
+	"github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/usecases"
 )
 
 type GetHabitResponse struct {
@@ -121,6 +123,20 @@ func (s Server) postHabit(w http.ResponseWriter, r *http.Request) {
 
 	if user.TgID != userTgID {
 		err = apperrors.NewForbiddenErr("couldn't create habit for another user")
+		return
+	}
+
+	if user.Subscription, err = usecases.GetUserSubscription(s.Res, user); err != nil {
+		return
+	}
+
+	activeHabitsCount, err := s.Res.HabitRepo.GetUserActiveHabitsCount(user.ID)
+	if err != nil {
+		return
+	}
+
+	if activeHabitsCount >= user.Subscription.Plan.ActiveHabitsLimit {
+		err = apperrors.NewForbiddenErr("active habits limit reached for user subscription plan")
 		return
 	}
 
