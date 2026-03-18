@@ -1,8 +1,8 @@
 log_level:             -4
 max_event_handlers:    10
 
-basic_sub_plan_active_habits_limit:     5
-premium_sub_plan_active_habits_limit:   100
+basic_sub_plan_habits_limit:     5
+premium_sub_plan_habits_limit:   100
 premium_sub_plan_price_stars_per_month: 100
 premium_sub_plan_price_stars_per_year:  1000
 premium_sub_plan_price_stars_forever:   2500

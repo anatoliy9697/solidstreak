@@ -139,6 +139,16 @@ function getCalendarHeatmapColorRange(
 }
 
 const openHabitDialog = (habitId?: number): void => {
+  if (!habitId && habitStore.habitsCount >= userStore.habitsLimit) {
+    // TODO: сделать нормально
+    toast.add({
+      severity: 'warn',
+      summary: 'Warning',
+      detail: `You have reached the limit of ${userStore.habitsLimit} habits`,
+      life: 3000,
+    })
+    return
+  }
   editingHabitId.value = habitId || null
   isHabitDialogVisible.value = true
 }

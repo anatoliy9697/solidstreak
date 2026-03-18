@@ -76,8 +76,8 @@ func main() {
 		TgBotAPI:  tgBotAPI,
 		UsrRepo:   usrRepo.Init(mainCtx, pgPool),
 		SubRepo: subRepo.Init(mainCtx, pgPool, subPkg.GetSubscriptionPlans(
-			viper.GetInt64("basic_sub_plan_active_habits_limit"),
-			viper.GetInt64("premium_sub_plan_active_habits_limit"),
+			viper.GetInt64("basic_sub_plan_habits_limit"),
+			viper.GetInt64("premium_sub_plan_habits_limit"),
 			viper.GetInt64("premium_sub_plan_price_stars_per_month"),
 			viper.GetInt64("premium_sub_plan_price_stars_per_year"),
 			viper.GetInt64("premium_sub_plan_price_stars_forever"),
@@ -120,11 +120,11 @@ func validateConfigParams() error {
 	if viper.GetInt("max_event_handlers") <= 0 {
 		return errors.New("max_event_handlers should be greater than 0")
 	}
-	if viper.GetInt("basic_sub_plan_active_habits_limit") <= 0 {
-		return errors.New("basic_sub_plan_active_habits_limit should be greater than 0")
+	if viper.GetInt("basic_sub_plan_habits_limit") <= 0 {
+		return errors.New("basic_sub_plan_habits_limit should be greater than 0")
 	}
-	if viper.GetInt("premium_sub_plan_active_habits_limit") <= 0 {
-		return errors.New("premium_sub_plan_active_habits_limit should be greater than 0")
+	if viper.GetInt("premium_sub_plan_habits_limit") <= 0 {
+		return errors.New("premium_sub_plan_habits_limit should be greater than 0")
 	}
 	if viper.GetInt("premium_sub_plan_price_stars_per_month") <= 0 {
 		return errors.New("premium_sub_plan_price_stars_per_month should be greater than 0")

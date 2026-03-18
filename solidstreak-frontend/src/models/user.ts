@@ -1,3 +1,5 @@
+import type { Subscription } from '@/models/subscription'
+
 export interface User {
   id?: number
   tgId: number
@@ -7,4 +9,5 @@ export interface User {
   tgLangCode?: string
   langCode?: string
   tgIsBot?: boolean
+  subscription?: Subscription
 }

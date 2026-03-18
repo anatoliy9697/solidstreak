@@ -152,6 +152,10 @@ export const useHabitStore = defineStore('habit', {
       return state.habits.filter((habit) => habit.archived)
     },
 
+    habitsCount(state): number {
+      return state.habits.length
+    },
+
     activeHabitsCount(state): number {
       return state.habits.filter((habit) => !habit.archived).length
     },
