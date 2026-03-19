@@ -1,5 +1,6 @@
 import axios from 'axios'
 
+import type { Plan } from '@/models/subscription'
 import type { User } from '@/models/user'
 import type { Habit, HabitCheck } from '@/models/habit'
 
@@ -49,28 +50,34 @@ type ApiRequest =
   | DeleteHabitRequest
   | PostHabitCheckRequest
 
+export interface SubscriptionPlansResponse {
+  data?: Plan[]
+  errors?: Error[]
+}
+
 export interface UserResponse {
-  data: User
+  data?: User
   errors?: Error[]
 }
 export interface PutHabitResponse {
-  data: Habit
+  data?: Habit
   errors?: Error[]
 }
 export interface DeleteHabitResponse {
-  data: Habit
+  data?: Habit
   errors?: Error[]
 }
 export interface GetHabitsResponse {
-  data: Habit[]
+  data?: Habit[]
   errors?: Error[]
 }
 export interface PostHabitCheckResponse {
-  data: HabitCheck
+  data?: HabitCheck
   errors?: Error[]
 }
 
 type ApiResponse =
+  | SubscriptionPlansResponse
   | UserResponse
   | PutHabitResponse
   | DeleteHabitResponse
@@ -137,6 +144,10 @@ export class ApiFetcher {
   constructor(initData: string, username?: string) {
     this.initData = initData
     this.username = username
+  }
+
+  async fetchSubscriptionPlans(): Promise<RequestResult> {
+    return await performRequest('get', `/api/v1/subscription-plans`, this.initData)
   }
 
   async upsertUserInfo(user: User, tgChat: { tgId: number }): Promise<RequestResult> {

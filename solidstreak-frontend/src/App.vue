@@ -10,6 +10,7 @@ import { getHeatmapLocale } from '@/i18n'
 import { type Theme } from '@/models/theme'
 import { dateToLocalString } from '@/utils/date'
 import { ApiFetcher } from '@/api/request'
+import { useSubscriptionStore } from '@/stores/subscription'
 import { useUserStore } from '@/stores/user'
 import { useHabitStore } from '@/stores/habit'
 import { type Color, GRAY, ORANGE, generateColorGradient } from '@/models/color'
@@ -26,9 +27,9 @@ import HabitDialog from '@/components/habit-dialog/HabitDialog.vue'
 const { t, locale } = useI18n()
 const primeVue = usePrimeVue()
 const toast = useToast()
+const subscriptionStore = useSubscriptionStore()
 const userStore = useUserStore()
 const habitStore = useHabitStore()
-
 const init = ref<boolean>(true)
 const initErrorMsg = ref<string | null>(null)
 const view = ref<'active' | 'archived'>('active')
@@ -139,16 +140,6 @@ function getCalendarHeatmapColorRange(
 }
 
 const openHabitDialog = (habitId?: number): void => {
-  if (!habitId && habitStore.habitsCount >= userStore.habitsLimit) {
-    // TODO: сделать нормально
-    toast.add({
-      severity: 'warn',
-      summary: 'Warning',
-      detail: `You have reached the limit of ${userStore.habitsLimit} habits`,
-      life: 3000,
-    })
-    return
-  }
   editingHabitId.value = habitId || null
   isHabitDialogVisible.value = true
 }
@@ -177,7 +168,14 @@ onMounted(async (): Promise<void> => {
 
   const apiFetcher = new ApiFetcher(initData, user.username)
 
-  userStore.init(apiFetcher)
+  subscriptionStore.init(apiFetcher)
+  const subscriptionPlansResult = await subscriptionStore.fetchSubscriptionPlans()
+  if (!subscriptionPlansResult.success || !subscriptionStore.planByCode('basic')) {
+    finishInitialization(t('app.initFailed', 'Initialization failed'))
+    return
+  }
+
+  userStore.init(apiFetcher, subscriptionStore.default)
   const upsertUserInfoResult = await userStore.upsertUserInfo(user, chat || { id: user.id }) // Use personal chat with user if no other chat info
   if (!upsertUserInfoResult.success) {
     finishInitialization(t('app.initFailed', 'Initialization failed'))

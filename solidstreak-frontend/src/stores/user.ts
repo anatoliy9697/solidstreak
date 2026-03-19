@@ -3,7 +3,7 @@ import { defineStore } from 'pinia'
 import { toLocalLang } from '@/i18n'
 import { ApiFetcher, type RequestResult } from '@/api/request'
 import type { User } from '@/models/user'
-import { type Subscription, getDefaultSubscription } from '@/models/subscription'
+import type { Subscription } from '@/models/subscription'
 import { type Theme, getDefaultTheme, toLocalTheme } from '@/models/theme'
 
 export const useUserStore = defineStore('user', {
@@ -17,13 +17,14 @@ export const useUserStore = defineStore('user', {
     tgLangCode: '' as string,
     langCode: toLocalLang(localStorage.getItem('lang')) as string,
     avatarUrl: '' as string,
-    _subscription: getDefaultSubscription() as Subscription,
+    _subscription: undefined as Subscription | undefined,
     _theme: toLocalTheme(localStorage.getItem('theme') || getDefaultTheme()) as Theme,
   }),
 
   actions: {
-    init(apiFetcher: ApiFetcher): void {
+    init(apiFetcher: ApiFetcher, defaultSubscription: Subscription): void {
       this.apiFetcher = apiFetcher
+      this._subscription = defaultSubscription
     },
 
     setAvatarUrl(avatarUrl: string): void {
@@ -56,7 +57,7 @@ export const useUserStore = defineStore('user', {
           user.langCode || localStorage.getItem('lang') || user.tgLangCode,
         )
         localStorage.setItem('lang', this.langCode)
-        this._subscription = user.subscription || getDefaultSubscription()
+        this._subscription = user.subscription || this._subscription
       }
 
       return result
@@ -96,8 +97,8 @@ export const useUserStore = defineStore('user', {
       return toLocalTheme(state._theme || localStorage.getItem('theme') || getDefaultTheme())
     },
 
-    habitsLimit: (state): number => {
-      return state._subscription.plan.habitsLimit
+    habitsLimit: (state): number  => {
+      return state._subscription!.plan.habitsLimit
     },
   },
 })
