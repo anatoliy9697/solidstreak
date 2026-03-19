@@ -36,6 +36,8 @@ func (s Server) Run(mainCtx context.Context, doneCh chan struct{}) {
 	api.Use(s.Logger())
 	api.Use(s.ValidateTelegramInitData())
 
+	api.Get("/subscription-plans", s.getSubscriptionPlans)
+
 	api.Post("/user-info/upsert", s.postUserInfo)
 	api.Get("/users/{userId}", s.getUser)
 	api.Patch("/users/{userID}", s.patchUser)

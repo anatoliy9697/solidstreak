@@ -20,3 +20,13 @@ func (r pgRepo) GetPlanByCode(planCode string) (*subPkg.Plan, error) {
 
 	return plan, nil
 }
+
+func (r pgRepo) GetPlans() ([]*subPkg.Plan, error) {
+	plans := make([]*subPkg.Plan, 0, len(r.subPlans))
+
+	for _, plan := range r.subPlans {
+		plans = append(plans, plan)
+	}
+
+	return plans, nil
+}
