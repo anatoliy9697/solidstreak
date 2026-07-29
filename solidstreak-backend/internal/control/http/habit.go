@@ -130,7 +130,7 @@ func (s Server) postHabit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	activeHabitsCount, err := s.Res.HabitRepo.GetUserActiveHabitsCount(user.ID)
+	activeHabitsCount, err := s.Res.HabitRepo.GetUserActiveNotArchivedHabitsCount(user.ID)
 	if err != nil {
 		return
 	}
@@ -227,9 +227,27 @@ func (s Server) putHabit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	habit, err := s.Res.HabitRepo.GetByIDAndOwnerID(habitID, userID, requestedByOwner)
+	var habit *hPkg.Habit
+	habit, err = s.Res.HabitRepo.GetByIDAndOwnerID(habitID, userID, requestedByOwner)
 	if err != nil {
 		return
+	}
+
+	if habit.Archived == true && *req.Data.Archived == false {
+		if user.Subscription, err = usecases.GetUserSubscription(s.Res, user); err != nil {
+			return
+		}
+
+		var activeHabitsCount int64
+		activeHabitsCount, err = s.Res.HabitRepo.GetUserActiveNotArchivedHabitsCount(user.ID)
+		if err != nil {
+			return
+		}
+
+		if activeHabitsCount >= user.Subscription.Plan.HabitsLimit {
+			err = apperrors.NewForbiddenErr("active habits limit reached for user subscription plan")
+			return
+		}
 	}
 
 	habit.Archived = *req.Data.Archived

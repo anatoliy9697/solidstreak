@@ -252,7 +252,7 @@ func (r pgRepo) GetUserHabitsCompletedChecks(userID int64, habitIDs []int64, fro
 	return checks, nil
 }
 
-func (r pgRepo) GetUserActiveHabitsCount(userID int64) (int64, error) {
+func (r pgRepo) GetUserActiveNotArchivedHabitsCount(userID int64) (int64, error) {
 	sql := `
 		SELECT COUNT(*)
 		FROM user_habits uh
@@ -260,6 +260,7 @@ func (r pgRepo) GetUserActiveHabitsCount(userID int64) (int64, error) {
 		WHERE uh.user_id = $1
 			AND uh.active IS TRUE
 			AND h.active IS TRUE
+			AND h.archived IS FALSE
 	`
 	var count int64
 	err := r.p.QueryRow(
