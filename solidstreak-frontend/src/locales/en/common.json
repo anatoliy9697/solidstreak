@@ -75,5 +75,8 @@
     "upperLess": "Less",
     "less": "less",
     "upperMore": "More",
-    "more": "more"
+    "more": "more",
+    "basicSubscriptionUpper": "Basic subscription",
+    "premiumSubscriptionUpper": "Premium subscription",
+    "until": "until"
 }

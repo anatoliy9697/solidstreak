@@ -1,5 +1,9 @@
 {
     "darkTheme": "Переключить на темную тему",
     "lightTheme": "Переключить на светлую тему",
-    "selectLang": "Выбрать язык"
+    "selectLang": "Выбрать язык",
+    "buyPremium": "купить премиум",
+    "renew": "продлить",
+    "buyPremiumSubscription": "Купить премиум подписку",
+    "renewPremiumSubscription": "Продлить премиум подписку"
 }

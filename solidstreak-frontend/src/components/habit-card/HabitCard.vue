@@ -7,7 +7,7 @@ import { SquarePen, Package, PackageOpen, Trash2 } from 'lucide-vue-next'
 
 import { getHeatmapLocale } from '@/i18n'
 import { type Theme, toLocalTheme } from '@/models/theme'
-import { dateToLocalString } from '@/utils/date'
+import { dateToISO8601String } from '@/utils/date'
 import { useUserStore } from '@/stores/user'
 import { useHabitStore } from '@/stores/habit'
 import { type Color, COLORS, generateColorGradient, GRAY, GREEN } from '@/models/color'
@@ -45,18 +45,18 @@ const habitStore = useHabitStore()
 // ─────────────────────────────────────────────
 // Constants & reactive state
 // ─────────────────────────────────────────────
-const selectedDateStr = ref<string>(dateToLocalString(props.selectedDate))
+const selectedDateStr = ref<string>(dateToISO8601String(props.selectedDate))
 const isCheckButtonHovered = ref<boolean>(false)
 const selectedDateChecked = ref<boolean>(
   props.habit.checks?.some(
-    (check) => check.checkDate === dateToLocalString(props.selectedDate) && check.completed,
+    (check) => check.checkDate === dateToISO8601String(props.selectedDate) && check.completed,
   ) || false,
 )
 
 watch(
   () => props.selectedDate,
   (newDate) => {
-    selectedDateStr.value = dateToLocalString(newDate)
+    selectedDateStr.value = dateToISO8601String(newDate)
     selectedDateChecked.value =
       props.habit.checks?.some(
         (check) => check.checkDate === selectedDateStr.value && check.completed,
@@ -279,7 +279,7 @@ function getCheckButtonStyleObj(
       class="calendar-heatmap"
       v-if="expanded && !habit.archived"
       :values="checksArray"
-      :endDate="dateToLocalString(new Date())"
+      :endDate="dateToISO8601String(new Date())"
       :max="1"
       :rangeColor="getCalendarHeatmapColorRange(color, toLocalTheme(props.theme))"
       :tooltip="false"

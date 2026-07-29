@@ -1,5 +1,9 @@
 {
     "darkTheme": "Turn on dark theme",
     "lightTheme": "Turn on light theme",
-    "selectLang": "Select language"
+    "selectLang": "Select language",
+    "buyPremium": "buy premium",
+    "renew": "renew",
+    "buyPremiumSubscription": "Buy premium subscription",
+    "renewPremiumSubscription": "Renew premium subscription"
 }

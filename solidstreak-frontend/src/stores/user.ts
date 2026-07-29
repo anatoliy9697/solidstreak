@@ -58,6 +58,8 @@ export const useUserStore = defineStore('user', {
         )
         localStorage.setItem('lang', this.langCode)
         this._subscription = user.subscription || this._subscription
+        if (this._subscription!.finishDt)
+          this._subscription!.finishDt = new Date(this._subscription!.finishDt) // Преобразуем в Date, т.к. по факту из API оно приходит в строкой
       }
 
       return result
@@ -97,7 +99,11 @@ export const useUserStore = defineStore('user', {
       return toLocalTheme(state._theme || localStorage.getItem('theme') || getDefaultTheme())
     },
 
-    habitsLimit: (state): number  => {
+    subscription: (state): Subscription => {
+      return state._subscription!
+    },
+
+    habitsLimit: (state): number => {
       return state._subscription!.plan.habitsLimit
     },
   },

@@ -31,9 +31,11 @@ export const useSubscriptionStore = defineStore('subscription', {
   },
 
   getters: {
-    planByCode: (state) => (code: string): Plan | undefined => {
-      return state.subPlansMap.get(code)
-    },
+    planByCode:
+      (state) =>
+      (code: string): Plan | undefined => {
+        return state.subPlansMap.get(code)
+      },
 
     default(state): Subscription {
       return {

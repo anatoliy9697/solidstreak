@@ -1,8 +1,16 @@
-export function dateToLocalString(date: Date): string {
+export function dateToISO8601String(date: Date): string {
   const yyyy = date.getFullYear()
   const mm = String(date.getMonth() + 1).padStart(2, '0')
   const dd = String(date.getDate()).padStart(2, '0')
   return `${yyyy}-${mm}-${dd}`
+}
+
+export function dateToDDMMYYYYString(date: Date): string {
+  console.log(typeof date)
+  const yyyy = date.getFullYear()
+  const mm = String(date.getMonth() + 1).padStart(2, '0')
+  const dd = String(date.getDate()).padStart(2, '0')
+  return `${dd}.${mm}.${yyyy}`
 }
 
 export function isSameDay(a: Date, b: Date): boolean {

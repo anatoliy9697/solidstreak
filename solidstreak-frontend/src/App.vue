@@ -8,7 +8,7 @@ import Toast from 'primevue/toast'
 import { applyTheme } from '@/main'
 import { getHeatmapLocale } from '@/i18n'
 import { type Theme } from '@/models/theme'
-import { dateToLocalString } from '@/utils/date'
+import { dateToISO8601String } from '@/utils/date'
 import { ApiFetcher } from '@/api/request'
 import { useSubscriptionStore } from '@/stores/subscription'
 import { useUserStore } from '@/stores/user'
@@ -218,7 +218,7 @@ onMounted(async (): Promise<void> => {
         id="main-calendar-heatmap"
         v-if="!init && !initErrorMsg"
         :values="habitStore.activities"
-        :endDate="dateToLocalString(new Date())"
+        :endDate="dateToISO8601String(new Date())"
         :max="habitStore.activeHabitsCount"
         :tooltipUnit="t('calendarHeatmap.checks', 'checks')"
         :rangeColor="

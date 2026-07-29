@@ -75,5 +75,8 @@
     "upperLess": "Меньше",
     "less": "меньше",
     "upperMore": "Больше",
-    "more": "больше"
+    "more": "больше",
+    "basicSubscriptionUpper": "Базовая подписка",
+    "premiumSubscriptionUpper": "Премиум подписка",
+    "until": "до"
 }
