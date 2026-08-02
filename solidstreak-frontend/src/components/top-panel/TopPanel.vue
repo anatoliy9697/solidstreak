@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 import Button from 'primevue/button'
 import Select from 'primevue/select'
 import { type Theme, getDefaultTheme, getNextTheme } from '@/models/theme'
+import { useSubscriptionStore } from '@/stores/subscription'
 import { useUserStore } from '@/stores/user'
 
 import { LANGS, getDefaultLang } from '@/i18n'
@@ -29,6 +30,7 @@ const emit = defineEmits<{
 // Composables & stores
 // ─────────────────────────────────────────────
 const { t } = useI18n()
+const subscriptionStore = useSubscriptionStore()
 const userStore = useUserStore()
 
 // ─────────────────────────────────────────────
@@ -82,8 +84,10 @@ watch(
         }}
         <template
           v-if="
-            userStore._subscription!.plan.code === 'basic' ||
-            (userStore._subscription!.plan.code === 'premium' && userStore._subscription!.finishDt)
+            subscriptionStore.planByCode('premium') &&
+            (userStore._subscription!.plan.code === 'basic' ||
+              (userStore._subscription!.plan.code === 'premium' &&
+                userStore._subscription!.finishDt))
           "
         >
           (<a
