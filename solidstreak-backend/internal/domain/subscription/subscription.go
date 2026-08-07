@@ -4,17 +4,32 @@ import (
 	"time"
 )
 
+type SubscriptionPeriod string
+
+const (
+	Month    SubscriptionPeriod = "month"
+	Year     SubscriptionPeriod = "year"
+	Lifetime SubscriptionPeriod = "lifetime"
+)
+
+type Currency string
+
+const (
+	TgStars Currency = "XTR"
+)
+
 type Pricing struct {
-	TgStarsPerMonth int64 `json:"tgStarsPerMonth"`
-	TgStarsPerYear  int64 `json:"tgStarsPerYear"`
-	TgStarsForever  int64 `json:"tgStarsForever"`
+	Period       SubscriptionPeriod `json:"period"`
+	Price        float64            `json:"price"`
+	Currency     Currency           `json:"currency"`
+	DisplayOrder int                `json:"displayOrder"`
 }
 
 type Plan struct {
-	Code        string  `json:"code"`
-	Price       Pricing `json:"price"`
-	HabitsLimit int64   `json:"habitsLimit"`
-	ShowAds     bool    `json:"showAds"`
+	Code              string    `json:"code"`
+	Pricing           []Pricing `json:"pricing"`
+	ActiveHabitsLimit int64     `json:"activeHabitsLimit"`
+	ShowAds           bool      `json:"showAds"`
 }
 
 type Subscription struct {
@@ -28,32 +43,67 @@ type Subscription struct {
 }
 
 func GetSubscriptionPlans(
-	basicPlanHabitsLimit int64,
-	premiumPlanHabitsLimit int64,
-	premiumPlanPriceStarsPerMonth int64,
-	premiumPlanPriceStarsPerYear int64,
-	premiumPlanPriceStarsForever int64,
+	basicPlanPriceStarsPerMonth float64,
+	basicPlanPriceStarsPerYear float64,
+	basicPlanPriceStarsLifetime float64,
+	basicPlanActiveHabitsLimit int64,
+	basicPlanShowAds bool,
+	premiumPlanPriceStarsPerMonth float64,
+	premiumPlanPriceStarsPerYear float64,
+	premiumPlanPriceStarsLifetime float64,
+	premiumPlanActiveHabitsLimit int64,
+	premiumPlanShowAds bool,
 ) map[string]*Plan {
 	basicPlan := &Plan{
 		Code: "basic",
-		Price: Pricing{
-			TgStarsPerMonth: 0,
-			TgStarsPerYear:  0,
-			TgStarsForever:  0,
+		Pricing: []Pricing{
+			{
+				Period:       Month,
+				Price:        basicPlanPriceStarsPerMonth,
+				Currency:     TgStars,
+				DisplayOrder: 1,
+			},
+			{
+				Period:       Year,
+				Price:        basicPlanPriceStarsPerYear,
+				Currency:     TgStars,
+				DisplayOrder: 2,
+			},
+			{
+				Period:       Lifetime,
+				Price:        basicPlanPriceStarsLifetime,
+				Currency:     TgStars,
+				DisplayOrder: 3,
+			},
 		},
-		HabitsLimit: basicPlanHabitsLimit,
-		ShowAds:     true,
+		ActiveHabitsLimit: basicPlanActiveHabitsLimit,
+		ShowAds:           basicPlanShowAds,
 	}
 
 	premiumPlan := &Plan{
 		Code: "premium",
-		Price: Pricing{
-			TgStarsPerMonth: premiumPlanPriceStarsPerMonth,
-			TgStarsPerYear:  premiumPlanPriceStarsPerYear,
-			TgStarsForever:  premiumPlanPriceStarsForever,
+		Pricing: []Pricing{
+			{
+				Period:       Month,
+				Price:        premiumPlanPriceStarsPerMonth,
+				Currency:     TgStars,
+				DisplayOrder: 1,
+			},
+			{
+				Period:       Year,
+				Price:        premiumPlanPriceStarsPerYear,
+				Currency:     TgStars,
+				DisplayOrder: 2,
+			},
+			{
+				Period:       Lifetime,
+				Price:        premiumPlanPriceStarsLifetime,
+				Currency:     TgStars,
+				DisplayOrder: 3,
+			},
 		},
-		HabitsLimit: premiumPlanHabitsLimit,
-		ShowAds:     false,
+		ActiveHabitsLimit: premiumPlanActiveHabitsLimit,
+		ShowAds:           premiumPlanShowAds,
 	}
 
 	return map[string]*Plan{

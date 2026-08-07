@@ -1,8 +1,18 @@
 log_level:             -4
 max_event_handlers:    10
 
-basic_sub_plan_habits_limit:     5
-premium_sub_plan_habits_limit:   100
-premium_sub_plan_price_stars_per_month: 100
-premium_sub_plan_price_stars_per_year:  1000
-premium_sub_plan_price_stars_forever:   2500
+basic_subscription:
+  price:
+    tg_stars_per_month: 0
+    tg_stars_per_year:  0
+    tg_stars_lifetime:  0
+  active_habits_limit: 5
+  show_ads: true
+
+premium_subscription:
+  price:
+    tg_stars_per_month: 100
+    tg_stars_per_year:  1000
+    tg_stars_lifetime:  2500
+  active_habits_limit: 100
+  show_ads: false

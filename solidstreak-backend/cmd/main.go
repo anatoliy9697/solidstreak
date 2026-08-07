@@ -76,11 +76,16 @@ func main() {
 		TgBotAPI:  tgBotAPI,
 		UsrRepo:   usrRepo.Init(mainCtx, pgPool),
 		SubRepo: subRepo.Init(mainCtx, pgPool, subPkg.GetSubscriptionPlans(
-			viper.GetInt64("basic_sub_plan_habits_limit"),
-			viper.GetInt64("premium_sub_plan_habits_limit"),
-			viper.GetInt64("premium_sub_plan_price_stars_per_month"),
-			viper.GetInt64("premium_sub_plan_price_stars_per_year"),
-			viper.GetInt64("premium_sub_plan_price_stars_forever"),
+			viper.GetFloat64("basic_subscription.price.tg_stars_per_month"),
+			viper.GetFloat64("basic_subscription.price.tg_stars_per_year"),
+			viper.GetFloat64("basic_subscription.price.tg_stars_lifetime"),
+			viper.GetInt64("basic_subscription.active_habits_limit"),
+			viper.GetBool("basic_subscription.show_ads"),
+			viper.GetFloat64("premium_subscription.price.tg_stars_per_month"),
+			viper.GetFloat64("premium_subscription.price.tg_stars_per_year"),
+			viper.GetFloat64("premium_subscription.price.tg_stars_lifetime"),
+			viper.GetInt64("premium_subscription.active_habits_limit"),
+			viper.GetBool("premium_subscription.show_ads"),
 		)),
 		TCRepo:    tcRepo.Init(mainCtx, pgPool),
 		HabitRepo: hRepo.Init(mainCtx, pgPool),
@@ -120,20 +125,20 @@ func validateConfigParams() error {
 	if viper.GetInt("max_event_handlers") <= 0 {
 		return errors.New("max_event_handlers should be greater than 0")
 	}
-	if viper.GetInt("basic_sub_plan_habits_limit") <= 0 {
-		return errors.New("basic_sub_plan_habits_limit should be greater than 0")
+	if viper.GetInt("basic_subscription.active_habits_limit") <= 0 {
+		return errors.New("basic_subscription.active_habits_limit should be greater than 0")
 	}
-	if viper.GetInt("premium_sub_plan_habits_limit") <= 0 {
-		return errors.New("premium_sub_plan_habits_limit should be greater than 0")
+	if viper.GetFloat64("premium_subscription.price.tg_stars_per_month") <= 0 {
+		return errors.New("premium_subscription.price.tg_stars_per_month should be greater than 0")
 	}
-	if viper.GetInt("premium_sub_plan_price_stars_per_month") <= 0 {
-		return errors.New("premium_sub_plan_price_stars_per_month should be greater than 0")
+	if viper.GetFloat64("premium_subscription.price.tg_stars_per_year") <= 0 {
+		return errors.New("premium_subscription.price.tg_stars_per_year should be greater than 0")
 	}
-	if viper.GetInt("premium_sub_plan_price_stars_per_year") <= 0 {
-		return errors.New("premium_sub_plan_price_stars_per_year should be greater than 0")
+	if viper.GetFloat64("premium_subscription.price.tg_stars_lifetime") <= 0 {
+		return errors.New("premium_subscription.price.tg_stars_lifetime should be greater than 0")
 	}
-	if viper.GetInt("premium_sub_plan_price_stars_forever") <= 0 {
-		return errors.New("premium_sub_plan_price_stars_forever should be greater than 0")
+	if viper.GetInt64("premium_subscription.active_habits_limit") <= 0 {
+		return errors.New("premium_subscription.active_habits_limit should be greater than 0")
 	}
 
 	return nil

@@ -24,6 +24,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'langSelected', lang: string): void
   (e: 'themeToggled', theme: Theme): void
+  (e: 'subscriptionPurchaseRequested'): void
 }>()
 
 // ─────────────────────────────────────────────
@@ -72,15 +73,15 @@ watch(
       >
         {{
           userStore._subscription!.plan.code === 'basic'
-            ? t('common.basicSubscriptionUpper', 'Basic subscription')
-            : t('common.premiumSubscriptionUpper', 'Premium subscription')
+            ? t('common.basicUpper', 'Basic')
+            : t('common.premiumUpper', 'Premium')
         }}
         {{
           userStore._subscription!.finishDt
             ? t('common.until', 'until') +
               ' ' +
               dateToDDMMYYYYString(userStore._subscription!.finishDt)
-            : ''
+            : t('common.subscription', 'subscription')
         }}
         <template
           v-if="
@@ -91,7 +92,7 @@ watch(
           "
         >
           (<a
-            href="#"
+            @click="emit('subscriptionPurchaseRequested')"
             :title="
               userStore._subscription!.plan.code === 'basic'
                 ? t('topPanel.buyPremiumSubscription', 'Buy premium subscription')

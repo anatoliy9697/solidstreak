@@ -1,0 +1,12 @@
+{
+    "premiumSubscription": "Premium subscription",
+    "month": "1 month",
+    "year": "1 year",
+    "lifetime": "Lifetime",
+    "XTR": "Telegram Stars",
+    "premiumBenefits": "Premium subscription benefits",
+    "habitLimits": "Up to {premiumSubscriptionActiveHabitsLimit} active habits, instead of {basicSubscriptionActiveHabitsLimit} in the basic subscription",
+    "noAds": "No ads",
+    "futureFeatures": "Access to some upcoming features",
+    "purchase": "Purchase"
+}

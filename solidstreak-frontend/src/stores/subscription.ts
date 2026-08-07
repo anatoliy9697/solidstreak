@@ -6,7 +6,7 @@ import type { ApiFetcher, RequestResult } from '@/api/request'
 export const useSubscriptionStore = defineStore('subscription', {
   state: () => ({
     apiFetcher: null as ApiFetcher | null,
-    subPlansMap: new Map<string, Plan>(),
+    subscriptionPlansMap: new Map<string, Plan>(),
   }),
 
   actions: {
@@ -20,10 +20,10 @@ export const useSubscriptionStore = defineStore('subscription', {
       const data = result.response?.data
       const plans = data ? (data as Plan[]) : []
 
-      this.subPlansMap.clear()
+      this.subscriptionPlansMap.clear()
 
       for (const plan of plans) {
-        this.subPlansMap.set(plan.code, plan)
+        this.subscriptionPlansMap.set(plan.code, plan)
       }
 
       return result
@@ -34,14 +34,14 @@ export const useSubscriptionStore = defineStore('subscription', {
     planByCode:
       (state) =>
       (code: string): Plan | undefined => {
-        return state.subPlansMap.get(code)
+        return state.subscriptionPlansMap.get(code)
       },
 
     default(state): Subscription {
       return {
         active: true,
         planCode: 'basic',
-        plan: state.subPlansMap.get('basic'),
+        plan: state.subscriptionPlansMap.get('basic'),
       } as Subscription
     },
   },

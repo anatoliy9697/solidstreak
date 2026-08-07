@@ -14,6 +14,8 @@ import enDatePicker from './locales/en/date-picker.json'
 import ruDatePicker from './locales/ru/date-picker.json'
 import enCalendarHeatmap from './locales/en/calendar-heatmap.json'
 import ruCalendarHeatmap from './locales/ru/calendar-heatmap.json'
+import enSubscriptionPurchaseDialog from './locales/en/subscription-purchase-dialog.json'
+import ruSubscriptionPurchaseDialog from './locales/ru/subscription-purchase-dialog.json'
 
 const messages = {
   en: {
@@ -24,6 +26,7 @@ const messages = {
     habitDialog: enHabitDialog,
     datePicker: enDatePicker,
     calendarHeatmap: enCalendarHeatmap,
+    subscriptionPurchaseDialog: enSubscriptionPurchaseDialog,
   },
   ru: {
     common: ruCommon,
@@ -33,6 +36,7 @@ const messages = {
     habitDialog: ruHabitDialog,
     datePicker: ruDatePicker,
     calendarHeatmap: ruCalendarHeatmap,
+    subscriptionPurchaseDialog: ruSubscriptionPurchaseDialog,
   },
 }
 

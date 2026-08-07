@@ -103,8 +103,8 @@ export const useUserStore = defineStore('user', {
       return state._subscription!
     },
 
-    habitsLimit: (state): number => {
-      return state._subscription!.plan.habitsLimit
+    activeHabitsLimit: (state): number => {
+      return state._subscription!.plan.activeHabitsLimit
     },
   },
 })

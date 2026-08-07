@@ -20,6 +20,7 @@ import CalendarHeatmap from '@/components/calendar-heatmap/CalendarHeatmap.vue'
 import DatePicker from '@/components/date-picker/DatePicker.vue'
 import HabitCard from '@/components/habit-card/HabitCard.vue'
 import HabitDialog from '@/components/habit-dialog/HabitDialog.vue'
+import SubscriptionPurchaseDialog from '@/components/subscription-purchase-dialog/SubscriptionPurchaseDialog.vue'
 
 // ─────────────────────────────────────────────
 // States & stores
@@ -38,6 +39,7 @@ const mainHeatmapColor = ref<Color>(ORANGE)
 const expandedHabitCardId = ref<number | null>(null)
 const editingHabitId = ref<number | null>(null)
 const isHabitDialogVisible = ref(false)
+const isSubscriptionPurchaseDialogVisible = ref(false)
 
 // ─────────────────────────────────────────────
 // Methods
@@ -175,6 +177,9 @@ onMounted(async (): Promise<void> => {
     return
   }
 
+  console.log('subscriptionStore.planByCode("basic")', subscriptionStore.planByCode('basic'))
+  console.log('subscriptionStore.planByCode("premium")', subscriptionStore.planByCode('premium'))
+
   userStore.init(apiFetcher, subscriptionStore.default)
   const upsertUserInfoResult = await userStore.upsertUserInfo(user, chat || { id: user.id }) // Use personal chat with user if no other chat info
   if (!upsertUserInfoResult.success) {
@@ -210,6 +215,7 @@ onMounted(async (): Promise<void> => {
         :theme="userStore.theme"
         @langSelected="updateLang"
         @themeToggled="updateTheme"
+        @subscriptionPurchaseRequested="isSubscriptionPurchaseDialogVisible = true"
       />
     </div>
 
@@ -333,6 +339,10 @@ onMounted(async (): Promise<void> => {
     </div>
   </template>
 
+  <SubscriptionPurchaseDialog
+    :visible="isSubscriptionPurchaseDialogVisible"
+    @closeSubscriptionPurchaseDialog="isSubscriptionPurchaseDialogVisible = false"
+  />
   <HabitDialog
     :visible="isHabitDialogVisible"
     :newHabit="editingHabitId === null"

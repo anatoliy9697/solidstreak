@@ -9,7 +9,7 @@ const { t } = useI18n()
 </script>
 
 <template>
-  <ConfirmDialog group="headless" class="px-4 pt-2 pb-4">
+  <ConfirmDialog group="headless" class="!rounded-xl px-4 pt-2 pb-4">
     <template #container="{ message, acceptCallback, rejectCallback }">
       <h2 v-if="message.header" class="mb-2">{{ message.header }}</h2>
       <p class="mb-2">{{ message.message }}</p>

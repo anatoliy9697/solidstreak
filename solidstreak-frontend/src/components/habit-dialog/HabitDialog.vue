@@ -123,14 +123,7 @@ async function onColorSelected(selectedColor: Color): Promise<void> {
     position="bottom"
     :modal="true"
     :draggable="false"
-    class="p-4"
-    :style="{
-      width: '95vw',
-      maxWidth: '500px',
-      margin: '0.5rem',
-      marginBottom: 0,
-      borderRadius: '0.375rem 0.375rem 0 0',
-    }"
+    class="!m-2 !mb-0 w-[calc(100vw-1rem)] max-w-[31rem] !rounded-t-xl !rounded-b-none !border-b-0 p-4"
   >
     <template #container="{ closeCallback }">
       <div class="mb-4 flex items-start justify-between">

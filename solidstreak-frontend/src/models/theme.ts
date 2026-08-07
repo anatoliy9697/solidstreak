@@ -66,6 +66,20 @@ export const THEMES: Record<Theme, { [key: string]: string }> = {
     '--main-calendar-heatmap-vch-label-color': '#9ca3af', // gray-400
     '--calendar-heatmap-vch-label-color': '#9ca3af', // gray-400
     '--calendar-heatmap-vch-day-square-hover-stroke-color': '#6b7280', // gray-500
+    '--p-radiobutton-background': '#fff', // white
+    '--p-radiobutton-checked-background': '#ea580c', // orange-600
+    '--p-radiobutton-checked-hover-background': '#c2410c', // orange-700
+    // '--p-radiobutton-filled-background': '', //
+    '--p-radiobutton-border-color': '#d1d5db', // gray-300
+    '--p-radiobutton-hover-border-color': '#9ca3af', // gray-400
+    // '--p-radiobutton-focus-border-color': '', //
+    '--p-radiobutton-checked-border-color': '#ea580c', // orange-600
+    '--p-radiobutton-checked-hover-border-color': '#c2410c', // orange-700
+    // '--p-radiobutton-checked-focus-border-color': '', //
+    // '--p-radiobutton-focus-ring-color': '', //
+    '--p-radiobutton-icon-checked-color': '#fff', // white
+    '--p-radiobutton-icon-checked-hover-color': '#fff', // white
+    // '--p-radiobutton-icon-disabled-color': ''; //
   },
   dark: {
     '--a-text-decoration-color': '#60a5fa', // blue-400
@@ -118,5 +132,19 @@ export const THEMES: Record<Theme, { [key: string]: string }> = {
     '--main-calendar-heatmap-vch-label-color': '#6b7280', // gray-500
     '--calendar-heatmap-vch-label-color': '#9ca3af', // gray-400
     '--calendar-heatmap-vch-day-square-hover-stroke-color': '#9ca3af', // gray-400
+    '--p-radiobutton-background': '#374151', // gray-700
+    '--p-radiobutton-checked-background': '#ea580c', // orange-600
+    '--p-radiobutton-checked-hover-background': '#f97316', // orange-500
+    // '--p-radiobutton-filled-background': '', //
+    '--p-radiobutton-border-color': '#9ca3af', // gray-400
+    '--p-radiobutton-hover-border-color': '#d1d5db', // gray-300
+    // '--p-radiobutton-focus-border-color': '', //
+    '--p-radiobutton-checked-border-color': '#ea580c', // orange-600
+    '--p-radiobutton-checked-hover-border-color': '#f97316', // orange-500
+    // '--p-radiobutton-checked-focus-border-color': '', //
+    // '--p-radiobutton-focus-ring-color': '', //
+    '--p-radiobutton-icon-checked-color': '#374151', // gray-700
+    '--p-radiobutton-icon-checked-hover-color': '#374151', // gray-700
+    // '--p-radiobutton-icon-disabled-color': ''; //
   },
 }

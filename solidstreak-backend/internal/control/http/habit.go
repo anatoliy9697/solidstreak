@@ -135,7 +135,7 @@ func (s Server) postHabit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if activeHabitsCount >= user.Subscription.Plan.HabitsLimit {
+	if activeHabitsCount >= user.Subscription.Plan.ActiveHabitsLimit {
 		err = apperrors.NewForbiddenErr("active habits limit reached for user subscription plan")
 		return
 	}
@@ -244,7 +244,7 @@ func (s Server) putHabit(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		if activeHabitsCount >= user.Subscription.Plan.HabitsLimit {
+		if activeHabitsCount >= user.Subscription.Plan.ActiveHabitsLimit {
 			err = apperrors.NewForbiddenErr("active habits limit reached for user subscription plan")
 			return
 		}

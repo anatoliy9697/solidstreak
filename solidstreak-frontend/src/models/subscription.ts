@@ -1,13 +1,28 @@
+export const SUBSCRIPTION_PERIOD = {
+  MONTH: 'month',
+  YEAR: 'year',
+  LIFETIME: 'lifetime',
+} as const
+
+export type SubscriptionPeriod = (typeof SUBSCRIPTION_PERIOD)[keyof typeof SUBSCRIPTION_PERIOD]
+
+export const CURRENCY = {
+  XTR: 'XTR',
+} as const
+
+export type Currency = (typeof CURRENCY)[keyof typeof CURRENCY]
+
 export interface Pricing {
-  tgStarsPerMonth: number
-  tgStarsPerYear: number
-  tgStarsForever: number
+  period: SubscriptionPeriod
+  price: number
+  currency: Currency
+  displayOrder: number
 }
 
 export interface Plan {
   code: string
-  price: Pricing
-  habitsLimit: number
+  pricing: Pricing[]
+  activeHabitsLimit: number
   showAds: boolean
 }
 
@@ -19,22 +34,4 @@ export interface Subscription {
   startDt?: Date
   finishDt?: Date
   createdAt?: Date
-}
-
-export function getDefaultSubscription(): Subscription {
-  return {
-    active: true,
-    planCode: 'basic',
-    plan: {
-      // TODO: брать планы из бэкенда
-      code: 'basic',
-      price: {
-        tgStarsPerMonth: 0,
-        tgStarsPerYear: 0,
-        tgStarsForever: 0,
-      },
-      habitsLimit: 5,
-      showAds: true,
-    },
-  }
 }
