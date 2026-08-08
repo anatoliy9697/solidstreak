@@ -16,6 +16,7 @@ solidstreak-backend/static/
 
 # --- Node.js frontend ---
 solidstreak-frontend/node_modules/
+solidstreak-frontend/public/vendor/
 solidstreak-frontend/dist/
 solidstreak-frontend/dist-ssr/
 
