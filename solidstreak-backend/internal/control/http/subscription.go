@@ -7,7 +7,7 @@ import (
 	subPkg "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/subscription"
 )
 
-type SubscriptionPlansResponse struct {
+type GetSubscriptionPlansResponse struct {
 	Data []*subPkg.Plan `json:"data"`
 }
 
@@ -33,5 +33,5 @@ func (s Server) getSubscriptionPlans(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	json.NewEncoder(w).Encode(SubscriptionPlansResponse{Data: plans})
+	json.NewEncoder(w).Encode(GetSubscriptionPlansResponse{Data: plans})
 }

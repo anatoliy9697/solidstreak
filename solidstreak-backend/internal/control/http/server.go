@@ -39,7 +39,7 @@ func (s Server) Run(mainCtx context.Context, doneCh chan struct{}) {
 	api.Get("/subscription-plans", s.getSubscriptionPlans)
 
 	api.Post("/user-info/upsert", s.postUserInfo)
-	api.Get("/users/{userId}", s.getUser)
+	api.Get("/users/{userID}", s.getUser)
 	api.Patch("/users/{userID}", s.patchUser)
 
 	api.Post("/users/{userID}/habits", s.postHabit)
@@ -49,6 +49,8 @@ func (s Server) Run(mainCtx context.Context, doneCh chan struct{}) {
 	api.Get("/users/{userID}/habits", s.getHabits)
 	api.Post("/users/{userID}/habits/{habitID}/checks", s.postUserHabitCheck)
 	api.Get("/users/{userID}/habits/{habitID}/checks", s.getUserHabitCompletedChecks)
+
+	api.Post("/users/{userID}/invoice", s.postInvoice)
 
 	router.Mount("/api/v1", api)
 

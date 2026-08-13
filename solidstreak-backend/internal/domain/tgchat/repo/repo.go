@@ -11,6 +11,7 @@ type Repo interface {
 	IsExistsByTgID(int64) (bool, error)
 	Create(*tcPkg.Chat) error
 	Update(*tcPkg.Chat) error
+	GetByUserID(int64) (*tcPkg.Chat, error)
 }
 
 func Init(c context.Context, p *pgxpool.Pool) Repo {

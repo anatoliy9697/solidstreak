@@ -15,7 +15,7 @@ func (r pgRepo) GetBasic() (*subPkg.Subscription, error) {
 func (r pgRepo) GetPlanByCode(planCode string) (*subPkg.Plan, error) {
 	plan, ok := r.subPlans[planCode]
 	if !ok {
-		return nil, apperrors.NewInternalErr("subscription plan not found")
+		return nil, apperrors.NewNotFoundErr("subscription plan not found")
 	}
 
 	return plan, nil

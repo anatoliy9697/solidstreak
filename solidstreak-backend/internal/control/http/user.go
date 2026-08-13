@@ -196,7 +196,7 @@ func (s Server) getUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var userID int64
-	if userID, err = getInt64FromURLParams(r, "userId", true); err != nil {
+	if userID, err = getInt64FromURLParams(r, "userID", true); err != nil {
 		return
 	}
 

@@ -66,10 +66,7 @@ func main() {
 	defer pgPool.Close()
 
 	var tgBotAPI *tgbotapi.Bot
-	if tgBotAPI, err = tgbotapi.NewBot(
-		os.Getenv("TG_BOT_API_TOKEN"),
-		// tgbotapi.WithTestServerPath(),
-	); err != nil {
+	if tgBotAPI, err = tgbotapi.NewBot(os.Getenv("TG_BOT_API_TOKEN")); err != nil {
 		return
 	}
 

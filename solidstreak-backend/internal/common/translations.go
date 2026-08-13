@@ -2,14 +2,26 @@ package common
 
 var MESSAGES = map[string]map[string]string{
 	"en": {
-		"smthWrong": "Something went wrong\nPlease try again later",
-		"helloMsg":  "Hello, %s!\nPush \"Open\" button to start using bot",
-		"open":      "Open",
+		"smthWrong":           "Something went wrong\nPlease try again later",
+		"helloMsg":            "Hello, %s!\nPush \"Open\" button to start using bot",
+		"open":                "Open",
+		"premiumSubscription": "Premium subscription",
+		"accessToPremium":     "Access to premium features",
+		"month":               "for 1 month",
+		"year":                "for 1 year",
+		"lifetime":            "for life",
+		"premium":             "Premium",
 	},
 	"ru": {
-		"smthWrong": "Что-то пошло не так\nПожалуйста, попробуйте позже",
-		"helloMsg":  "Привет, %s!\nНажмите кнопку \"Открыть\", чтобы начать пользоваться ботом",
-		"open":      "Открыть",
+		"smthWrong":           "Что-то пошло не так\nПожалуйста, попробуйте позже",
+		"helloMsg":            "Привет, %s!\nНажмите кнопку \"Открыть\", чтобы начать пользоваться ботом",
+		"open":                "Открыть",
+		"premiumSubscription": "Премиум подписка",
+		"accessToPremium":     "Доступ к премиум функциям",
+		"month":               "на 1 месяц",
+		"year":                "на 1 год",
+		"lifetime":            "навсегда",
+		"premium":             "Премиум",
 	},
 }
 

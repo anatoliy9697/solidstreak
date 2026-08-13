@@ -124,7 +124,7 @@ function getCalendarHeatmapColorRange(
     return [
       GRAY.value700hex,
       ...generateColorGradient(
-        generateColorGradient(GRAY.value700hex, color.value700hex, 5)[1]!,
+        generateColorGradient(GRAY.value700hex, color.value700hex, 5)[activeHabitsCount === 2 ? 3 : 1]!,
         color.value600hex,
         activeHabitsCount,
       ),

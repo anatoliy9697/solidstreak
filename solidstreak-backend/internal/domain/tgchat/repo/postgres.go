@@ -3,7 +3,10 @@ package repo
 import (
 	"context"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+
+	apperrors "github.com/anatoliy9697/solidstreak/solidstreak-backend/pkg/errors"
 
 	tcPkg "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/tgchat"
 )
@@ -46,7 +49,7 @@ func (r pgRepo) Create(tc *tcPkg.Chat) error {
 	return err
 }
 
-func (r pgRepo) Update(c *tcPkg.Chat) error {
+func (r pgRepo) Update(tc *tcPkg.Chat) error {
 	sql := `
 		UPDATE tg_chats SET
 			user_id = $1
@@ -56,9 +59,29 @@ func (r pgRepo) Update(c *tcPkg.Chat) error {
 	err := r.pool.QueryRow(
 		r.ctx,
 		sql,
-		c.UserID,
-		c.TgID,
-	).Scan(&c.CreatedAt)
+		tc.UserID,
+		tc.TgID,
+	).Scan(&tc.CreatedAt)
 
 	return err
+}
+
+func (r pgRepo) GetByUserID(userID int64) (*tcPkg.Chat, error) {
+	tc := &tcPkg.Chat{}
+
+	sql := `SELECT tg_id, user_id, created_at FROM tg_chats WHERE user_id = $1`
+
+	err := r.pool.QueryRow(r.ctx, sql, userID).Scan(
+		&tc.TgID,
+		&tc.UserID,
+		&tc.CreatedAt,
+	)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			return nil, apperrors.NewNotFoundErr("couldn't find telegram chat by user id")
+		}
+		return nil, err
+	}
+
+	return tc, nil
 }

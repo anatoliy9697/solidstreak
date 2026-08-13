@@ -12,11 +12,21 @@ const (
 	Lifetime SubscriptionPeriod = "lifetime"
 )
 
+var SubscriptionPeriodMapping = map[string]SubscriptionPeriod{
+	string(Month):    Month,
+	string(Year):     Year,
+	string(Lifetime): Lifetime,
+}
+
 type Currency string
 
 const (
 	TgStars Currency = "XTR"
 )
+
+var CurrencyMapping = map[string]Currency{
+	string(TgStars): TgStars,
+}
 
 type Pricing struct {
 	Period       SubscriptionPeriod `json:"period"`

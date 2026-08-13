@@ -34,7 +34,7 @@ func (eh EventHandler) Run(ctx context.Context, doneCh chan string, upd *tgbotap
 			eh.Res.Logger.Error("event handler error", "error", err)
 		}
 		if !success && tc != nil {
-			_ = usecases.SendReplyMsg(ctx, eh.Res.TgBotAPI, usecases.GetErrorReplyMsg(eh.Res, tc, usr))
+			_ = usecases.SendTgMessage(ctx, eh.Res.TgBotAPI, usecases.GetErrorTgMessageParams(eh.Res, tc, usr))
 		}
 		doneCh <- eh.Code
 	}()
@@ -51,7 +51,7 @@ func (eh EventHandler) Run(ctx context.Context, doneCh chan string, upd *tgbotap
 	}
 	eh.Res.Logger.Debug("telegram chat mapped to inner model and saved to DB", "tgChat", tc)
 
-	if err = usecases.SendReplyMsg(ctx, eh.Res.TgBotAPI, usecases.GetSuccessReplyMsg(eh.Res, tc, usr)); err != nil {
+	if err = usecases.SendTgMessage(ctx, eh.Res.TgBotAPI, usecases.GetSuccessTgMessageParams(eh.Res, tc, usr)); err != nil {
 		return
 	}
 }
