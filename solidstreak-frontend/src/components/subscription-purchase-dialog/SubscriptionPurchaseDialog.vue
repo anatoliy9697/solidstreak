@@ -5,7 +5,7 @@ import RadioButton from 'primevue/radiobutton'
 import { useI18n } from 'vue-i18n'
 
 import { useSubscriptionStore } from '@/stores/subscription'
-import { type SubscriptionPeriod, SUBSCRIPTION_PERIOD } from '@/models/subscription'
+import { type Pricing } from '@/models/subscription'
 
 // ─────────────────────────────────────────────
 // Props
@@ -30,13 +30,13 @@ const subscriptionStore = useSubscriptionStore()
 // ─────────────────────────────────────────────
 // Constants & reactive state
 // ─────────────────────────────────────────────
-const selectedPeriod = ref<SubscriptionPeriod>(SUBSCRIPTION_PERIOD.MONTH)
+const selectedPricing = ref<Pricing | null>(null)
 
 watch(
   () => props.visible,
   (visible) => {
     if (visible) {
-      selectedPeriod.value = SUBSCRIPTION_PERIOD.MONTH
+      selectedPricing.value = premiumSubscriptionPricing.value[0] ?? null
     }
   },
   { immediate: true },
@@ -83,18 +83,20 @@ const premiumSubscriptionPricing = computed(() =>
 
       <div
         v-for="pricingOption in premiumSubscriptionPricing"
-        :key="pricingOption.period"
+        :key="pricingOption.periodCount + pricingOption.periodUnit"
         :class="[
           pricingOption.displayOrder == premiumSubscriptionPricing.length ? 'mb-4' : 'mb-2',
           'flex cursor-pointer items-center justify-between rounded-md border bg-gray-100 px-4 py-2 hover:bg-gray-200 dark:bg-gray-600 dark:hover:bg-gray-500',
-          selectedPeriod === pricingOption.period
+          selectedPricing === pricingOption
             ? 'border-orange-600'
             : 'border-gray-200 hover:border-gray-300 dark:border-gray-500 dark:hover:border-gray-400',
         ]"
-        @click="selectedPeriod = pricingOption.period"
+        @click="selectedPricing = pricingOption"
       >
         <span class="mr-2 text-lg font-semibold whitespace-nowrap">{{
-          t('subscriptionPurchaseDialog.' + pricingOption.period)
+          t('subscriptionPurchaseDialog.' + pricingOption.periodUnit + 'SubscriptionPeriod', {
+            subscriptionPeriodCount: pricingOption.periodCount,
+          })
         }}</span>
         <div class="flex items-center">
           <span class="mr-2 text-lg font-semibold">{{ pricingOption.price }}</span>
@@ -102,10 +104,10 @@ const premiumSubscriptionPricing = computed(() =>
             t('subscriptionPurchaseDialog.' + pricingOption.currency)
           }}</span>
           <RadioButton
-            v-model="selectedPeriod"
-            :inputId="pricingOption.period"
+            v-model="selectedPricing"
+            :inputId="pricingOption.periodCount + pricingOption.periodUnit"
             name="pricing"
-            :value="pricingOption.period"
+            :value="pricingOption"
           />
         </div>
       </div>
@@ -116,7 +118,18 @@ const premiumSubscriptionPricing = computed(() =>
       <ul class="mb-3 pl-2">
         <li class="mb-1 flex items-start">
           <span class="mr-2">📚</span>
-          <span>{{ t('subscriptionPurchaseDialog.habitLimits', { premiumSubscriptionActiveHabitsLimit: subscriptionStore.planByCode('premium')!.activeHabitsLimit, basicSubscriptionActiveHabitsLimit: subscriptionStore.planByCode('basic')!.activeHabitsLimit }, 'Up to {premiumSubscriptionActiveHabitsLimit} active habits, instead of {basicSubscriptionActiveHabitsLimit} in the basic subscription') }}</span>
+          <span>{{
+            t(
+              'subscriptionPurchaseDialog.habitLimits',
+              {
+                premiumSubscriptionActiveHabitsLimit:
+                  subscriptionStore.planByCode('premium')!.activeHabitsLimit,
+                basicSubscriptionActiveHabitsLimit:
+                  subscriptionStore.planByCode('basic')!.activeHabitsLimit,
+              },
+              'Up to {premiumSubscriptionActiveHabitsLimit} active habits, instead of {basicSubscriptionActiveHabitsLimit} in the basic subscription',
+            )
+          }}</span>
         </li>
         <li v-if="!subscriptionStore.planByCode('premium')!.showAds" class="mb-1 flex items-start">
           <span class="mr-2">📢</span>

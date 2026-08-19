@@ -109,7 +109,7 @@ func (s Server) postHabit(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	if color == "" {
-		color = hPkg.Green
+		color = hPkg.ColorGreen
 	}
 	if req.Data.IsPublic == nil {
 		err = apperrors.NewBadRequestErr("habit public status is required")
@@ -209,7 +209,7 @@ func (s Server) putHabit(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	if color == "" {
-		color = hPkg.Green
+		color = hPkg.ColorGreen
 	}
 	if req.Data.IsPublic == nil {
 		err = apperrors.NewBadRequestErr("habit public status is required")
@@ -678,7 +678,7 @@ func getFromToDatesFromURLQuery(r *http.Request) (*date.Date, *date.Date, error)
 func getHabitStatusFromURLQuery(r *http.Request) (hPkg.HabitStatus, error) {
 	var statusStr string
 	if statusStr = r.URL.Query().Get("status"); statusStr == "" {
-		return hPkg.Any, nil
+		return hPkg.HabitStatusAny, nil
 	}
 
 	var (
@@ -686,7 +686,7 @@ func getHabitStatusFromURLQuery(r *http.Request) (hPkg.HabitStatus, error) {
 		ok     bool
 	)
 	if status, ok = hPkg.HabitStatusMapping[statusStr]; !ok {
-		return hPkg.Any, apperrors.NewBadRequestErr("invalid habit status \"" + statusStr + "\" in URL query")
+		return hPkg.HabitStatusAny, apperrors.NewBadRequestErr("invalid habit status \"" + statusStr + "\" in URL query")
 	}
 
 	return status, nil

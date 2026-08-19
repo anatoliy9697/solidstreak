@@ -1,10 +1,11 @@
-export const SUBSCRIPTION_PERIOD = {
+export const SUBSCRIPTION_PERIOD_UNIT = {
   MONTH: 'month',
   YEAR: 'year',
   LIFETIME: 'lifetime',
 } as const
 
-export type SubscriptionPeriod = (typeof SUBSCRIPTION_PERIOD)[keyof typeof SUBSCRIPTION_PERIOD]
+export type SubscriptionPeriodUnit =
+  (typeof SUBSCRIPTION_PERIOD_UNIT)[keyof typeof SUBSCRIPTION_PERIOD_UNIT]
 
 export const CURRENCY = {
   XTR: 'XTR',
@@ -13,7 +14,8 @@ export const CURRENCY = {
 export type Currency = (typeof CURRENCY)[keyof typeof CURRENCY]
 
 export interface Pricing {
-  period: SubscriptionPeriod
+  periodUnit: SubscriptionPeriodUnit
+  periodCount: number
   price: number
   currency: Currency
   displayOrder: number

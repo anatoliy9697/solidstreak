@@ -96,9 +96,9 @@ func (r pgRepo) GetByOwnerIDAndStatus(ownerID int64, status hPkg.HabitStatus, re
 			AND uh.user_id = $1
 	`
 	switch status {
-	case hPkg.Active:
+	case hPkg.HabitStatusActive:
 		sql += " AND h.archived IS FALSE"
-	case hPkg.Archived:
+	case hPkg.HabitStatusArchived:
 		sql += " AND h.archived IS TRUE"
 	}
 	if !requestedByOwner {

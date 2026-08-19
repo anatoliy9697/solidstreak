@@ -55,7 +55,7 @@ func SendTgMessage(ctx context.Context, tgBotAPI *tgbotapi.Bot, msg *tgbotapi.Se
 	return err
 }
 
-func GetTgInvoiceParams(r common.Resources, tc *tcPkg.Chat, u *usrPkg.User, subscriptionPlan *subPkg.Plan, subscriptionPeriod subPkg.SubscriptionPeriod, currency subPkg.Currency) (*tgbotapi.SendInvoiceParams, error) {
+func GetTgInvoiceParams(r common.Resources, tc *tcPkg.Chat, u *usrPkg.User, subscriptionPlan *subPkg.Plan, subscriptionPeriodUnit subPkg.SubscriptionPeriodUnit, subscriptionPeriodCount int64, currency subPkg.Currency) (*tgbotapi.SendInvoiceParams, error) {
 	lang := ""
 	if u != nil {
 		lang = u.LangCode
@@ -66,28 +66,28 @@ func GetTgInvoiceParams(r common.Resources, tc *tcPkg.Chat, u *usrPkg.User, subs
 
 	var pricing *subPkg.Pricing
 	for _, p := range subscriptionPlan.Pricing {
-		if p.Period == subscriptionPeriod && p.Currency == currency {
+		if p.PeriodUnit == subscriptionPeriodUnit && p.PeriodCount == subscriptionPeriodCount && p.Currency == currency {
 			pricing = &p
 			break
 		}
 	}
 	if pricing == nil {
-		return nil, apperrors.NewNotFoundErr(fmt.Sprintf("couldn't find pricing for plan \"%s\", period \"%s\", currency \"%s\"", subscriptionPlan.Code, subscriptionPeriod, currency))
+		return nil, apperrors.NewNotFoundErr(fmt.Sprintf("couldn't find pricing for plan \"%s\", period unit \"%s\", period count \"%d\", currency \"%s\"", subscriptionPlan.Code, subscriptionPeriodUnit, subscriptionPeriodCount, currency))
 	}
 
-	fmt.Println(common.MESSAGES[lang]["premium"] + " " + common.MESSAGES[lang][string(subscriptionPeriod)])
+	payload := "user:" + fmt.Sprint(u.ID) + ":subscription:" + subscriptionPlan.Code + ":periodUnit:" + string(subscriptionPeriodUnit) + ":periodCount:" + fmt.Sprint(subscriptionPeriodCount) + ":currency:" + string(currency)
 
-	payload := "user:" + fmt.Sprint(u.ID) + ":subscription:" + subscriptionPlan.Code + ":period:" + string(subscriptionPeriod) + ":currency:" + string(currency)
+	subscriptionPeriodLabel := getSubscriptionPeriodLabel(lang, subscriptionPeriodUnit, subscriptionPeriodCount)
 	return &tgbotapi.SendInvoiceParams{
 		ChatID:        tgbotapi.ChatID{ID: tc.TgID},
-		Title:         common.MESSAGES[lang]["premiumSubscription"],                                                       // Если появятся другие планы, то нужно будет формировать динамически
-		Description:   common.MESSAGES[lang]["accessToPremium"] + " " + common.MESSAGES[lang][string(subscriptionPeriod)], // Если появятся другие планы, то нужно будет формировать динамически + TODO: добавить время, за которое надо выполнить оплату
+		Title:         common.MESSAGES[lang]["premiumSubscription"],                             // Если появятся другие планы, то нужно будет формировать динамически
+		Description:   common.MESSAGES[lang]["accessToPremium"] + " " + subscriptionPeriodLabel, // Если появятся другие планы, то нужно будет формировать динамически + TODO: добавить время, за которое надо выполнить оплату
 		Payload:       payload,
 		ProviderToken: "", // Для Stars должен быть пустой
 		Currency:      string(currency),
 		Prices: []tgbotapi.LabeledPrice{
 			{
-				Label:  common.MESSAGES[lang]["premium"] + " " + common.MESSAGES[lang][string(subscriptionPeriod)], // Если появятся другие планы, то нужно будет формировать динамически
+				Label:  common.MESSAGES[lang]["premium"] + " " + subscriptionPeriodLabel, // Если появятся другие планы, то нужно будет формировать динамически
 				Amount: int(pricing.Price),
 			},
 		},
@@ -100,4 +100,11 @@ func SendTgInvoice(ctx context.Context, tgBotAPI *tgbotapi.Bot, tgInvoiceParams 
 	_, err := tgBotAPI.SendInvoice(ctx, tgInvoiceParams)
 
 	return err
+}
+
+func getSubscriptionPeriodLabel(lang string, subscriptionPeriodUnit subPkg.SubscriptionPeriodUnit, subscriptionPeriodCount int64) string {
+	if subscriptionPeriodUnit == subPkg.SubscriptionPeriodUnitLifetime {
+		return common.MESSAGES[lang]["lifetime"]
+	}
+	return common.MESSAGES[lang]["for"] + " " + fmt.Sprint(subscriptionPeriodCount) + " " + common.MESSAGES[lang][string(subscriptionPeriodUnit)+"Short"]
 }

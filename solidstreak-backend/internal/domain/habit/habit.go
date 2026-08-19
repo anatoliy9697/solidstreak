@@ -23,37 +23,37 @@ type Habit struct {
 type HabitStatus string
 
 const (
-	Active   HabitStatus = "active"
-	Archived HabitStatus = "archived"
-	Any      HabitStatus = "any"
+	HabitStatusActive   HabitStatus = "active"
+	HabitStatusArchived HabitStatus = "archived"
+	HabitStatusAny      HabitStatus = "any"
 )
 
 var HabitStatusMapping = map[string]HabitStatus{
-	string(Active):   Active,
-	string(Archived): Archived,
-	string(Any):      Any,
+	string(HabitStatusActive):   HabitStatusActive,
+	string(HabitStatusArchived): HabitStatusArchived,
+	string(HabitStatusAny):      HabitStatusAny,
 }
 
 type Color string
 
 const (
-	Red    Color = "red"
-	Orange Color = "orange"
-	Yellow Color = "yellow"
-	Lime   Color = "lime"
-	Green  Color = "green"
-	Blue   Color = "blue"
-	Purple Color = "purple"
+	ColorRed    Color = "red"
+	ColorOrange Color = "orange"
+	ColorYellow Color = "yellow"
+	ColorLime   Color = "lime"
+	ColorGreen  Color = "green"
+	ColorBlue   Color = "blue"
+	ColorPurple Color = "purple"
 )
 
 var ColorMapping = map[string]Color{
-	string(Red):    Red,
-	string(Orange): Orange,
-	string(Yellow): Yellow,
-	string(Lime):   Lime,
-	string(Green):  Green,
-	string(Blue):   Blue,
-	string(Purple): Purple,
+	string(ColorRed):    ColorRed,
+	string(ColorOrange): ColorOrange,
+	string(ColorYellow): ColorYellow,
+	string(ColorLime):   ColorLime,
+	string(ColorGreen):  ColorGreen,
+	string(ColorBlue):   ColorBlue,
+	string(ColorPurple): ColorPurple,
 }
 
 type HabitCheck struct {

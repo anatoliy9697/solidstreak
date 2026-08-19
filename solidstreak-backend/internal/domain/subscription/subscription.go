@@ -4,35 +4,36 @@ import (
 	"time"
 )
 
-type SubscriptionPeriod string
+type SubscriptionPeriodUnit string
 
 const (
-	Month    SubscriptionPeriod = "month"
-	Year     SubscriptionPeriod = "year"
-	Lifetime SubscriptionPeriod = "lifetime"
+	SubscriptionPeriodUnitMonth    SubscriptionPeriodUnit = "month"
+	SubscriptionPeriodUnitYear     SubscriptionPeriodUnit = "year"
+	SubscriptionPeriodUnitLifetime SubscriptionPeriodUnit = "lifetime"
 )
 
-var SubscriptionPeriodMapping = map[string]SubscriptionPeriod{
-	string(Month):    Month,
-	string(Year):     Year,
-	string(Lifetime): Lifetime,
+var SubscriptionPeriodUnitMapping = map[string]SubscriptionPeriodUnit{
+	string(SubscriptionPeriodUnitMonth):    SubscriptionPeriodUnitMonth,
+	string(SubscriptionPeriodUnitYear):     SubscriptionPeriodUnitYear,
+	string(SubscriptionPeriodUnitLifetime): SubscriptionPeriodUnitLifetime,
 }
 
 type Currency string
 
 const (
-	TgStars Currency = "XTR"
+	CurrencyTgStars Currency = "XTR"
 )
 
 var CurrencyMapping = map[string]Currency{
-	string(TgStars): TgStars,
+	string(CurrencyTgStars): CurrencyTgStars,
 }
 
 type Pricing struct {
-	Period       SubscriptionPeriod `json:"period"`
-	Price        float64            `json:"price"`
-	Currency     Currency           `json:"currency"`
-	DisplayOrder int                `json:"displayOrder"`
+	PeriodUnit   SubscriptionPeriodUnit `json:"periodUnit"`
+	PeriodCount  int64                  `json:"periodCount"`
+	Price        float64                `json:"price"`
+	Currency     Currency               `json:"currency"`
+	DisplayOrder int64                  `json:"displayOrder"`
 }
 
 type Plan struct {
@@ -50,6 +51,7 @@ type Subscription struct {
 	StartDt   *time.Time `json:"startDt,omitempty"`
 	FinishDt  *time.Time `json:"finishDt,omitempty"`
 	CreatedAt *time.Time `json:"createdAt,omitempty"`
+	UpdatedAt *time.Time `json:"updatedAt,omitempty"`
 }
 
 func GetSubscriptionPlans(
@@ -68,21 +70,24 @@ func GetSubscriptionPlans(
 		Code: "basic",
 		Pricing: []Pricing{
 			{
-				Period:       Month,
+				PeriodUnit:   SubscriptionPeriodUnitMonth,
+				PeriodCount:  1,
 				Price:        basicPlanPriceStarsPerMonth,
-				Currency:     TgStars,
+				Currency:     CurrencyTgStars,
 				DisplayOrder: 1,
 			},
 			{
-				Period:       Year,
+				PeriodUnit:   SubscriptionPeriodUnitYear,
+				PeriodCount:  1,
 				Price:        basicPlanPriceStarsPerYear,
-				Currency:     TgStars,
+				Currency:     CurrencyTgStars,
 				DisplayOrder: 2,
 			},
 			{
-				Period:       Lifetime,
+				PeriodUnit:   SubscriptionPeriodUnitLifetime,
+				PeriodCount:  1,
 				Price:        basicPlanPriceStarsLifetime,
-				Currency:     TgStars,
+				Currency:     CurrencyTgStars,
 				DisplayOrder: 3,
 			},
 		},
@@ -94,21 +99,24 @@ func GetSubscriptionPlans(
 		Code: "premium",
 		Pricing: []Pricing{
 			{
-				Period:       Month,
+				PeriodUnit:   SubscriptionPeriodUnitMonth,
+				PeriodCount:  1,
 				Price:        premiumPlanPriceStarsPerMonth,
-				Currency:     TgStars,
+				Currency:     CurrencyTgStars,
 				DisplayOrder: 1,
 			},
 			{
-				Period:       Year,
+				PeriodUnit:   SubscriptionPeriodUnitYear,
+				PeriodCount:  1,
 				Price:        premiumPlanPriceStarsPerYear,
-				Currency:     TgStars,
+				Currency:     CurrencyTgStars,
 				DisplayOrder: 2,
 			},
 			{
-				Period:       Lifetime,
+				PeriodUnit:   SubscriptionPeriodUnitLifetime,
+				PeriodCount:  1,
 				Price:        premiumPlanPriceStarsLifetime,
-				Currency:     TgStars,
+				Currency:     CurrencyTgStars,
 				DisplayOrder: 3,
 			},
 		},

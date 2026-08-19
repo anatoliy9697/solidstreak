@@ -15,9 +15,10 @@ import (
 )
 
 type Invoice struct {
-	SubscriptionPlanCode *string                    `json:"subscriptionPlanCode"`
-	SubscriptionPeriod   *subPkg.SubscriptionPeriod `json:"subscriptionPeriod"`
-	Currency             *subPkg.Currency           `json:"currency"`
+	SubscriptionPlanCode    *string                        `json:"subscriptionPlanCode"`
+	SubscriptionPeriodUnit  *subPkg.SubscriptionPeriodUnit `json:"subscriptionPeriodUnit"`
+	SubscriptionPeriodCount *int64                         `json:"subscriptionPeriodCount"`
+	Currency                *subPkg.Currency               `json:"currency"`
 }
 
 type PostInvoiceRequest struct {
@@ -77,13 +78,21 @@ func (s Server) postInvoice(w http.ResponseWriter, r *http.Request) {
 		err = apperrors.NewBadRequestErr("cannot purchase basic subscription")
 		return
 	}
-	if req.Data.SubscriptionPeriod == nil {
-		err = apperrors.NewBadRequestErr("subscription period is required")
+	if req.Data.SubscriptionPeriodUnit == nil {
+		err = apperrors.NewBadRequestErr("subscription period unit is required")
 		return
 	}
-	var period subPkg.SubscriptionPeriod
-	if period, ok = subPkg.SubscriptionPeriodMapping[string(*req.Data.SubscriptionPeriod)]; !ok {
-		err = apperrors.NewBadRequestErr("invalid subscription period")
+	var periodUnit subPkg.SubscriptionPeriodUnit
+	if periodUnit, ok = subPkg.SubscriptionPeriodUnitMapping[string(*req.Data.SubscriptionPeriodUnit)]; !ok {
+		err = apperrors.NewBadRequestErr("invalid subscription period unit")
+		return
+	}
+	if req.Data.SubscriptionPeriodCount == nil {
+		err = apperrors.NewBadRequestErr("subscription period count is required")
+		return
+	}
+	if *req.Data.SubscriptionPeriodCount != 1 {
+		err = apperrors.NewBadRequestErr("invalid subscription period count")
 		return
 	}
 	if req.Data.Currency == nil {
@@ -114,7 +123,7 @@ func (s Server) postInvoice(w http.ResponseWriter, r *http.Request) {
 	// TOOD: проверка на наличие активного инвойса
 
 	var tgInvoiceParams *tgbotapi.SendInvoiceParams
-	if tgInvoiceParams, err = usecases.GetTgInvoiceParams(s.Res, tgChat, user, plan, period, currency); err != nil {
+	if tgInvoiceParams, err = usecases.GetTgInvoiceParams(s.Res, tgChat, user, plan, periodUnit, *req.Data.SubscriptionPeriodCount, currency); err != nil {
 		return
 	}
 
