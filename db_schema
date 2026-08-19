@@ -24,7 +24,7 @@ CREATE TABLE habits (
 	creator_id BIGINT NOT NULL REFERENCES users(id),
 	title VARCHAR(256) NOT NULL,
 	description TEXT,
-	color VARCHAR(32) NOT NULL DEFAULT 'green',
+	color VARCHAR(32) NOT NULL DEFAULT 'green' CHECK (color IN ('red', 'orange', 'yellow', 'lime', 'green', 'blue', 'purple')),
 	created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
 	updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL
 );
@@ -103,9 +103,21 @@ CREATE TABLE user_subscriptions (
 	id BIGSERIAL PRIMARY KEY UNIQUE NOT NULL,
 	active BOOLEAN NOT NULL DEFAULT TRUE,
 	user_id INTEGER NOT NULL REFERENCES users(id),
-	plan_code VARCHAR(32) NOT NULL,
+	plan_code VARCHAR(32) NOT NULL CHECK (plan_code IN ('basic', 'premium')),
 	start_dt TIMESTAMP WITHOUT TIME ZONE NOT NULL,
 	finish_dt TIMESTAMP WITHOUT TIME ZONE,
 	created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
 	updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL
 );
+
+ALTER TABLE habits
+ADD CONSTRAINT habits_color_check
+CHECK (color IN (
+    'red',
+    'orange',
+    'yellow',
+    'lime',
+    'green',
+    'blue',
+    'purple'
+));

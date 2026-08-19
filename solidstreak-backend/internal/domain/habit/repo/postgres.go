@@ -129,6 +129,9 @@ func (r pgRepo) GetByOwnerIDAndStatus(ownerID int64, status hPkg.HabitStatus, re
 		if err != nil {
 			return nil, err
 		}
+		if _, ok := hPkg.ColorMapping[string(h.Color)]; !ok {
+			return nil, apperrors.NewInternalErr("habit has invalid color")
+		}
 		habits = append(habits, h)
 	}
 	if rows.Err() != nil {
@@ -180,6 +183,10 @@ func (r pgRepo) GetByIDAndOwnerID(id int64, ownerID int64, requestedByOwner bool
 			return nil, apperrors.NewNotFoundErr("couldn't find habit for specified user")
 		}
 		return nil, err
+	}
+
+	if _, ok := hPkg.ColorMapping[string(h.Color)]; !ok {
+		return nil, apperrors.NewInternalErr("habit has invalid color")
 	}
 
 	return h, nil

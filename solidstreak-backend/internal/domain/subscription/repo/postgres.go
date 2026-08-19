@@ -53,5 +53,9 @@ func (r pgRepo) GetActiveByUserID(userID int64) (*subPkg.Subscription, error) {
 		return nil, err
 	}
 
+	if _, ok := r.subPlans[s.PlanCode]; !ok {
+		return nil, apperrors.NewInternalErr("subscription has invalid plan code")
+	}
+
 	return s, nil
 }
