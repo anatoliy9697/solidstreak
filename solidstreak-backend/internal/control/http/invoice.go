@@ -2,12 +2,16 @@ package http
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"time"
 
+	"github.com/google/uuid"
 	tgbotapi "github.com/mymmrac/telego"
 
 	apperrors "github.com/anatoliy9697/solidstreak/solidstreak-backend/pkg/errors"
 
+	invPkg "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/invoice"
 	subPkg "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/subscription"
 	tcPkg "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/tgchat"
 	usrPkg "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/user"
@@ -18,7 +22,7 @@ type Invoice struct {
 	SubscriptionPlanCode    *string                        `json:"subscriptionPlanCode"`
 	SubscriptionPeriodUnit  *subPkg.SubscriptionPeriodUnit `json:"subscriptionPeriodUnit"`
 	SubscriptionPeriodCount *int64                         `json:"subscriptionPeriodCount"`
-	Currency                *subPkg.Currency               `json:"currency"`
+	Currency                *invPkg.Currency               `json:"currency"`
 }
 
 type PostInvoiceRequest struct {
@@ -99,8 +103,8 @@ func (s Server) postInvoice(w http.ResponseWriter, r *http.Request) {
 		err = apperrors.NewBadRequestErr("currency is required")
 		return
 	}
-	var currency subPkg.Currency
-	if currency, ok = subPkg.CurrencyMapping[string(*req.Data.Currency)]; !ok {
+	var currency invPkg.Currency
+	if currency, ok = invPkg.CurrencyMapping[string(*req.Data.Currency)]; !ok {
 		err = apperrors.NewBadRequestErr("invalid currency")
 		return
 	}
@@ -120,16 +124,47 @@ func (s Server) postInvoice(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var pricing *subPkg.Pricing
+	for _, p := range plan.Pricing {
+		if p.PeriodUnit == periodUnit && p.PeriodCount == *req.Data.SubscriptionPeriodCount && p.Currency == currency {
+			pricing = &p
+			break
+		}
+	}
+	if pricing == nil {
+		err = apperrors.NewNotFoundErr(fmt.Sprintf("couldn't find pricing for plan \"%s\", period unit \"%s\", period count \"%d\", currency \"%s\"", plan.Code, periodUnit, *req.Data.SubscriptionPeriodCount, currency))
+		return
+	}
+
 	// TOOD: проверка на наличие активного инвойса
+	// TODO: проверять, что пользователь не имеет активной бесконечной подписки
+
+	uuid := uuid.NewString()
 
 	var tgInvoiceParams *tgbotapi.SendInvoiceParams
-	if tgInvoiceParams, err = usecases.GetTgInvoiceParams(s.Res, tgChat, user, plan, periodUnit, *req.Data.SubscriptionPeriodCount, currency); err != nil {
+	if tgInvoiceParams, err = usecases.GetTgInvoiceParams(s.Res, tgChat, user, plan.Code, periodUnit, *req.Data.SubscriptionPeriodCount, currency, pricing.Price, uuid); err != nil {
 		return
 	}
 
 	if err = usecases.SendTgInvoice(r.Context(), s.Res.TgBotAPI, tgInvoiceParams); err != nil {
 		return
 	}
+
+	_ = invPkg.NewInvoice(
+		uuid, currency, pricing.Price, user.ID,
+		time.Now().Add(24*time.Hour), // TODO: сделать настройку времени жизни инвойса
+	)
+
+	_ = subPkg.NewSubscriptionEvent(
+		subPkg.SubscriptionEventTypeAcquisition,
+		subPkg.SubscriptionEventStatusInProgress,
+		subPkg.SubscriptionOriginPurchase,
+		plan.Code,
+		periodUnit,
+		*req.Data.SubscriptionPeriodCount,
+		user.ID,
+		uuid,
+	)
 
 	// TODO: создание инвойса в БД
 

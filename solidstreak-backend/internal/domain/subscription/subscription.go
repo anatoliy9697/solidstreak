@@ -2,6 +2,8 @@ package subscription
 
 import (
 	"time"
+
+	invPkg "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/invoice"
 )
 
 type SubscriptionPeriodUnit string
@@ -18,21 +20,11 @@ var SubscriptionPeriodUnitMapping = map[string]SubscriptionPeriodUnit{
 	string(SubscriptionPeriodUnitLifetime): SubscriptionPeriodUnitLifetime,
 }
 
-type Currency string
-
-const (
-	CurrencyTgStars Currency = "XTR"
-)
-
-var CurrencyMapping = map[string]Currency{
-	string(CurrencyTgStars): CurrencyTgStars,
-}
-
 type Pricing struct {
 	PeriodUnit   SubscriptionPeriodUnit `json:"periodUnit"`
 	PeriodCount  int64                  `json:"periodCount"`
 	Price        float64                `json:"price"`
-	Currency     Currency               `json:"currency"`
+	Currency     invPkg.Currency        `json:"currency"`
 	DisplayOrder int64                  `json:"displayOrder"`
 }
 
@@ -54,6 +46,41 @@ type Subscription struct {
 	UpdatedAt *time.Time `json:"updatedAt,omitempty"`
 }
 
+type SubscriptionEventType string
+
+const (
+	SubscriptionEventTypeAcquisition SubscriptionEventType = "acquisition"
+)
+
+type SubscriptionEventStatus string
+
+const (
+	SubscriptionEventStatusInProgress     SubscriptionEventStatus = "in_progress"
+	SubscriptionEventStatusCompleted      SubscriptionEventStatus = "completed"
+	SubscriptionEventStatusPaymentTimeOut SubscriptionEventStatus = "payment_timeout"
+)
+
+type SubscriptionOrigin string
+
+const (
+	SubscriptionOriginPurchase SubscriptionOrigin = "purchase"
+)
+
+type SubscriptionEvent struct {
+	Active                  bool                    `json:"active"`
+	Type                    SubscriptionEventType   `json:"type"`
+	Status                  SubscriptionEventStatus `json:"status"`
+	SubscriptionOrigin      SubscriptionOrigin      `json:"subscriptionOrigin"`
+	SubscriptionPlanCode    string                  `json:"subscriptionPlanCode"`
+	SubscriptionPeriodUnit  SubscriptionPeriodUnit  `json:"subscriptionPeriodUnit"`
+	SubscriptionPeriodCount int64                   `json:"subscriptionPeriodCount"`
+	UserID                  int64                   `json:"userId"`
+	SubscriptionID          int64                   `json:"subscriptionId"`
+	InvoiceUUID             string                  `json:"invoiceUUID"`
+	CreatedAt               time.Time               `json:"createdAt"`
+	UpdatedAt               time.Time               `json:"updatedAt"`
+}
+
 func GetSubscriptionPlans(
 	basicPlanPriceStarsPerMonth float64,
 	basicPlanPriceStarsPerYear float64,
@@ -73,21 +100,21 @@ func GetSubscriptionPlans(
 				PeriodUnit:   SubscriptionPeriodUnitMonth,
 				PeriodCount:  1,
 				Price:        basicPlanPriceStarsPerMonth,
-				Currency:     CurrencyTgStars,
+				Currency:     invPkg.CurrencyTgStars,
 				DisplayOrder: 1,
 			},
 			{
 				PeriodUnit:   SubscriptionPeriodUnitYear,
 				PeriodCount:  1,
 				Price:        basicPlanPriceStarsPerYear,
-				Currency:     CurrencyTgStars,
+				Currency:     invPkg.CurrencyTgStars,
 				DisplayOrder: 2,
 			},
 			{
 				PeriodUnit:   SubscriptionPeriodUnitLifetime,
 				PeriodCount:  1,
 				Price:        basicPlanPriceStarsLifetime,
-				Currency:     CurrencyTgStars,
+				Currency:     invPkg.CurrencyTgStars,
 				DisplayOrder: 3,
 			},
 		},
@@ -102,21 +129,21 @@ func GetSubscriptionPlans(
 				PeriodUnit:   SubscriptionPeriodUnitMonth,
 				PeriodCount:  1,
 				Price:        premiumPlanPriceStarsPerMonth,
-				Currency:     CurrencyTgStars,
+				Currency:     invPkg.CurrencyTgStars,
 				DisplayOrder: 1,
 			},
 			{
 				PeriodUnit:   SubscriptionPeriodUnitYear,
 				PeriodCount:  1,
 				Price:        premiumPlanPriceStarsPerYear,
-				Currency:     CurrencyTgStars,
+				Currency:     invPkg.CurrencyTgStars,
 				DisplayOrder: 2,
 			},
 			{
 				PeriodUnit:   SubscriptionPeriodUnitLifetime,
 				PeriodCount:  1,
 				Price:        premiumPlanPriceStarsLifetime,
-				Currency:     CurrencyTgStars,
+				Currency:     invPkg.CurrencyTgStars,
 				DisplayOrder: 3,
 			},
 		},
@@ -127,5 +154,30 @@ func GetSubscriptionPlans(
 	return map[string]*Plan{
 		"basic":   basicPlan,
 		"premium": premiumPlan,
+	}
+}
+
+func NewSubscriptionEvent(
+	eventType SubscriptionEventType,
+	status SubscriptionEventStatus,
+	subscriptionOrigin SubscriptionOrigin,
+	subscriptionPlanCode string,
+	subscriptionPeriodUnit SubscriptionPeriodUnit,
+	subscriptionPeriodCount int64,
+	userID int64,
+	invoiceUUID string,
+) *SubscriptionEvent {
+	return &SubscriptionEvent{
+		Active:                  true,
+		Type:                    eventType,
+		Status:                  status,
+		SubscriptionOrigin:      subscriptionOrigin,
+		SubscriptionPlanCode:    subscriptionPlanCode,
+		SubscriptionPeriodUnit:  subscriptionPeriodUnit,
+		SubscriptionPeriodCount: subscriptionPeriodCount,
+		UserID:                  userID,
+		InvoiceUUID:             invoiceUUID,
+		CreatedAt:               time.Now(),
+		UpdatedAt:               time.Now(),
 	}
 }
