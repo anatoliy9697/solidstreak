@@ -94,6 +94,8 @@ FOR VALUES FROM ('2026-11-01') TO ('2026-12-01');
 CREATE TABLE user_habit_checks_y2026m12 PARTITION OF user_habit_checks
 FOR VALUES FROM ('2026-12-01') TO ('2027-01-01');
 
+-- Next release --
+
 ALTER TABLE users ADD COLUMN lang_code VARCHAR(3) NOT NULL DEFAULT 'en';
 UPDATE users SET lang_code = tg_lang_code;
 
@@ -121,3 +123,17 @@ CHECK (color IN (
     'blue',
     'purple'
 ));
+
+CREATE TABLE invoices (
+	active BOOLEAN NOT NULL DEFAULT TRUE,
+	uuid VARCHAR(64) NOT NULL,
+	status VARCHAR(32) NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'paid', 'expired')),
+	currency VARCHAR(32) NOT NULL CHECK (currency IN ('XTR')),
+	amount BIGINT NOT NULL,
+	user_id INTEGER NOT NULL REFERENCES users(id),
+	tg_message_id BIGINT NOT NULL,
+	tg_payment_charge_id VARCHAR(256),
+	expires_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+	created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+	updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL
+);

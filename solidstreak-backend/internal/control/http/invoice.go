@@ -150,7 +150,7 @@ func (s Server) postInvoice(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_ = invPkg.NewInvoice(
+	invoice := invPkg.NewInvoice(
 		uuid, currency, pricing.Price, user.ID,
 		time.Now().Add(24*time.Hour), // TODO: сделать настройку времени жизни инвойса
 	)
@@ -166,7 +166,10 @@ func (s Server) postInvoice(w http.ResponseWriter, r *http.Request) {
 		uuid,
 	)
 
-	// TODO: создание инвойса в БД
+	if err = s.Res.InvRepo.Create(invoice); err != nil {
+		return
+	}
+	// TODO: создание ивента подписки в БД
 
 	// response := PostInvoiceResponse{Data: invoice}
 

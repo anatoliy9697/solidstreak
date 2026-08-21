@@ -31,7 +31,7 @@ type Invoice struct {
 	UUID              string        `json:"uuid"`
 	Status            InvoiceStatus `json:"status"`
 	Currency          Currency      `json:"currency"`
-	Amount            float64       `json:"amount"`
+	Amount            int64         `json:"amount"`
 	UserID            int64         `json:"userId"`
 	TgMessageID       int64         `json:"tgMessageId"`
 	TgPaymentChargeID string        `json:"tgPaymentChargeId"`
@@ -43,7 +43,7 @@ type Invoice struct {
 func NewInvoice(
 	uuid string,
 	currency Currency,
-	amount float64,
+	amount int64,
 	userID int64,
 	expiresAt time.Time,
 ) *Invoice {

@@ -18,6 +18,7 @@ import (
 	"github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/control/http"
 	"github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/control/tgbot"
 	hRepo "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/habit/repo"
+	invRepo "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/invoice/repo"
 	subPkg "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/subscription"
 	subRepo "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/subscription/repo"
 	tcRepo "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/tgchat/repo"
@@ -76,19 +77,20 @@ func main() {
 		TgBotAPI:  tgBotAPI,
 		UsrRepo:   usrRepo.Init(mainCtx, pgPool),
 		SubRepo: subRepo.Init(mainCtx, pgPool, subPkg.GetSubscriptionPlans(
-			viper.GetFloat64("basic_subscription.price.tg_stars_per_month"),
-			viper.GetFloat64("basic_subscription.price.tg_stars_per_year"),
-			viper.GetFloat64("basic_subscription.price.tg_stars_lifetime"),
+			viper.GetInt64("basic_subscription.price.tg_stars_per_month"),
+			viper.GetInt64("basic_subscription.price.tg_stars_per_year"),
+			viper.GetInt64("basic_subscription.price.tg_stars_lifetime"),
 			viper.GetInt64("basic_subscription.active_habits_limit"),
 			viper.GetBool("basic_subscription.show_ads"),
-			viper.GetFloat64("premium_subscription.price.tg_stars_per_month"),
-			viper.GetFloat64("premium_subscription.price.tg_stars_per_year"),
-			viper.GetFloat64("premium_subscription.price.tg_stars_lifetime"),
+			viper.GetInt64("premium_subscription.price.tg_stars_per_month"),
+			viper.GetInt64("premium_subscription.price.tg_stars_per_year"),
+			viper.GetInt64("premium_subscription.price.tg_stars_lifetime"),
 			viper.GetInt64("premium_subscription.active_habits_limit"),
 			viper.GetBool("premium_subscription.show_ads"),
 		)),
 		TCRepo:    tcRepo.Init(mainCtx, pgPool),
 		HabitRepo: hRepo.Init(mainCtx, pgPool),
+		InvRepo:   invRepo.Init(mainCtx, pgPool),
 	}
 
 	goroutineDoneCh := make(chan struct{}, 2)
@@ -128,13 +130,13 @@ func validateConfigParams() error {
 	if viper.GetInt("basic_subscription.active_habits_limit") <= 0 {
 		return errors.New("basic_subscription.active_habits_limit should be greater than 0")
 	}
-	if viper.GetFloat64("premium_subscription.price.tg_stars_per_month") <= 0 {
+	if viper.GetInt64("premium_subscription.price.tg_stars_per_month") <= 0 {
 		return errors.New("premium_subscription.price.tg_stars_per_month should be greater than 0")
 	}
-	if viper.GetFloat64("premium_subscription.price.tg_stars_per_year") <= 0 {
+	if viper.GetInt64("premium_subscription.price.tg_stars_per_year") <= 0 {
 		return errors.New("premium_subscription.price.tg_stars_per_year should be greater than 0")
 	}
-	if viper.GetFloat64("premium_subscription.price.tg_stars_lifetime") <= 0 {
+	if viper.GetInt64("premium_subscription.price.tg_stars_lifetime") <= 0 {
 		return errors.New("premium_subscription.price.tg_stars_lifetime should be greater than 0")
 	}
 	if viper.GetInt64("premium_subscription.active_habits_limit") <= 0 {

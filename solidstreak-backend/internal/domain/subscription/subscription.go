@@ -23,7 +23,7 @@ var SubscriptionPeriodUnitMapping = map[string]SubscriptionPeriodUnit{
 type Pricing struct {
 	PeriodUnit   SubscriptionPeriodUnit `json:"periodUnit"`
 	PeriodCount  int64                  `json:"periodCount"`
-	Price        float64                `json:"price"`
+	Price        int64                  `json:"price"`
 	Currency     invPkg.Currency        `json:"currency"`
 	DisplayOrder int64                  `json:"displayOrder"`
 }
@@ -82,14 +82,14 @@ type SubscriptionEvent struct {
 }
 
 func GetSubscriptionPlans(
-	basicPlanPriceStarsPerMonth float64,
-	basicPlanPriceStarsPerYear float64,
-	basicPlanPriceStarsLifetime float64,
+	basicPlanPriceStarsPerMonth int64,
+	basicPlanPriceStarsPerYear int64,
+	basicPlanPriceStarsLifetime int64,
 	basicPlanActiveHabitsLimit int64,
 	basicPlanShowAds bool,
-	premiumPlanPriceStarsPerMonth float64,
-	premiumPlanPriceStarsPerYear float64,
-	premiumPlanPriceStarsLifetime float64,
+	premiumPlanPriceStarsPerMonth int64,
+	premiumPlanPriceStarsPerYear int64,
+	premiumPlanPriceStarsLifetime int64,
 	premiumPlanActiveHabitsLimit int64,
 	premiumPlanShowAds bool,
 ) map[string]*Plan {

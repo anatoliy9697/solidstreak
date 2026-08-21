@@ -62,7 +62,7 @@ func GetTgInvoiceParams(
 	subscriptionPeriodUnit subPkg.SubscriptionPeriodUnit,
 	subscriptionPeriodCount int64,
 	currency invPkg.Currency,
-	price float64,
+	price int64,
 	invoiceUUID string,
 ) (*tgbotapi.SendInvoiceParams, error) {
 	lang := ""
