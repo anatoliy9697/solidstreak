@@ -13,6 +13,7 @@ type Repo interface {
 	GetBasic() (*subPkg.Subscription, error)
 	GetPlanByCode(string) (*subPkg.Plan, error)
 	GetPlans() ([]*subPkg.Plan, error)
+	CreateEvent(*subPkg.SubscriptionEvent) error
 }
 
 func Init(c context.Context, p *pgxpool.Pool, subPlans map[string]*subPkg.Plan) Repo {

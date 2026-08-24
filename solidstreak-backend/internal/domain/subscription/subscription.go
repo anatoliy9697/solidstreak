@@ -67,18 +67,19 @@ const (
 )
 
 type SubscriptionEvent struct {
-	Active                  bool                    `json:"active"`
-	Type                    SubscriptionEventType   `json:"type"`
-	Status                  SubscriptionEventStatus `json:"status"`
-	SubscriptionOrigin      SubscriptionOrigin      `json:"subscriptionOrigin"`
-	SubscriptionPlanCode    string                  `json:"subscriptionPlanCode"`
-	SubscriptionPeriodUnit  SubscriptionPeriodUnit  `json:"subscriptionPeriodUnit"`
-	SubscriptionPeriodCount int64                   `json:"subscriptionPeriodCount"`
-	UserID                  int64                   `json:"userId"`
-	SubscriptionID          int64                   `json:"subscriptionId"`
-	InvoiceUUID             string                  `json:"invoiceUUID"`
-	CreatedAt               time.Time               `json:"createdAt"`
-	UpdatedAt               time.Time               `json:"updatedAt"`
+	ID                      int64
+	Active                  bool
+	Type                    SubscriptionEventType
+	Status                  SubscriptionEventStatus
+	SubscriptionOrigin      SubscriptionOrigin
+	SubscriptionPlanCode    string
+	SubscriptionPeriodUnit  SubscriptionPeriodUnit
+	SubscriptionPeriodCount int64
+	UserID                  int64
+	SubscriptionID          *int64
+	InvoiceUUID             string
+	CreatedAt               time.Time
+	UpdatedAt               time.Time
 }
 
 func GetSubscriptionPlans(

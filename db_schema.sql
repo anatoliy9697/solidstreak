@@ -137,3 +137,19 @@ CREATE TABLE invoices (
 	created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
 	updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL
 );
+
+CREATE TABLE subscription_events (
+	id BIGSERIAL PRIMARY KEY UNIQUE NOT NULL,
+	active BOOLEAN NOT NULL DEFAULT TRUE,
+	type VARCHAR(32) NOT NULL CHECK (type IN ('acquisition')),
+	status VARCHAR(32) NOT NULL CHECK (status IN ('in_progress', 'completed', 'payment_timeout')),
+	subscription_origin VARCHAR(32) CHECK (subscription_origin IN ('purchase')),
+	subscription_plan_code VARCHAR(32) NOT NULL CHECK (subscription_plan_code IN ('basic', 'premium')),
+	subscription_period_unit VARCHAR(32) NOT NULL CHECK (subscription_period_unit IN ('month', 'year', 'lifetime')),
+	subscription_period_count BIGINT NOT NULL,
+	user_id BIGINT NOT NULL REFERENCES users(id),
+	subscription_id BIGINT REFERENCES user_subscriptions(id),
+	invoice_uuid VARCHAR(64),
+	created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+	updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL
+);

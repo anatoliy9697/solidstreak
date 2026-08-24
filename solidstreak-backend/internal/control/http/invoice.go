@@ -29,6 +29,10 @@ type PostInvoiceRequest struct {
 	Data *Invoice `json:"data"`
 }
 
+type PostInvoiceResponse struct {
+	Data *invPkg.Invoice `json:"data"`
+}
+
 func (s Server) postInvoice(w http.ResponseWriter, r *http.Request) {
 	var err error
 
@@ -138,6 +142,7 @@ func (s Server) postInvoice(w http.ResponseWriter, r *http.Request) {
 
 	// TOOD: проверка на наличие активного инвойса
 	// TODO: проверять, что пользователь не имеет активной бесконечной подписки
+	// TODO: вынести бизнес-логику в usecases, чтобы не дублировать код в разных местах
 
 	uuid := uuid.NewString()
 
@@ -155,7 +160,7 @@ func (s Server) postInvoice(w http.ResponseWriter, r *http.Request) {
 		time.Now().Add(24*time.Hour), // TODO: сделать настройку времени жизни инвойса
 	)
 
-	_ = subPkg.NewSubscriptionEvent(
+	subscriptionEvent := subPkg.NewSubscriptionEvent(
 		subPkg.SubscriptionEventTypeAcquisition,
 		subPkg.SubscriptionEventStatusInProgress,
 		subPkg.SubscriptionOriginPurchase,
@@ -169,9 +174,12 @@ func (s Server) postInvoice(w http.ResponseWriter, r *http.Request) {
 	if err = s.Res.InvRepo.Create(invoice); err != nil {
 		return
 	}
-	// TODO: создание ивента подписки в БД
 
-	// response := PostInvoiceResponse{Data: invoice}
+	if err = s.Res.SubRepo.CreateEvent(subscriptionEvent); err != nil {
+		return
+	}
 
-	// json.NewEncoder(w).Encode(response)
+	response := PostInvoiceResponse{Data: invoice}
+
+	json.NewEncoder(w).Encode(response)
 }
