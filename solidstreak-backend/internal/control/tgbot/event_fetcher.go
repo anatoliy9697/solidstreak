@@ -39,8 +39,8 @@ loop:
 
 		// New update received
 		case upd := <-upds:
-			// Ignore non-message and non-callback updates
-			if upd.Message == nil && upd.CallbackQuery == nil {
+			// Ignore non-message updates
+			if upd.Message == nil {
 				continue
 			}
 			ef.Res.Logger.Info("new update received", "update", upd)

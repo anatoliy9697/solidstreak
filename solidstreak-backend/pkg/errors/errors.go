@@ -24,6 +24,7 @@ var ErrInternal = &Error{Err: nil, HTTPCode: 500, Title: "internal server error"
 var ErrBadRequest = &Error{Err: nil, HTTPCode: 400, Title: "bad request", Detail: ""}
 var ErrUnauthorized = &Error{Err: nil, HTTPCode: 401, Title: "unauthorized", Detail: ""}
 var ErrForbidden = &Error{Err: nil, HTTPCode: 403, Title: "forbidden", Detail: ""}
+var ErrConflict = &Error{Err: nil, HTTPCode: 409, Title: "conflict", Detail: ""}
 
 func NewNotFoundErr(detail string) *Error {
 	return &Error{Err: ErrNotFound, HTTPCode: 404, Title: "not found", Detail: detail}
@@ -43,4 +44,8 @@ func NewUnauthorizedErr(detail string) *Error {
 
 func NewForbiddenErr(detail string) *Error {
 	return &Error{Err: ErrForbidden, HTTPCode: 403, Title: "forbidden", Detail: detail}
+}
+
+func NewConflictErr(detail string) *Error {
+	return &Error{Err: ErrConflict, HTTPCode: 409, Title: "conflict", Detail: detail}
 }

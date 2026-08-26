@@ -2,12 +2,9 @@ package http
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
-	"time"
-
-	"github.com/google/uuid"
-	tgbotapi "github.com/mymmrac/telego"
 
 	apperrors "github.com/anatoliy9697/solidstreak/solidstreak-backend/pkg/errors"
 
@@ -140,42 +137,26 @@ func (s Server) postInvoice(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TOOD: проверка на наличие активного инвойса
-	// TODO: проверять, что пользователь не имеет активной бесконечной подписки
-	// TODO: вынести бизнес-логику в usecases, чтобы не дублировать код в разных местах
-
-	uuid := uuid.NewString()
-
-	var tgInvoiceParams *tgbotapi.SendInvoiceParams
-	if tgInvoiceParams, err = usecases.GetTgInvoiceParams(s.Res, tgChat, user, plan.Code, periodUnit, *req.Data.SubscriptionPeriodCount, currency, pricing.Price, uuid); err != nil {
+	var subscription *subPkg.Subscription
+	if subscription, err = usecases.GetUserSubscription(s.Res, user); err != nil {
 		return
 	}
 
-	if err = usecases.SendTgInvoice(r.Context(), s.Res.TgBotAPI, tgInvoiceParams); err != nil {
+	if subscription.PlanCode == "premium" && subscription.FinishDt == nil {
+		err = apperrors.NewConflictErr("cannot purchase or renew a premium subscription while user already has an active lifetime subscription")
 		return
 	}
 
-	invoice := invPkg.NewInvoice(
-		uuid, currency, pricing.Price, user.ID,
-		time.Now().Add(24*time.Hour), // TODO: сделать настройку времени жизни инвойса
-	)
-
-	subscriptionEvent := subPkg.NewSubscriptionEvent(
-		subPkg.SubscriptionEventTypeAcquisition,
-		subPkg.SubscriptionEventStatusInProgress,
-		subPkg.SubscriptionOriginPurchase,
-		plan.Code,
-		periodUnit,
-		*req.Data.SubscriptionPeriodCount,
-		user.ID,
-		uuid,
-	)
-
-	if err = s.Res.InvRepo.Create(invoice); err != nil {
+	var invoice *invPkg.Invoice
+	if invoice, err = s.Res.InvRepo.GetActiveNotExpiredByStatusesAndUserID(userID, []string{string(invPkg.InvoiceStatusPending)}); err != nil && !errors.Is(err, apperrors.ErrNotFound) {
+		return
+	}
+	if invoice != nil {
+		err = apperrors.NewConflictErr("user already has an active and not expired invoice in pending status")
 		return
 	}
 
-	if err = s.Res.SubRepo.CreateEvent(subscriptionEvent); err != nil {
+	if invoice, err = usecases.CreateAndSendInvoice(r.Context(), s.Res, user, tgChat, plan, periodUnit, *req.Data.SubscriptionPeriodCount, pricing); err != nil {
 		return
 	}
 

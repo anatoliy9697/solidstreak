@@ -10,6 +10,7 @@ import (
 
 type Repo interface {
 	Create(*invPkg.Invoice) error
+	GetActiveNotExpiredByStatusesAndUserID(userID int64, statuses []string) (*invPkg.Invoice, error)
 }
 
 func Init(c context.Context, p *pgxpool.Pool) Repo {
