@@ -15,12 +15,13 @@ import (
 )
 
 type Server struct {
-	Env          string
-	CertFilePath string
-	KeyFilePath  string
-	Addr         string
-	Res          common.Resources
-	s            *http.Server
+	Env              string
+	CertFilePath     string
+	KeyFilePath      string
+	Addr             string
+	InvoiceExpiresIn time.Duration
+	Res              common.Resources
+	s                *http.Server
 }
 
 func (s Server) Run(mainCtx context.Context, doneCh chan struct{}) {

@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
@@ -103,11 +104,12 @@ func main() {
 
 	// Running web server
 	webServer := http.Server{
-		Env:          os.Getenv("ENV"),
-		CertFilePath: os.Getenv("CERT_FILE_PATH"),
-		KeyFilePath:  os.Getenv("KEY_FILE_PATH"),
-		Addr:         os.Getenv("SERVER_ADDR"),
-		Res:          resources,
+		Env:              os.Getenv("ENV"),
+		CertFilePath:     os.Getenv("CERT_FILE_PATH"),
+		KeyFilePath:      os.Getenv("KEY_FILE_PATH"),
+		Addr:             os.Getenv("SERVER_ADDR"),
+		InvoiceExpiresIn: time.Duration(viper.GetInt64("invoice_expires_in_ms")) * time.Millisecond,
+		Res:              resources,
 	}
 	go webServer.Run(mainCtx, goroutineDoneCh)
 
@@ -126,6 +128,9 @@ func main() {
 func validateConfigParams() error {
 	if viper.GetInt("max_event_handlers") <= 0 {
 		return errors.New("max_event_handlers should be greater than 0")
+	}
+	if viper.GetInt64("invoice_expires_in_ms") <= 0 {
+		return errors.New("invoice_expires_in_ms should be greater than 0")
 	}
 	if viper.GetInt("basic_subscription.active_habits_limit") <= 0 {
 		return errors.New("basic_subscription.active_habits_limit should be greater than 0")

@@ -156,7 +156,7 @@ func (s Server) postInvoice(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if invoice, err = usecases.CreateAndSendInvoice(r.Context(), s.Res, user, tgChat, plan, periodUnit, *req.Data.SubscriptionPeriodCount, pricing); err != nil {
+	if invoice, err = usecases.CreateAndSendInvoice(r.Context(), s.Res, user, tgChat, plan, periodUnit, *req.Data.SubscriptionPeriodCount, pricing, s.InvoiceExpiresIn); err != nil {
 		return
 	}
 

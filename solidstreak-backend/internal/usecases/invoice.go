@@ -24,23 +24,13 @@ func CreateAndSendInvoice(
 	subscriptionPeriodUnit subPkg.SubscriptionPeriodUnit,
 	subscriptionPeriodCount int64,
 	pricing *subPkg.Pricing,
+	invoiceExpiresIn time.Duration,
 ) (*invPkg.Invoice, error) {
 	var err error
 
-	invoiceUUID := uuid.NewString()
-
-	var tgInvoiceParams *tgbotapi.SendInvoiceParams
-	if tgInvoiceParams, err = GetTgInvoiceParams(r, tc, u, plan.Code, subscriptionPeriodUnit, subscriptionPeriodCount, pricing.Currency, pricing.Price, invoiceUUID); err != nil {
-		return nil, err
-	}
-
-	if err = SendTgInvoice(ctx, r.TgBotAPI, tgInvoiceParams); err != nil {
-		return nil, err
-	}
-
 	invoice := invPkg.NewInvoice(
-		invoiceUUID, pricing.Currency, pricing.Price, u.ID,
-		time.Now().Add(24*time.Hour), // TODO: сделать настройку времени жизни инвойса
+		uuid.NewString(), pricing.Currency, pricing.Price, u.ID,
+		time.Now().Add(invoiceExpiresIn),
 	)
 
 	subscriptionEvent := subPkg.NewSubscriptionEvent(
@@ -51,8 +41,17 @@ func CreateAndSendInvoice(
 		subscriptionPeriodUnit,
 		subscriptionPeriodCount,
 		u.ID,
-		invoiceUUID,
+		invoice.UUID,
 	)
+
+	var tgInvoiceParams *tgbotapi.SendInvoiceParams
+	if tgInvoiceParams, err = GetTgInvoiceParams(r, tc, u, invoice, subscriptionEvent); err != nil {
+		return nil, err
+	}
+
+	if err = SendTgInvoice(ctx, r.TgBotAPI, tgInvoiceParams); err != nil {
+		return nil, err
+	}
 
 	if err = r.InvRepo.Create(invoice); err != nil {
 		return nil, err

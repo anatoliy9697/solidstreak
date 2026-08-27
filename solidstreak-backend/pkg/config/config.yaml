@@ -1,5 +1,6 @@
 log_level:             -4
 max_event_handlers:    10
+invoice_expires_in_ms: 900000
 
 basic_subscription:
   price:

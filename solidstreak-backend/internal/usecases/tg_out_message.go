@@ -58,12 +58,8 @@ func GetTgInvoiceParams(
 	r common.Resources,
 	tc *tcPkg.Chat,
 	u *usrPkg.User,
-	subscriptionPlanCode string,
-	subscriptionPeriodUnit subPkg.SubscriptionPeriodUnit,
-	subscriptionPeriodCount int64,
-	currency invPkg.Currency,
-	price int64,
-	invoiceUUID string,
+	invoice *invPkg.Invoice,
+	subscriptionEvent *subPkg.SubscriptionEvent,
 ) (*tgbotapi.SendInvoiceParams, error) {
 	lang := ""
 	if u != nil {
@@ -73,20 +69,20 @@ func GetTgInvoiceParams(
 		lang = common.GetDefaultLang()
 	}
 
-	payload := "user:" + fmt.Sprint(u.ID) + ":subscription:" + subscriptionPlanCode + ":periodUnit:" + string(subscriptionPeriodUnit) + ":periodCount:" + fmt.Sprint(subscriptionPeriodCount) + ":currency:" + string(currency) + ":invoiceUUID:" + invoiceUUID
+	payload := "user:" + fmt.Sprint(u.ID) + ":subscription:" + subscriptionEvent.SubscriptionPlanCode + ":periodUnit:" + string(subscriptionEvent.SubscriptionPeriodUnit) + ":periodCount:" + fmt.Sprint(subscriptionEvent.SubscriptionPeriodCount) + ":currency:" + string(invoice.Currency) + ":invoiceUUID:" + invoice.UUID
 
-	subscriptionPeriodLabel := getSubscriptionPeriodLabel(lang, subscriptionPeriodUnit, subscriptionPeriodCount)
+	subscriptionPeriodLabel := getSubscriptionPeriodLabel(lang, subscriptionEvent.SubscriptionPeriodUnit, subscriptionEvent.SubscriptionPeriodCount)
 	return &tgbotapi.SendInvoiceParams{
 		ChatID:        tgbotapi.ChatID{ID: tc.TgID},
 		Title:         common.MESSAGES[lang]["premiumSubscription"],                             // Если появятся другие планы, то нужно будет формировать динамически
 		Description:   common.MESSAGES[lang]["accessToPremium"] + " " + subscriptionPeriodLabel, // Если появятся другие планы, то нужно будет формировать динамически + TODO: добавить время, за которое надо выполнить оплату
 		Payload:       payload,
 		ProviderToken: "", // Для Stars должен быть пустой
-		Currency:      string(currency),
+		Currency:      string(invoice.Currency),
 		Prices: []tgbotapi.LabeledPrice{
 			{
 				Label:  common.MESSAGES[lang]["premium"] + " " + subscriptionPeriodLabel, // Если появятся другие планы, то нужно будет формировать динамически
-				Amount: int(price),
+				Amount: int(invoice.Amount),
 			},
 		},
 		StartParameter: "invoice_lock", // Чтобы предотвратить оплату из других чатов
