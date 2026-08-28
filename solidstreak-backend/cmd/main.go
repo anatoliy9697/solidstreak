@@ -108,7 +108,7 @@ func main() {
 		CertFilePath:     os.Getenv("CERT_FILE_PATH"),
 		KeyFilePath:      os.Getenv("KEY_FILE_PATH"),
 		Addr:             os.Getenv("SERVER_ADDR"),
-		InvoiceExpiresIn: time.Duration(viper.GetInt64("invoice_expires_in_ms")) * time.Millisecond,
+		InvoiceExpiresIn: time.Duration(viper.GetInt64("invoice_expires_in_min")) * time.Minute,
 		Res:              resources,
 	}
 	go webServer.Run(mainCtx, goroutineDoneCh)
@@ -129,8 +129,8 @@ func validateConfigParams() error {
 	if viper.GetInt("max_event_handlers") <= 0 {
 		return errors.New("max_event_handlers should be greater than 0")
 	}
-	if viper.GetInt64("invoice_expires_in_ms") <= 0 {
-		return errors.New("invoice_expires_in_ms should be greater than 0")
+	if viper.GetInt64("invoice_expires_in_min") <= 0 {
+		return errors.New("invoice_expires_in_min should be greater than 0")
 	}
 	if viper.GetInt("basic_subscription.active_habits_limit") <= 0 {
 		return errors.New("basic_subscription.active_habits_limit should be greater than 0")

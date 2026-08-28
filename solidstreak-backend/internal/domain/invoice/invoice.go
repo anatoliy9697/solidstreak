@@ -33,7 +33,7 @@ type Invoice struct {
 	Currency          Currency      `json:"currency"`
 	Amount            int64         `json:"amount"`
 	UserID            int64         `json:"userId"`
-	TgMessageID       int64         `json:"-"`
+	TgMessageID       int           `json:"-"`
 	TgPaymentChargeID string        `json:"-"`
 	ExpiresAt         time.Time     `json:"expiresAt"`
 	CreatedAt         time.Time     `json:"createdAt"`

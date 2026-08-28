@@ -1,19 +1,19 @@
-log_level:             -4
-max_event_handlers:    10
-invoice_expires_in_ms: 900000
+log_level:              -4
+max_event_handlers:     10
+invoice_expires_in_min: 15
 
 basic_subscription:
   price:
     tg_stars_per_month: 0
     tg_stars_per_year:  0
     tg_stars_lifetime:  0
-  active_habits_limit: 5
-  show_ads: true
+  active_habits_limit:  5
+  show_ads:             true
 
 premium_subscription:
   price:
-    tg_stars_per_month: 100
-    tg_stars_per_year:  1000
-    tg_stars_lifetime:  2500
-  active_habits_limit: 100
-  show_ads: false
+    tg_stars_per_month: 1 # 100
+    tg_stars_per_year:  2 # 1000
+    tg_stars_lifetime:  3 #2500
+  active_habits_limit:  100
+  show_ads:             false

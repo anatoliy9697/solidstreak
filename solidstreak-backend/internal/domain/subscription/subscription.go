@@ -52,6 +52,10 @@ const (
 	SubscriptionEventTypeAcquisition SubscriptionEventType = "acquisition"
 )
 
+var SubscriptionEventTypeMapping = map[string]SubscriptionEventType{
+	string(SubscriptionEventTypeAcquisition): SubscriptionEventTypeAcquisition,
+}
+
 type SubscriptionEventStatus string
 
 const (
@@ -60,11 +64,21 @@ const (
 	SubscriptionEventStatusPaymentTimeOut SubscriptionEventStatus = "payment_timeout"
 )
 
+var SubscriptionEventStatusMapping = map[string]SubscriptionEventStatus{
+	string(SubscriptionEventStatusInProgress):     SubscriptionEventStatusInProgress,
+	string(SubscriptionEventStatusCompleted):      SubscriptionEventStatusCompleted,
+	string(SubscriptionEventStatusPaymentTimeOut): SubscriptionEventStatusPaymentTimeOut,
+}
+
 type SubscriptionOrigin string
 
 const (
 	SubscriptionOriginPurchase SubscriptionOrigin = "purchase"
 )
+
+var SubscriptionOriginMapping = map[string]SubscriptionOrigin{
+	string(SubscriptionOriginPurchase): SubscriptionOriginPurchase,
+}
 
 type SubscriptionEvent struct {
 	ID                      int64

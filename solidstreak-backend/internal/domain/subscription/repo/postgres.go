@@ -98,3 +98,72 @@ func (r pgRepo) CreateEvent(se *subPkg.SubscriptionEvent) error {
 
 	return err
 }
+
+func (r pgRepo) GetActiveEventByInvoiceUUIDAndStatuses(invoiceUUID string, statuses []subPkg.SubscriptionEventStatus) (*subPkg.SubscriptionEvent, error) {
+	se := &subPkg.SubscriptionEvent{}
+
+	sql := `
+		SELECT
+			active,
+			type,
+			status,
+			subscription_origin,
+			subscription_plan_code,
+			subscription_period_unit,
+			subscription_period_count,
+			user_id,
+			subscription_id,
+			invoice_uuid,
+			created_at,
+			updated_at
+		FROM subscription_events
+		WHERE 
+			active = true AND 
+			invoice_uuid = $1 AND 
+			status = ANY($2)
+		LIMIT 1
+	`
+	err := r.pool.QueryRow(
+		r.ctx,
+		sql,
+		invoiceUUID,
+		statuses,
+	).Scan(
+		&se.Active,
+		&se.Type,
+		&se.Status,
+		&se.SubscriptionOrigin,
+		&se.SubscriptionPlanCode,
+		&se.SubscriptionPeriodUnit,
+		&se.SubscriptionPeriodCount,
+		&se.UserID,
+		&se.SubscriptionID,
+		&se.InvoiceUUID,
+		&se.CreatedAt,
+		&se.UpdatedAt,
+	)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			return nil, apperrors.NewNotFoundErr("couldn't find subscription event")
+		}
+		return nil, err
+	}
+
+	if _, ok := subPkg.SubscriptionEventTypeMapping[string(se.Type)]; !ok {
+		return nil, apperrors.NewInternalErr("subscription event has invalid type")
+	}
+	if _, ok := subPkg.SubscriptionEventStatusMapping[string(se.Status)]; !ok {
+		return nil, apperrors.NewInternalErr("subscription event has invalid status")
+	}
+	if _, ok := subPkg.SubscriptionOriginMapping[string(se.SubscriptionOrigin)]; !ok {
+		return nil, apperrors.NewInternalErr("subscription event has invalid subscription origin")
+	}
+	if _, ok := r.subPlans[string(se.SubscriptionPlanCode)]; !ok {
+		return nil, apperrors.NewInternalErr("subscription event has invalid subscription plan code")
+	}
+	if _, ok := subPkg.SubscriptionPeriodUnitMapping[string(se.SubscriptionPeriodUnit)]; !ok {
+		return nil, apperrors.NewInternalErr("subscription event has invalid subscription period unit")
+	}
+
+	return se, nil
+}

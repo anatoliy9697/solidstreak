@@ -40,7 +40,7 @@ loop:
 		// New update received
 		case upd := <-upds:
 			// Ignore non-message updates
-			if upd.Message == nil {
+			if upd.Message == nil && upd.PreCheckoutQuery == nil {
 				continue
 			}
 			ef.Res.Logger.Info("new update received", "update", upd)

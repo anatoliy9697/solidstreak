@@ -125,13 +125,13 @@ CHECK (color IN (
 ));
 
 CREATE TABLE invoices (
+	uuid VARCHAR(64) PRIMARY KEY UNIQUE NOT NULL,
 	active BOOLEAN NOT NULL DEFAULT TRUE,
-	uuid VARCHAR(64) NOT NULL,
 	status VARCHAR(32) NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'paid', 'expired')),
 	currency VARCHAR(32) NOT NULL CHECK (currency IN ('XTR')),
 	amount BIGINT NOT NULL,
 	user_id INTEGER NOT NULL REFERENCES users(id),
-	tg_message_id BIGINT NOT NULL,
+	tg_message_id INTEGER NOT NULL,
 	tg_payment_charge_id VARCHAR(256),
 	expires_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
 	created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,

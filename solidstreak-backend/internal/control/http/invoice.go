@@ -148,7 +148,7 @@ func (s Server) postInvoice(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var invoice *invPkg.Invoice
-	if invoice, err = s.Res.InvRepo.GetActiveNotExpiredByStatusesAndUserID(userID, []string{string(invPkg.InvoiceStatusPending)}); err != nil && !errors.Is(err, apperrors.ErrNotFound) {
+	if invoice, err = s.Res.InvRepo.GetActiveNotExpiredByUserIDAndStatuses(userID, []invPkg.InvoiceStatus{invPkg.InvoiceStatusPending}); err != nil && !errors.Is(err, apperrors.ErrNotFound) {
 		return
 	}
 	if invoice != nil {
