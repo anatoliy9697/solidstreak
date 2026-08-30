@@ -55,18 +55,18 @@ func NewInvoice(
 		Amount:    amount,
 		UserID:    userID,
 		ExpiresAt: expiresAt,
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
+		CreatedAt: time.Now().UTC(),
+		UpdatedAt: time.Now().UTC(),
 	}
 }
 
 func (i *Invoice) SetTgMessageID(tgMessageID int) {
 	i.TgMessageID = tgMessageID
-	i.UpdatedAt = time.Now()
+	i.UpdatedAt = time.Now().UTC()
 }
 
 func (i *Invoice) MarkAsPaid(tgPaymentChargeID string) {
 	i.Status = InvoiceStatusPaid
 	i.TgPaymentChargeID = tgPaymentChargeID
-	i.UpdatedAt = time.Now()
+	i.UpdatedAt = time.Now().UTC()
 }

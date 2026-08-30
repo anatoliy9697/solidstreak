@@ -11,7 +11,8 @@ import (
 type Date time.Time
 
 func New(t time.Time) Date {
-	return Date(time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, t.Location()))
+	t = t.UTC()
+	return Date(time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, time.UTC))
 }
 
 func (d Date) String() string {
@@ -36,7 +37,7 @@ func (d *Date) UnmarshalJSON(b []byte) error {
 	if err != nil {
 		return err
 	}
-	*d = Date(t)
+	*d = New(t)
 	return nil
 }
 
@@ -46,7 +47,7 @@ func (d Date) Value() (driver.Value, error) {
 
 func (d *Date) Scan(value interface{}) error {
 	if value == nil {
-		*d = Date(time.Time{})
+		*d = New(time.Time{})
 		return nil
 	}
 	switch v := value.(type) {
@@ -73,9 +74,13 @@ func (d *Date) Scan(value interface{}) error {
 }
 
 func Today() Date {
-	return New(time.Now())
+	return New(time.Now().UTC())
 }
 
 func (d Date) AddDate(years int, months int, days int) Date {
 	return New(time.Time(d).AddDate(years, months, days))
+}
+
+func (d Date) DDMMYYYYString() string {
+	return time.Time(d).Format("02.01.2006")
 }

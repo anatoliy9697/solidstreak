@@ -7,14 +7,14 @@ CREATE TABLE users (
 	tg_lang_code VARCHAR(3) NOT NULL,
 	tg_is_bot BOOLEAN NOT NULL,
 	lang_code VARCHAR(3) NOT NULL DEFAULT 'en',
-	created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL
+	created_at TIMESTAMPTZ NOT NULL
 );
 
 CREATE TABLE tg_chats (
 	id BIGSERIAL PRIMARY KEY UNIQUE NOT NULL,
 	tg_id BIGINT UNIQUE NOT NULL,
 	user_id BIGINT NOT NULL REFERENCES users(id),
-	created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL
+	created_at TIMESTAMPTZ NOT NULL
 );
 
 CREATE TABLE habits (
@@ -25,8 +25,8 @@ CREATE TABLE habits (
 	title VARCHAR(256) NOT NULL,
 	description TEXT,
 	color VARCHAR(32) NOT NULL DEFAULT 'green' CHECK (color IN ('red', 'orange', 'yellow', 'lime', 'green', 'blue', 'purple')),
-	created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
-	updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL
+	created_at TIMESTAMPTZ NOT NULL,
+	updated_at TIMESTAMPTZ NOT NULL
 );
 
 CREATE TABLE user_habits (
@@ -42,7 +42,7 @@ CREATE TABLE user_habit_checks (
 	habit_id BIGINT NOT NULL REFERENCES habits(id),
 	check_date DATE NOT NULL,
 	completed BOOLEAN NOT NULL DEFAULT FALSE,
-	checked_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+	checked_at TIMESTAMPTZ NOT NULL,
 	PRIMARY KEY (user_id, habit_id, check_date)
 ) PARTITION BY RANGE (check_date);
 
@@ -106,10 +106,10 @@ CREATE TABLE user_subscriptions (
 	active BOOLEAN NOT NULL DEFAULT TRUE,
 	user_id INTEGER NOT NULL REFERENCES users(id),
 	plan_code VARCHAR(32) NOT NULL CHECK (plan_code IN ('basic', 'premium')),
-	start_dt DATE NOT NULL,
-	finish_dt DATE,
-	created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
-	updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL
+	start_date DATE NOT NULL,
+	finish_date DATE,
+	created_at TIMESTAMPTZ NOT NULL,
+	updated_at TIMESTAMPTZ NOT NULL
 );
 
 ALTER TABLE habits
@@ -133,9 +133,9 @@ CREATE TABLE invoices (
 	user_id INTEGER NOT NULL REFERENCES users(id),
 	tg_message_id INTEGER NOT NULL,
 	tg_payment_charge_id VARCHAR(256),
-	expires_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
-	created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
-	updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL
+	expires_at TIMESTAMPTZ NOT NULL,
+	created_at TIMESTAMPTZ NOT NULL,
+	updated_at TIMESTAMPTZ NOT NULL
 );
 
 CREATE TABLE subscription_events (
@@ -147,11 +147,24 @@ CREATE TABLE subscription_events (
 	subscription_plan_code VARCHAR(32) NOT NULL CHECK (subscription_plan_code IN ('basic', 'premium')),
 	subscription_period_unit VARCHAR(32) NOT NULL CHECK (subscription_period_unit IN ('month', 'year', 'lifetime')),
 	subscription_period_count BIGINT NOT NULL,
-	subscription_period_start_dt DATE,
-	subscription_period_finish_dt DATE,
+	subscription_period_start_date DATE,
+	subscription_period_finish_date DATE,
 	user_id BIGINT NOT NULL REFERENCES users(id),
 	subscription_id BIGINT REFERENCES user_subscriptions(id),
 	invoice_uuid VARCHAR(64) REFERENCES invoices(uuid),
-	created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
-	updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL
+	created_at TIMESTAMPTZ NOT NULL,
+	updated_at TIMESTAMPTZ NOT NULL
 );
+
+ALTER TABLE users
+	ALTER COLUMN created_at TYPE TIMESTAMPTZ USING created_at AT TIME ZONE 'UTC';
+
+ALTER TABLE tg_chats
+	ALTER COLUMN created_at TYPE TIMESTAMPTZ USING created_at AT TIME ZONE 'UTC';
+
+ALTER TABLE habits
+	ALTER COLUMN created_at TYPE TIMESTAMPTZ USING created_at AT TIME ZONE 'UTC',
+	ALTER COLUMN updated_at TYPE TIMESTAMPTZ USING updated_at AT TIME ZONE 'UTC';
+
+ALTER TABLE user_habit_checks
+	ALTER COLUMN checked_at TYPE TIMESTAMPTZ USING checked_at AT TIME ZONE 'UTC';

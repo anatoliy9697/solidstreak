@@ -12,6 +12,6 @@ func NewChat(tgID int64, userID int64) *Chat {
 	return &Chat{
 		TgID:      tgID,
 		UserID:    userID,
-		CreatedAt: time.Now(),
+		CreatedAt: time.Now().UTC(),
 	}
 }

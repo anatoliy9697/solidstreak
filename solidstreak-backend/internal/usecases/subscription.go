@@ -2,11 +2,11 @@ package usecases
 
 import (
 	"errors"
-	"time"
 
 	"github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/common"
 	subPkg "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/subscription"
 	usrPkg "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/user"
+	"github.com/anatoliy9697/solidstreak/solidstreak-backend/pkg/date"
 	apperrors "github.com/anatoliy9697/solidstreak/solidstreak-backend/pkg/errors"
 )
 
@@ -26,28 +26,27 @@ func GetUserSubscription(r common.Resources, u *usrPkg.User) (*subPkg.Subscripti
 	return sub, nil
 }
 
-func CalculateSubscriptionEventStartAndFinishDt(renew bool, prevEventFinishDt *time.Time, subscriptionEvent *subPkg.SubscriptionEvent) (*time.Time, *time.Time) {
-	var startDt time.Time
-	if renew && prevEventFinishDt != nil {
-		startDt = time.Date(prevEventFinishDt.Year(), prevEventFinishDt.Month(), prevEventFinishDt.Day(), 0, 0, 0, 0, prevEventFinishDt.Location()).AddDate(0, 0, 1)
+func CalculateSubscriptionEventStartAndFinishDate(renew bool, prevEventFinishDate *date.Date, subscriptionEvent *subPkg.SubscriptionEvent) (*date.Date, *date.Date) {
+	var startDate date.Date
+	if renew && prevEventFinishDate != nil {
+		startDate = prevEventFinishDate.AddDate(0, 0, 1)
 	} else {
-		startDt = time.Now()
-		startDt = time.Date(startDt.Year(), startDt.Month(), startDt.Day(), 0, 0, 0, 0, startDt.Location())
+		startDate = date.Today()
 	}
 
-	var finishDtPtr *time.Time
+	var finishDatePtr *date.Date
 	if subscriptionEvent.SubscriptionPeriodUnit != subPkg.SubscriptionPeriodUnitLifetime {
-		var finishDt time.Time
+		var finishDate date.Date
 		switch subscriptionEvent.SubscriptionPeriodUnit {
 		case subPkg.SubscriptionPeriodUnitYear:
-			finishDt = startDt.AddDate(int(subscriptionEvent.SubscriptionPeriodCount), 0, 0)
+			finishDate = startDate.AddDate(int(subscriptionEvent.SubscriptionPeriodCount), 0, 0)
 		case subPkg.SubscriptionPeriodUnitMonth:
-			finishDt = startDt.AddDate(0, int(subscriptionEvent.SubscriptionPeriodCount), 0)
+			finishDate = startDate.AddDate(0, int(subscriptionEvent.SubscriptionPeriodCount), 0)
 		}
-		finishDtPtr = &finishDt
+		finishDatePtr = &finishDate
 	}
 
-	return &startDt, finishDtPtr
+	return &startDate, finishDatePtr
 }
 
 func CreateOrUpdateSubscription(
@@ -55,25 +54,25 @@ func CreateOrUpdateSubscription(
 	subscription *subPkg.Subscription,
 	renew bool,
 	planCode string,
-	startDt *time.Time,
-	finishDt *time.Time,
+	startDate *date.Date,
+	finishDate *date.Date,
 	userID int64,
 ) (*subPkg.Subscription, error) {
 	var err error
 
 	if renew {
-		subscription.SetFinishDt(finishDt)
+		subscription.SetFinishDt(finishDate)
 		err = r.SubRepo.Update(subscription)
 	} else {
-		subscription = subPkg.NewSubscription(planCode, startDt, finishDt, userID)
+		subscription = subPkg.NewSubscription(planCode, startDate, finishDate, userID)
 		err = r.SubRepo.Create(subscription)
 	}
 
 	return subscription, err
 }
 
-func CompleteSubscriptionEvent(r common.Resources, subscriptionEvent *subPkg.SubscriptionEvent, startDt *time.Time, finishDt *time.Time, subscriptionID *int64) error {
-	subscriptionEvent.SetSubscriptionStartAndFinishDt(startDt, finishDt)
+func CompleteSubscriptionEvent(r common.Resources, subscriptionEvent *subPkg.SubscriptionEvent, startDate *date.Date, finishDate *date.Date, subscriptionID *int64) error {
+	subscriptionEvent.SetSubscriptionStartAndFinishDate(startDate, finishDate)
 	subscriptionEvent.SetSubscriptionID(subscriptionID)
 	subscriptionEvent.MarkAsCompleted()
 	return r.SubRepo.UpdateEvent(subscriptionEvent)

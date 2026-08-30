@@ -105,7 +105,7 @@ func (r pgRepo) GetActiveNotExpiredByUserIDAndStatuses(userID int64, statuses []
 		FROM invoices
 		WHERE 
 			active = true AND 
-			expires_at > now() AND 
+			expires_at > NOW() AND 
 			user_id = $1 AND 
 			status = ANY($2) 
 		LIMIT 1
@@ -165,7 +165,7 @@ func (r pgRepo) GetActiveNotExpiredByUUIDAndStatuses(uuid string, statuses []inv
 		FROM invoices
 		WHERE 
 			active = true AND 
-			expires_at > now() AND 
+			expires_at > NOW() AND 
 			uuid = $1 AND 
 			status = ANY($2) 
 		LIMIT 1

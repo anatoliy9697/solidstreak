@@ -73,7 +73,7 @@ func NewHabit(title, description string, color Color, creatorID int64, isPublic 
 		Color:       color,
 		IsPublic:    isPublic,
 		CreatorID:   creatorID,
-		CreatedAt:   time.Now(),
-		UpdatedAt:   time.Now(),
+		CreatedAt:   time.Now().UTC(),
+		UpdatedAt:   time.Now().UTC(),
 	}
 }

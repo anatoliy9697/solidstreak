@@ -250,6 +250,7 @@ func (s Server) putHabit(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// TODO: вынести в сеттер
 	habit.Archived = *req.Data.Archived
 	habit.Title = *req.Data.Title
 	if req.Data.Description != nil {
@@ -259,7 +260,7 @@ func (s Server) putHabit(w http.ResponseWriter, r *http.Request) {
 	}
 	habit.Color = color
 	habit.IsPublic = *req.Data.IsPublic
-	habit.UpdatedAt = time.Now()
+	habit.UpdatedAt = time.Now().UTC()
 
 	if err = s.Res.HabitRepo.Update(habit); err != nil {
 		return
@@ -315,8 +316,9 @@ func (s Server) deleteHabit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// TODO: вынести в сеттер
 	habit.Active = false
-	habit.UpdatedAt = time.Now()
+	habit.UpdatedAt = time.Now().UTC()
 
 	if err = s.Res.HabitRepo.Update(habit); err != nil {
 		return
@@ -554,12 +556,13 @@ func (s Server) postUserHabitCheck(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// TODO: вынести в конструктор
 	habitCheck := &hPkg.HabitCheck{
 		HabitID:   habit.ID,
 		UserID:    user.ID,
 		CheckDate: *req.Data.CheckDate,
 		Completed: *req.Data.Completed,
-		CheckedAt: time.Now(),
+		CheckedAt: time.Now().UTC(),
 	}
 
 	if err = s.Res.HabitRepo.SetUserHabitCheck(habitCheck); err != nil {

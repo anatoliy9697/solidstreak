@@ -33,7 +33,7 @@ export interface Subscription {
   active: boolean
   planCode: string
   plan: Plan
-  startDt?: Date
-  finishDt?: Date
+  startDate?: Date
+  finishDate?: Date
   createdAt?: Date
 }

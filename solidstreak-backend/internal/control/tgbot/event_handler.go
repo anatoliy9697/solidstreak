@@ -146,7 +146,7 @@ func (eh EventHandler) handlePreCheckoutQuery(ctx context.Context, pcq *tgbotapi
 		return
 	}
 
-	if subscription.PlanCode == "premium" && subscription.FinishDt == nil {
+	if subscription.PlanCode == "premium" && subscription.FinishDate == nil {
 		err = errors.New("cannot purchase or renew a premium subscription while user already has an active lifetime subscription")
 		return
 	}
@@ -218,14 +218,14 @@ func (eh EventHandler) handleSuccessfulPayment(ctx context.Context, pmt *tgbotap
 		return
 	}
 
-	if subscription.PlanCode == "premium" && subscription.FinishDt == nil {
+	if subscription.PlanCode == "premium" && subscription.FinishDate == nil {
 		err = errors.New("cannot purchase or renew a premium subscription while user already has an active lifetime subscription")
 		return
 	}
 
 	renew := subscription.PlanCode != "basic"
 
-	startDt, finishDt := usecases.CalculateSubscriptionEventStartAndFinishDt(renew, subscription.FinishDt, subscriptionEvent)
+	startDt, finishDt := usecases.CalculateSubscriptionEventStartAndFinishDate(renew, subscription.FinishDate, subscriptionEvent)
 
 	if subscription, err = usecases.CreateOrUpdateSubscription(eh.Res, subscription, renew, subscriptionEvent.SubscriptionPlanCode, startDt, finishDt, u.ID); err != nil {
 		return

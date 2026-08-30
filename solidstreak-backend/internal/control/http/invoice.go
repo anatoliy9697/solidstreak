@@ -142,7 +142,7 @@ func (s Server) postInvoice(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if subscription.PlanCode == "premium" && subscription.FinishDt == nil {
+	if subscription.PlanCode == "premium" && subscription.FinishDate == nil {
 		err = apperrors.NewConflictErr("cannot purchase or renew a premium subscription while user already has an active lifetime subscription")
 		return
 	}

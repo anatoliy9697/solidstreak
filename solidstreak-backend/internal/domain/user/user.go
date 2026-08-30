@@ -28,6 +28,6 @@ func NewUser(tgID int64, tgUsername, tgFirstName, tgLastName, tgLangCode, langCo
 		TgLangCode:  tgLangCode,
 		LangCode:    langCode,
 		TgIsBot:     tgIsBot,
-		CreatedAt:   time.Now(),
+		CreatedAt:   time.Now().UTC(),
 	}
 }

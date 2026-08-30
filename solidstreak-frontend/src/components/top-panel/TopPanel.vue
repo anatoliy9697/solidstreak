@@ -77,10 +77,10 @@ watch(
             : t('common.premiumUpper', 'Premium')
         }}
         {{
-          userStore._subscription!.finishDt
+          userStore._subscription!.finishDate
             ? t('common.until', 'until') +
               ' ' +
-              dateToDDMMYYYYString(userStore._subscription!.finishDt)
+              dateToDDMMYYYYString(userStore._subscription!.finishDate) + ' UTC'
             : t('common.subscription', 'subscription')
         }}
         <template
@@ -88,7 +88,7 @@ watch(
             subscriptionStore.planByCode('premium') &&
             (userStore._subscription!.plan.code === 'basic' ||
               (userStore._subscription!.plan.code === 'premium' &&
-                userStore._subscription!.finishDt))
+                userStore._subscription!.finishDate))
           "
         >
           (<a

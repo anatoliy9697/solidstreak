@@ -25,8 +25,8 @@ func (r pgRepo) Create(s *subPkg.Subscription) error {
 		INSERT INTO user_subscriptions (
 			active,
 			plan_code,
-			start_dt,
-			finish_dt,
+			start_date,
+			finish_date,
 			user_id,
 			created_at,
 			updated_at
@@ -39,8 +39,8 @@ func (r pgRepo) Create(s *subPkg.Subscription) error {
 		sql,
 		s.Active,
 		s.PlanCode,
-		s.StartDt,
-		s.FinishDt,
+		s.StartDate,
+		s.FinishDate,
 		s.UserID,
 		s.CreatedAt,
 		s.UpdatedAt,
@@ -54,8 +54,8 @@ func (r pgRepo) Update(s *subPkg.Subscription) error {
 		UPDATE user_subscriptions SET
 			active = $1,
 			plan_code = $2,
-			start_dt = $3,
-			finish_dt = $4,
+			start_date = $3,
+			finish_date = $4,
 			user_id = $5,
 			created_at = $6,
 			updated_at = $7
@@ -66,8 +66,8 @@ func (r pgRepo) Update(s *subPkg.Subscription) error {
 		sql,
 		s.Active,
 		s.PlanCode,
-		s.StartDt,
-		s.FinishDt,
+		s.StartDate,
+		s.FinishDate,
 		s.UserID,
 		s.CreatedAt,
 		s.UpdatedAt,
@@ -81,13 +81,13 @@ func (r pgRepo) GetActiveByUserID(userID int64) (*subPkg.Subscription, error) {
 	s := &subPkg.Subscription{}
 
 	sql := `
-		SELECT id, active, plan_code, start_dt, finish_dt, user_id, created_at, updated_at
+		SELECT id, active, plan_code, start_date, finish_date, user_id, created_at, updated_at
 		FROM user_subscriptions 
 		WHERE 
 			active IS TRUE
 			AND user_id = $1
-			AND start_dt <= NOW()
-			AND (finish_dt IS NULL OR finish_dt + interval '1 day' > NOW())
+			AND start_date <= (NOW() AT TIME ZONE 'UTC')::date
+			AND (finish_date IS NULL OR finish_date + interval '1 day' > (NOW() AT TIME ZONE 'UTC')::date)
 		LIMIT 1
 	`
 	err := r.pool.QueryRow(
@@ -98,8 +98,8 @@ func (r pgRepo) GetActiveByUserID(userID int64) (*subPkg.Subscription, error) {
 		&s.ID,
 		&s.Active,
 		&s.PlanCode,
-		&s.StartDt,
-		&s.FinishDt,
+		&s.StartDate,
+		&s.FinishDate,
 		&s.UserID,
 		&s.CreatedAt,
 		&s.UpdatedAt,
@@ -128,8 +128,8 @@ func (r pgRepo) CreateEvent(se *subPkg.SubscriptionEvent) error {
 			subscription_plan_code,
 			subscription_period_unit,
 			subscription_period_count,
-			subscription_period_start_dt,
-			subscription_period_finish_dt,
+			subscription_period_start_date,
+			subscription_period_finish_date,
 			user_id,
 			subscription_id,
 			invoice_uuid,
@@ -149,8 +149,8 @@ func (r pgRepo) CreateEvent(se *subPkg.SubscriptionEvent) error {
 		se.SubscriptionPlanCode,
 		se.SubscriptionPeriodUnit,
 		se.SubscriptionPeriodCount,
-		se.SubscriptionPeriodStartDt,
-		se.SubscriptionPeriodFinishDt,
+		se.SubscriptionPeriodStartDate,
+		se.SubscriptionPeriodFinishDate,
 		se.UserID,
 		se.SubscriptionID,
 		se.InvoiceUUID,
@@ -171,8 +171,8 @@ func (r pgRepo) UpdateEvent(se *subPkg.SubscriptionEvent) error {
 			subscription_plan_code = $5,
 			subscription_period_unit = $6,
 			subscription_period_count = $7,
-			subscription_period_start_dt = $8,
-			subscription_period_finish_dt = $9,
+			subscription_period_start_date = $8,
+			subscription_period_finish_date = $9,
 			user_id = $10,
 			subscription_id = $11,
 			invoice_uuid = $12,
@@ -190,8 +190,8 @@ func (r pgRepo) UpdateEvent(se *subPkg.SubscriptionEvent) error {
 		se.SubscriptionPlanCode,
 		se.SubscriptionPeriodUnit,
 		se.SubscriptionPeriodCount,
-		se.SubscriptionPeriodStartDt,
-		se.SubscriptionPeriodFinishDt,
+		se.SubscriptionPeriodStartDate,
+		se.SubscriptionPeriodFinishDate,
 		se.UserID,
 		se.SubscriptionID,
 		se.InvoiceUUID,
@@ -216,8 +216,8 @@ func (r pgRepo) GetActiveEventByInvoiceUUIDAndStatuses(invoiceUUID string, statu
 			subscription_plan_code,
 			subscription_period_unit,
 			subscription_period_count,
-			subscription_period_start_dt,
-			subscription_period_finish_dt,
+			subscription_period_start_date,
+			subscription_period_finish_date,
 			user_id,
 			subscription_id,
 			invoice_uuid,
@@ -244,8 +244,8 @@ func (r pgRepo) GetActiveEventByInvoiceUUIDAndStatuses(invoiceUUID string, statu
 		&se.SubscriptionPlanCode,
 		&se.SubscriptionPeriodUnit,
 		&se.SubscriptionPeriodCount,
-		&se.SubscriptionPeriodStartDt,
-		&se.SubscriptionPeriodFinishDt,
+		&se.SubscriptionPeriodStartDate,
+		&se.SubscriptionPeriodFinishDate,
 		&se.UserID,
 		&se.SubscriptionID,
 		&se.InvoiceUUID,

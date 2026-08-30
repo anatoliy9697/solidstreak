@@ -33,7 +33,7 @@ func CreateAndSendInvoice(
 
 	invoice := invPkg.NewInvoice(
 		uuid.NewString(), pricing.Currency, pricing.Price, u.ID,
-		time.Now().Add(invoiceExpiresIn),
+		time.Now().UTC().Add(invoiceExpiresIn),
 	)
 
 	subscriptionEvent := subPkg.NewSubscriptionEvent(

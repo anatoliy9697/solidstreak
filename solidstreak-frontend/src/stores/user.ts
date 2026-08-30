@@ -58,8 +58,8 @@ export const useUserStore = defineStore('user', {
         )
         localStorage.setItem('lang', this.langCode)
         this._subscription = user.subscription || this._subscription
-        if (this._subscription!.finishDt)
-          this._subscription!.finishDt = new Date(this._subscription!.finishDt) // Преобразуем в Date, т.к. по факту из API оно приходит в строкой
+        if (this._subscription!.finishDate)
+          this._subscription!.finishDate = new Date(this._subscription!.finishDate) // Преобразуем в Date, т.к. по факту из API оно приходит в строкой
       }
 
       return result
