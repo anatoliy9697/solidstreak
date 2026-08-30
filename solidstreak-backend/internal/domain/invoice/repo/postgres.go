@@ -54,6 +54,38 @@ func (r pgRepo) Create(i *invPkg.Invoice) error {
 	return err
 }
 
+func (r pgRepo) Update(i *invPkg.Invoice) error {
+	sql := `
+		UPDATE invoices SET
+			active = $1,
+			status = $2,
+			currency = $3,
+			amount = $4,
+			user_id = $5,
+			tg_message_id = $6,
+			tg_payment_charge_id = $7,
+			expires_at = $8,
+			created_at = $9,
+			updated_at = $10
+		WHERE uuid = $11
+	`
+	_, err := r.p.Exec(r.c, sql,
+		i.Active,
+		i.Status,
+		i.Currency,
+		i.Amount,
+		i.UserID,
+		i.TgMessageID,
+		i.TgPaymentChargeID,
+		i.ExpiresAt,
+		i.CreatedAt,
+		i.UpdatedAt,
+		i.UUID,
+	)
+
+	return err
+}
+
 func (r pgRepo) GetActiveNotExpiredByUserIDAndStatuses(userID int64, statuses []invPkg.InvoiceStatus) (*invPkg.Invoice, error) {
 	i := &invPkg.Invoice{}
 

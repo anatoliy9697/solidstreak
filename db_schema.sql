@@ -106,8 +106,8 @@ CREATE TABLE user_subscriptions (
 	active BOOLEAN NOT NULL DEFAULT TRUE,
 	user_id INTEGER NOT NULL REFERENCES users(id),
 	plan_code VARCHAR(32) NOT NULL CHECK (plan_code IN ('basic', 'premium')),
-	start_dt TIMESTAMP WITHOUT TIME ZONE NOT NULL,
-	finish_dt TIMESTAMP WITHOUT TIME ZONE,
+	start_dt DATE NOT NULL,
+	finish_dt DATE,
 	created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
 	updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL
 );
@@ -147,9 +147,11 @@ CREATE TABLE subscription_events (
 	subscription_plan_code VARCHAR(32) NOT NULL CHECK (subscription_plan_code IN ('basic', 'premium')),
 	subscription_period_unit VARCHAR(32) NOT NULL CHECK (subscription_period_unit IN ('month', 'year', 'lifetime')),
 	subscription_period_count BIGINT NOT NULL,
+	subscription_period_start_dt DATE,
+	subscription_period_finish_dt DATE,
 	user_id BIGINT NOT NULL REFERENCES users(id),
 	subscription_id BIGINT REFERENCES user_subscriptions(id),
-	invoice_uuid VARCHAR(64),
+	invoice_uuid VARCHAR(64) REFERENCES invoices(uuid),
 	created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
 	updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL
 );

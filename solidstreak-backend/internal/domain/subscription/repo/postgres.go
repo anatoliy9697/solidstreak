@@ -20,17 +20,74 @@ func initPGRepo(c context.Context, p *pgxpool.Pool, subPlans map[string]*subPkg.
 	return &pgRepo{c, p, subPlans}
 }
 
+func (r pgRepo) Create(s *subPkg.Subscription) error {
+	sql := `
+		INSERT INTO user_subscriptions (
+			active,
+			plan_code,
+			start_dt,
+			finish_dt,
+			user_id,
+			created_at,
+			updated_at
+		)
+		VALUES ($1, $2, $3, $4, $5, $6, $7)
+		RETURNING id
+	`
+	err := r.pool.QueryRow(
+		r.ctx,
+		sql,
+		s.Active,
+		s.PlanCode,
+		s.StartDt,
+		s.FinishDt,
+		s.UserID,
+		s.CreatedAt,
+		s.UpdatedAt,
+	).Scan(&s.ID)
+
+	return err
+}
+
+func (r pgRepo) Update(s *subPkg.Subscription) error {
+	sql := `
+		UPDATE user_subscriptions SET
+			active = $1,
+			plan_code = $2,
+			start_dt = $3,
+			finish_dt = $4,
+			user_id = $5,
+			created_at = $6,
+			updated_at = $7
+		WHERE id = $8
+	`
+	_, err := r.pool.Exec(
+		r.ctx,
+		sql,
+		s.Active,
+		s.PlanCode,
+		s.StartDt,
+		s.FinishDt,
+		s.UserID,
+		s.CreatedAt,
+		s.UpdatedAt,
+		s.ID,
+	)
+
+	return err
+}
+
 func (r pgRepo) GetActiveByUserID(userID int64) (*subPkg.Subscription, error) {
 	s := &subPkg.Subscription{}
 
 	sql := `
-		SELECT id, active, plan_code, start_dt, finish_dt, created_at, updated_at
+		SELECT id, active, plan_code, start_dt, finish_dt, user_id, created_at, updated_at
 		FROM user_subscriptions 
 		WHERE 
 			active IS TRUE
 			AND user_id = $1
 			AND start_dt <= NOW()
-			AND (finish_dt IS NULL OR finish_dt >= NOW())
+			AND (finish_dt IS NULL OR finish_dt + interval '1 day' > NOW())
 		LIMIT 1
 	`
 	err := r.pool.QueryRow(
@@ -43,6 +100,7 @@ func (r pgRepo) GetActiveByUserID(userID int64) (*subPkg.Subscription, error) {
 		&s.PlanCode,
 		&s.StartDt,
 		&s.FinishDt,
+		&s.UserID,
 		&s.CreatedAt,
 		&s.UpdatedAt,
 	)
@@ -70,13 +128,15 @@ func (r pgRepo) CreateEvent(se *subPkg.SubscriptionEvent) error {
 			subscription_plan_code,
 			subscription_period_unit,
 			subscription_period_count,
+			subscription_period_start_dt,
+			subscription_period_finish_dt,
 			user_id,
 			subscription_id,
 			invoice_uuid,
 			created_at,
 			updated_at
 		)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
 		RETURNING id
 	`
 	err := r.pool.QueryRow(
@@ -89,6 +149,8 @@ func (r pgRepo) CreateEvent(se *subPkg.SubscriptionEvent) error {
 		se.SubscriptionPlanCode,
 		se.SubscriptionPeriodUnit,
 		se.SubscriptionPeriodCount,
+		se.SubscriptionPeriodStartDt,
+		se.SubscriptionPeriodFinishDt,
 		se.UserID,
 		se.SubscriptionID,
 		se.InvoiceUUID,
@@ -99,11 +161,54 @@ func (r pgRepo) CreateEvent(se *subPkg.SubscriptionEvent) error {
 	return err
 }
 
+func (r pgRepo) UpdateEvent(se *subPkg.SubscriptionEvent) error {
+	sql := `
+		UPDATE subscription_events SET
+			active = $1,
+			type = $2,
+			status = $3,
+			subscription_origin = $4,
+			subscription_plan_code = $5,
+			subscription_period_unit = $6,
+			subscription_period_count = $7,
+			subscription_period_start_dt = $8,
+			subscription_period_finish_dt = $9,
+			user_id = $10,
+			subscription_id = $11,
+			invoice_uuid = $12,
+			created_at = $13,
+			updated_at = $14
+		WHERE id = $15
+	`
+	_, err := r.pool.Exec(
+		r.ctx,
+		sql,
+		se.Active,
+		se.Type,
+		se.Status,
+		se.SubscriptionOrigin,
+		se.SubscriptionPlanCode,
+		se.SubscriptionPeriodUnit,
+		se.SubscriptionPeriodCount,
+		se.SubscriptionPeriodStartDt,
+		se.SubscriptionPeriodFinishDt,
+		se.UserID,
+		se.SubscriptionID,
+		se.InvoiceUUID,
+		se.CreatedAt,
+		se.UpdatedAt,
+		se.ID,
+	)
+
+	return err
+}
+
 func (r pgRepo) GetActiveEventByInvoiceUUIDAndStatuses(invoiceUUID string, statuses []subPkg.SubscriptionEventStatus) (*subPkg.SubscriptionEvent, error) {
 	se := &subPkg.SubscriptionEvent{}
 
 	sql := `
 		SELECT
+			id,
 			active,
 			type,
 			status,
@@ -111,6 +216,8 @@ func (r pgRepo) GetActiveEventByInvoiceUUIDAndStatuses(invoiceUUID string, statu
 			subscription_plan_code,
 			subscription_period_unit,
 			subscription_period_count,
+			subscription_period_start_dt,
+			subscription_period_finish_dt,
 			user_id,
 			subscription_id,
 			invoice_uuid,
@@ -129,6 +236,7 @@ func (r pgRepo) GetActiveEventByInvoiceUUIDAndStatuses(invoiceUUID string, statu
 		invoiceUUID,
 		statuses,
 	).Scan(
+		&se.ID,
 		&se.Active,
 		&se.Type,
 		&se.Status,
@@ -136,6 +244,8 @@ func (r pgRepo) GetActiveEventByInvoiceUUIDAndStatuses(invoiceUUID string, statu
 		&se.SubscriptionPlanCode,
 		&se.SubscriptionPeriodUnit,
 		&se.SubscriptionPeriodCount,
+		&se.SubscriptionPeriodStartDt,
+		&se.SubscriptionPeriodFinishDt,
 		&se.UserID,
 		&se.SubscriptionID,
 		&se.InvoiceUUID,

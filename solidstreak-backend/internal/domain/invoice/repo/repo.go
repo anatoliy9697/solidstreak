@@ -10,6 +10,7 @@ import (
 
 type Repo interface {
 	Create(*invPkg.Invoice) error
+	Update(*invPkg.Invoice) error
 	GetActiveNotExpiredByUserIDAndStatuses(int64, []invPkg.InvoiceStatus) (*invPkg.Invoice, error)
 	GetActiveNotExpiredByUUIDAndStatuses(string, []invPkg.InvoiceStatus) (*invPkg.Invoice, error)
 }

@@ -11,36 +11,65 @@ import (
 	"github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/common"
 	invPkg "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/invoice"
 	subPkg "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/subscription"
-	usrPkg "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/user"
 )
 
-func GetErrorTgMessageParams(r common.Resources, tcTgID int64, lang string) *tgbotapi.SendMessageParams {
+func NewErrorTgMessageParams(r common.Resources, tcTgID int64, lang string) *tgbotapi.SendMessageParams {
 	if lang == "" {
 		lang = common.GetDefaultLang()
 	}
+
 	return tu.Message(
 		tu.ID(tcTgID),
 		common.MESSAGES[lang]["smthWrong"],
 	)
 }
 
-func GetSuccessTgMessageParams(r common.Resources, tcTgID int64, u *usrPkg.User) *tgbotapi.SendMessageParams {
-	lang := ""
-	if u != nil {
-		lang = u.LangCode
-	}
+func NewDefaultSuccessTgMessageParams(r common.Resources, tcTgID int64, userTgFirstName string, lang string) *tgbotapi.SendMessageParams {
 	if lang == "" {
 		lang = common.GetDefaultLang()
 	}
 
 	return tu.Message(
 		tu.ID(tcTgID),
-		fmt.Sprintf(common.MESSAGES[lang]["helloMsg"], u.TgFirstName),
+		fmt.Sprintf(common.MESSAGES[lang]["helloMsg"], userTgFirstName),
 	).WithReplyMarkup(tu.InlineKeyboard(
 		tu.InlineKeyboardRow(
 			tu.InlineKeyboardButton(common.MESSAGES[lang]["open"]).WithWebApp(tu.WebAppInfo(r.WebAppURL)),
 		),
 	))
+}
+
+func NewSubscriptionPurchaseSuccessTgMessageParams(r common.Resources, tcTgID int64, renew bool, subscriptionEvent *subPkg.SubscriptionEvent, lang string) *tgbotapi.SendMessageParams {
+	if lang == "" {
+		lang = common.GetDefaultLang()
+	}
+
+	var actionLabel string
+	if renew {
+		actionLabel = common.MESSAGES[lang]["renewed"]
+	} else {
+		actionLabel = common.MESSAGES[lang]["purchased"]
+	}
+
+	subscriptionPlanLabel := common.MESSAGES[lang][subscriptionEvent.SubscriptionPlanCode]
+
+	subscriptionPeriodLabel := buildSubscriptionPeriodLabel(lang, subscriptionEvent.SubscriptionPeriodUnit, subscriptionEvent.SubscriptionPeriodCount)
+
+	var subscriptionActiveUntilLabel string
+	if subscriptionEvent.SubscriptionPeriodUnit != subPkg.SubscriptionPeriodUnitLifetime {
+		subscriptionActiveUntilLabel = fmt.Sprintf(common.MESSAGES[lang]["subscriptionActiveUntil"], subscriptionEvent.SubscriptionPeriodFinishDt.Format("02.01.2006")) + "\n\n"
+	}
+
+	return tu.Message(
+		tu.ID(tcTgID),
+		fmt.Sprintf(
+			common.MESSAGES[lang]["subscriptionPurchasedMsg"],
+			actionLabel,
+			subscriptionPlanLabel,
+			subscriptionPeriodLabel,
+			subscriptionActiveUntilLabel,
+		),
+	)
 }
 
 func SendTgMessage(ctx context.Context, tgBotAPI *tgbotapi.Bot, params *tgbotapi.SendMessageParams) error {
@@ -49,7 +78,7 @@ func SendTgMessage(ctx context.Context, tgBotAPI *tgbotapi.Bot, params *tgbotapi
 	return err
 }
 
-func GetTgInvoiceParams(
+func NewTgInvoiceParams(
 	r common.Resources,
 	tcTgID int64,
 	lang string,
@@ -61,13 +90,13 @@ func GetTgInvoiceParams(
 		lang = common.GetDefaultLang()
 	}
 
-	payload := GetInvoicePayloadString(invoice, subscriptionEvent)
+	payload := BuildInvoicePayloadString(invoice, subscriptionEvent)
 
-	subscriptionPeriodLabel := getSubscriptionPeriodLabel(lang, subscriptionEvent.SubscriptionPeriodUnit, subscriptionEvent.SubscriptionPeriodCount)
+	subscriptionPeriodLabel := buildSubscriptionPeriodLabel(lang, subscriptionEvent.SubscriptionPeriodUnit, subscriptionEvent.SubscriptionPeriodCount)
 	return &tgbotapi.SendInvoiceParams{
 		ChatID:        tgbotapi.ChatID{ID: tcTgID},
-		Title:         common.MESSAGES[lang]["premiumSubscription"],                                                                                                                                 // Если появятся другие планы, то нужно будет формировать динамически
-		Description:   common.MESSAGES[lang]["accessToPremium"] + " " + subscriptionPeriodLabel + " " + fmt.Sprintf(common.MESSAGES[lang]["invoiceExpirationMsg"], int(invoiceExpiresIn.Minutes())), // Если появятся другие планы, то нужно будет формировать динамически
+		Title:         common.MESSAGES[lang]["premiumSubscription"],                                                                                                                                  // Если появятся другие планы, то нужно будет формировать динамически
+		Description:   common.MESSAGES[lang]["accessToPremium"] + " " + subscriptionPeriodLabel + ". " + fmt.Sprintf(common.MESSAGES[lang]["invoiceExpirationMsg"], int(invoiceExpiresIn.Minutes())), // Если появятся другие планы, то нужно будет формировать динамически
 		Payload:       payload,
 		ProviderToken: "", // Для Stars должен быть пустой
 		Currency:      string(invoice.Currency),
@@ -86,7 +115,7 @@ func SendTgInvoice(ctx context.Context, tgBotAPI *tgbotapi.Bot, params *tgbotapi
 	return tgBotAPI.SendInvoice(ctx, params)
 }
 
-func GetTgAnswerPreCheckoutQuery(pcqID string, ok bool, lang string) *tgbotapi.AnswerPreCheckoutQueryParams {
+func NewTgAnswerPreCheckoutQuery(pcqID string, ok bool, lang string) *tgbotapi.AnswerPreCheckoutQueryParams {
 	if lang == "" {
 		lang = common.GetDefaultLang()
 	}
@@ -107,7 +136,7 @@ func SendTgAnswerPreCheckoutQuery(ctx context.Context, tgBotAPI *tgbotapi.Bot, p
 	return tgBotAPI.AnswerPreCheckoutQuery(ctx, params)
 }
 
-func getSubscriptionPeriodLabel(lang string, subscriptionPeriodUnit subPkg.SubscriptionPeriodUnit, subscriptionPeriodCount int64) string {
+func buildSubscriptionPeriodLabel(lang string, subscriptionPeriodUnit subPkg.SubscriptionPeriodUnit, subscriptionPeriodCount int64) string {
 	if subscriptionPeriodUnit == subPkg.SubscriptionPeriodUnitLifetime {
 		return common.MESSAGES[lang]["lifetime"]
 	}

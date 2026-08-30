@@ -39,7 +39,7 @@ loop:
 
 		// New update received
 		case upd := <-upds:
-			// Ignore non-message updates
+			// Ignore non-message and non-pre-checkout-query updates
 			if upd.Message == nil && upd.PreCheckoutQuery == nil {
 				continue
 			}

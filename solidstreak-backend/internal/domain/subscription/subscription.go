@@ -42,6 +42,7 @@ type Subscription struct {
 	Plan      *Plan      `json:"plan"`
 	StartDt   *time.Time `json:"startDt,omitempty"`
 	FinishDt  *time.Time `json:"finishDt,omitempty"`
+	UserID    *int64     `json:"userId,omitempty"`
 	CreatedAt *time.Time `json:"createdAt,omitempty"`
 	UpdatedAt *time.Time `json:"updatedAt,omitempty"`
 }
@@ -81,19 +82,21 @@ var SubscriptionOriginMapping = map[string]SubscriptionOrigin{
 }
 
 type SubscriptionEvent struct {
-	ID                      int64
-	Active                  bool
-	Type                    SubscriptionEventType
-	Status                  SubscriptionEventStatus
-	SubscriptionOrigin      SubscriptionOrigin
-	SubscriptionPlanCode    string
-	SubscriptionPeriodUnit  SubscriptionPeriodUnit
-	SubscriptionPeriodCount int64
-	UserID                  int64
-	SubscriptionID          *int64
-	InvoiceUUID             string
-	CreatedAt               time.Time
-	UpdatedAt               time.Time
+	ID                         int64
+	Active                     bool
+	Type                       SubscriptionEventType
+	Status                     SubscriptionEventStatus
+	SubscriptionOrigin         SubscriptionOrigin
+	SubscriptionPlanCode       string
+	SubscriptionPeriodUnit     SubscriptionPeriodUnit
+	SubscriptionPeriodCount    int64
+	SubscriptionPeriodStartDt  *time.Time
+	SubscriptionPeriodFinishDt *time.Time
+	UserID                     int64
+	SubscriptionID             *int64
+	InvoiceUUID                string
+	CreatedAt                  time.Time
+	UpdatedAt                  time.Time
 }
 
 func GetSubscriptionPlans(
@@ -172,6 +175,30 @@ func GetSubscriptionPlans(
 	}
 }
 
+func NewSubscription(
+	planCode string,
+	startDt *time.Time,
+	finishDt *time.Time,
+	userID int64,
+) *Subscription {
+	now := time.Now()
+	return &Subscription{
+		Active:    true,
+		PlanCode:  planCode,
+		StartDt:   startDt,
+		FinishDt:  finishDt,
+		CreatedAt: &now,
+		UpdatedAt: &now,
+		UserID:    &userID,
+	}
+}
+
+func (s *Subscription) SetFinishDt(finishDt *time.Time) {
+	now := time.Now()
+	s.FinishDt = finishDt
+	s.UpdatedAt = &now
+}
+
 func NewSubscriptionEvent(
 	eventType SubscriptionEventType,
 	status SubscriptionEventStatus,
@@ -195,4 +222,20 @@ func NewSubscriptionEvent(
 		CreatedAt:               time.Now(),
 		UpdatedAt:               time.Now(),
 	}
+}
+
+func (se *SubscriptionEvent) SetSubscriptionStartAndFinishDt(startDt, finishDt *time.Time) {
+	se.SubscriptionPeriodStartDt = startDt
+	se.SubscriptionPeriodFinishDt = finishDt
+	se.UpdatedAt = time.Now()
+}
+
+func (se *SubscriptionEvent) SetSubscriptionID(subscriptionID *int64) {
+	se.SubscriptionID = subscriptionID
+	se.UpdatedAt = time.Now()
+}
+
+func (se *SubscriptionEvent) MarkAsCompleted() {
+	se.Status = SubscriptionEventStatusCompleted
+	se.UpdatedAt = time.Now()
 }

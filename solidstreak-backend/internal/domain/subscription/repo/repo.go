@@ -9,11 +9,14 @@ import (
 )
 
 type Repo interface {
+	Create(*subPkg.Subscription) error
+	Update(*subPkg.Subscription) error
 	GetActiveByUserID(int64) (*subPkg.Subscription, error)
 	GetBasic() (*subPkg.Subscription, error)
 	GetPlanByCode(string) (*subPkg.Plan, error)
 	GetPlans() ([]*subPkg.Plan, error)
 	CreateEvent(*subPkg.SubscriptionEvent) error
+	UpdateEvent(*subPkg.SubscriptionEvent) error
 	GetActiveEventByInvoiceUUIDAndStatuses(string, []subPkg.SubscriptionEventStatus) (*subPkg.SubscriptionEvent, error)
 }
 

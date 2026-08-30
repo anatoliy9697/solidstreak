@@ -12,8 +12,8 @@ basic_subscription:
 
 premium_subscription:
   price:
-    tg_stars_per_month: 1 # 100
-    tg_stars_per_year:  2 # 1000
-    tg_stars_lifetime:  3 #2500
+    tg_stars_per_month: 100
+    tg_stars_per_year:  1000
+    tg_stars_lifetime:  2500
   active_habits_limit:  100
   show_ads:             false

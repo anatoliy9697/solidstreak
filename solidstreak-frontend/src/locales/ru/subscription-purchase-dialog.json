@@ -1,10 +1,10 @@
 {
-    "premiumSubscription": "Премиум подписка",
+    "premiumSubscription": "Premium-подписка",
     "monthSubscriptionPeriod": "На {subscriptionPeriodCount} мес.",
     "yearSubscriptionPeriod": "На {subscriptionPeriodCount} г.",
     "lifetimeSubscriptionPeriod": "Навсегда",
     "XTR": "Телеграм Звезд",
-    "premiumBenefits": "Преимущества премиум подписки",
+    "premiumBenefits": "Преимущества Premium-подписки",
     "habitLimits": "До {premiumSubscriptionActiveHabitsLimit} активных привычек, вместо {basicSubscriptionActiveHabitsLimit} в базовой подписке",
     "noAds": "Отсутствие рекламы",
     "futureFeatures": "Доступ к части будущих функций",

@@ -59,3 +59,14 @@ func NewInvoice(
 		UpdatedAt: time.Now(),
 	}
 }
+
+func (i *Invoice) SetTgMessageID(tgMessageID int) {
+	i.TgMessageID = tgMessageID
+	i.UpdatedAt = time.Now()
+}
+
+func (i *Invoice) MarkAsPaid(tgPaymentChargeID string) {
+	i.Status = InvoiceStatusPaid
+	i.TgPaymentChargeID = tgPaymentChargeID
+	i.UpdatedAt = time.Now()
+}
