@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 
 import { toLocalLang } from '@/i18n'
+import { parseUTCDate } from '@/utils/date'
 import { ApiFetcher, type RequestResult } from '@/api/request'
 import type { User } from '@/models/user'
 import type { Subscription } from '@/models/subscription'
@@ -59,7 +60,7 @@ export const useUserStore = defineStore('user', {
         localStorage.setItem('lang', this.langCode)
         this._subscription = user.subscription || this._subscription
         if (this._subscription!.finishDate)
-          this._subscription!.finishDate = new Date(this._subscription!.finishDate) // Преобразуем в Date, т.к. по факту из API оно приходит в строкой
+          this._subscription!.finishDate = parseUTCDate(this._subscription!.finishDate) // Преобразуем в Date, т.к. по факту из API оно приходит строкой
       }
 
       return result

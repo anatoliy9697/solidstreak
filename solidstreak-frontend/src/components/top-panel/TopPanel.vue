@@ -8,7 +8,7 @@ import { useSubscriptionStore } from '@/stores/subscription'
 import { useUserStore } from '@/stores/user'
 
 import { LANGS, getDefaultLang } from '@/i18n'
-import { dateToDDMMYYYYString } from '@/utils/date'
+import { dateToDDMMYYYYUTCString } from '@/utils/date'
 
 // ─────────────────────────────────────────────
 // Props
@@ -80,7 +80,7 @@ watch(
           userStore._subscription!.finishDate
             ? t('common.until', 'until') +
               ' ' +
-              dateToDDMMYYYYString(userStore._subscription!.finishDate) + ' UTC'
+              dateToDDMMYYYYUTCString(userStore._subscription!.finishDate) + ' UTC'
             : t('common.subscription', 'subscription')
         }}
         <template

@@ -80,7 +80,7 @@ export class Heatmap {
   constructor(endDate: Date | string, values: Value[], max?: number) {
     this.endDate = this.parseDate(endDate)
     this.max = max || Math.ceil((Math.max(...values.map((day) => day.count)) / 5) * 4)
-    this.startDate = this.shiftDate(endDate, -Heatmap.DAYS_IN_ONE_YEAR)
+    this.startDate = this.shiftDate(this.endDate, -Heatmap.DAYS_IN_ONE_YEAR)
     this._values = values
   }
 
@@ -199,7 +199,13 @@ export class Heatmap {
   }
 
   private parseDate(entry: Date | string) {
-    return entry instanceof Date ? entry : new Date(entry)
+    // return entry instanceof Date ? entry : new Date(entry)
+    if (entry instanceof Date) {
+      return entry
+    } else {
+      const [year, month, day] = entry.split('-').map(Number)
+      return new Date(year!, month! - 1, day)
+    }
   }
 
   private keyDayParser(date: Date | string) {
