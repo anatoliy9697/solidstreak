@@ -32,7 +32,11 @@ func CreateAndSendInvoice(
 	var err error
 
 	invoice := invPkg.NewInvoice(
-		uuid.NewString(), pricing.Currency, pricing.Price, u.ID,
+		uuid.NewString(),
+		pricing.Currency,
+		pricing.Price,
+		u.ID,
+		tc.TgID,
 		time.Now().UTC().Add(invoiceExpiresIn),
 	)
 

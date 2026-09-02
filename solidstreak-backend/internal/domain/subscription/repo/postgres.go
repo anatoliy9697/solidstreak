@@ -2,6 +2,7 @@ package repo
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -106,13 +107,13 @@ func (r pgRepo) GetActiveByUserID(userID int64) (*subPkg.Subscription, error) {
 	)
 	if err != nil {
 		if err == pgx.ErrNoRows {
-			return nil, apperrors.NewNotFoundErr("couldn't find user subscription")
+			return nil, apperrors.NewNotFoundErr(fmt.Sprintf("couldn't find user subscription for user ID %v", userID))
 		}
 		return nil, err
 	}
 
 	if _, ok := r.subPlans[s.PlanCode]; !ok {
-		return nil, apperrors.NewInternalErr("subscription has invalid plan code")
+		return nil, apperrors.NewInternalErr(fmt.Sprintf("subscription has invalid plan code: %v", s.PlanCode))
 	}
 
 	return s, nil
@@ -254,25 +255,25 @@ func (r pgRepo) GetActiveEventByInvoiceUUIDAndStatuses(invoiceUUID string, statu
 	)
 	if err != nil {
 		if err == pgx.ErrNoRows {
-			return nil, apperrors.NewNotFoundErr("couldn't find subscription event")
+			return nil, apperrors.NewNotFoundErr(fmt.Sprintf("couldn't find subscription event by invoice UUID %v and statuses %v", invoiceUUID, statuses))
 		}
 		return nil, err
 	}
 
 	if _, ok := subPkg.SubscriptionEventTypeMapping[string(se.Type)]; !ok {
-		return nil, apperrors.NewInternalErr("subscription event has invalid type")
+		return nil, apperrors.NewInternalErr(fmt.Sprintf("subscription event has invalid type: %v", se.Type))
 	}
 	if _, ok := subPkg.SubscriptionEventStatusMapping[string(se.Status)]; !ok {
-		return nil, apperrors.NewInternalErr("subscription event has invalid status")
+		return nil, apperrors.NewInternalErr(fmt.Sprintf("subscription event has invalid status: %v", se.Status))
 	}
 	if _, ok := subPkg.SubscriptionOriginMapping[string(se.SubscriptionOrigin)]; !ok {
-		return nil, apperrors.NewInternalErr("subscription event has invalid subscription origin")
+		return nil, apperrors.NewInternalErr(fmt.Sprintf("subscription event has invalid subscription origin: %v", se.SubscriptionOrigin))
 	}
 	if _, ok := r.subPlans[string(se.SubscriptionPlanCode)]; !ok {
-		return nil, apperrors.NewInternalErr("subscription event has invalid subscription plan code")
+		return nil, apperrors.NewInternalErr(fmt.Sprintf("subscription event has invalid subscription plan code: %v", se.SubscriptionPlanCode))
 	}
 	if _, ok := subPkg.SubscriptionPeriodUnitMapping[string(se.SubscriptionPeriodUnit)]; !ok {
-		return nil, apperrors.NewInternalErr("subscription event has invalid subscription period unit")
+		return nil, apperrors.NewInternalErr(fmt.Sprintf("subscription event has invalid subscription period unit: %v", se.SubscriptionPeriodUnit))
 	}
 
 	return se, nil

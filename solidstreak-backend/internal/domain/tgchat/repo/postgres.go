@@ -2,6 +2,7 @@ package repo
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -78,7 +79,7 @@ func (r pgRepo) GetByUserID(userID int64) (*tcPkg.Chat, error) {
 	)
 	if err != nil {
 		if err == pgx.ErrNoRows {
-			return nil, apperrors.NewNotFoundErr("couldn't find telegram chat by user id")
+			return nil, apperrors.NewNotFoundErr(fmt.Sprintf("couldn't find telegram chat by user ID %d", userID))
 		}
 		return nil, err
 	}

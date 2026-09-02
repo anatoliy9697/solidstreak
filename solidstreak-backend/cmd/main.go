@@ -17,9 +17,11 @@ import (
 
 	"github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/common"
 	"github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/control/http"
+	"github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/control/scheduler"
 	"github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/control/tgbot"
 	hRepo "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/habit/repo"
 	invRepo "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/invoice/repo"
+	st "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/schedulertask"
 	subPkg "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/subscription"
 	subRepo "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/subscription/repo"
 	tcRepo "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/tgchat/repo"
@@ -56,11 +58,11 @@ func main() {
 		log.Fatal("invalid env parameter: " + err.Error())
 	}
 
-	// Creating main context that will be cancelled on SIGINT or SIGTERM
+	// creating main context that will be cancelled on SIGINT or SIGTERM
 	mainCtx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
-	// Storage connection pool initialization
+	// storage connection pool initialization
 	var pgPool *pgxpool.Pool
 	if pgPool, err = pgxpool.New(mainCtx, os.Getenv("POSTGRES_CONN_STRING")); err != nil {
 		return
@@ -72,6 +74,7 @@ func main() {
 		return
 	}
 
+	invRepoInstance := invRepo.Init(mainCtx, pgPool)
 	resources := common.Resources{
 		WebAppURL: os.Getenv("WEB_APP_URL"),
 		Logger:    logger,
@@ -91,34 +94,44 @@ func main() {
 		)),
 		TCRepo:    tcRepo.Init(mainCtx, pgPool),
 		HabitRepo: hRepo.Init(mainCtx, pgPool),
-		InvRepo:   invRepo.Init(mainCtx, pgPool),
+		InvRepo:   invRepoInstance,
 	}
 
 	goroutineDoneCh := make(chan struct{}, 2)
 
-	// Running event fetcher
+	// running event fetcher
 	go tgbot.EventFetcher{
-		MaxEventHandlers: viper.GetInt("max_event_handlers"),
+		MaxEventHandlers: viper.GetInt("max_tg_event_handlers"),
 		Res:              resources,
 	}.Run(mainCtx, goroutineDoneCh)
 
-	// Running web server
+	// running scheduler
+	go scheduler.Scheduler{
+		Res:                    resources,
+		TaskSources:            []st.TaskSource{invRepoInstance},
+		MaxTaskHandlers:        viper.GetInt("scheduler.max_task_handlers"),
+		TaskBatchSizePerSource: viper.GetInt("scheduler.task_batch_size_per_source"),
+		TaskWaitingDuration:    time.Duration(viper.GetInt("scheduler.task_waiting_duration_ms")) * time.Millisecond,
+		LockDuration:           time.Duration(viper.GetInt("scheduler.lock_duration_ms")) * time.Millisecond,
+	}.Run(mainCtx, goroutineDoneCh)
+
+	// running web server
 	webServer := http.Server{
 		Env:              os.Getenv("ENV"),
 		CertFilePath:     os.Getenv("CERT_FILE_PATH"),
 		KeyFilePath:      os.Getenv("KEY_FILE_PATH"),
 		Addr:             os.Getenv("SERVER_ADDR"),
-		InvoiceExpiresIn: time.Duration(viper.GetInt64("invoice_expires_in_min")) * time.Minute,
+		InvoiceExpiresIn: time.Duration(viper.GetInt("invoice_expires_in_min")) * time.Minute,
 		Res:              resources,
 	}
 	go webServer.Run(mainCtx, goroutineDoneCh)
 
 	logger.Info("solid streak started")
 
-	// Keeping alive
+	// keeping alive
 	<-mainCtx.Done()
 
-	// Waiting for goroutines to finish
+	// waiting for goroutines to finish
 	<-goroutineDoneCh
 	<-goroutineDoneCh
 
@@ -126,10 +139,10 @@ func main() {
 }
 
 func validateConfigParams() error {
-	if viper.GetInt("max_event_handlers") <= 0 {
-		return errors.New("max_event_handlers should be greater than 0")
+	if viper.GetInt("max_tg_event_handlers") <= 0 {
+		return errors.New("max_tg_event_handlers should be greater than 0")
 	}
-	if viper.GetInt64("invoice_expires_in_min") <= 0 {
+	if viper.GetInt("invoice_expires_in_min") <= 0 {
 		return errors.New("invoice_expires_in_min should be greater than 0")
 	}
 	if viper.GetInt("basic_subscription.active_habits_limit") <= 0 {
@@ -146,6 +159,18 @@ func validateConfigParams() error {
 	}
 	if viper.GetInt64("premium_subscription.active_habits_limit") <= 0 {
 		return errors.New("premium_subscription.active_habits_limit should be greater than 0")
+	}
+	if viper.GetInt("scheduler.max_task_handlers") <= 0 {
+		return errors.New("scheduler.max_task_handlers should be greater than 0")
+	}
+	if viper.GetInt("scheduler.task_batch_size_per_source") <= 0 {
+		return errors.New("scheduler.task_batch_size_per_source should be greater than 0")
+	}
+	if viper.GetInt("scheduler.task_waiting_duration_ms") <= 0 {
+		return errors.New("scheduler.task_waiting_duration_ms should be greater than 0")
+	}
+	if viper.GetInt("scheduler.lock_duration_ms") <= 0 {
+		return errors.New("scheduler.lock_duration_ms should be greater than 0")
 	}
 
 	return nil

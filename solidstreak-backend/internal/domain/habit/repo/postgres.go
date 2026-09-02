@@ -2,6 +2,7 @@ package repo
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -130,7 +131,7 @@ func (r pgRepo) GetByOwnerIDAndStatus(ownerID int64, status hPkg.HabitStatus, re
 			return nil, err
 		}
 		if _, ok := hPkg.ColorMapping[string(h.Color)]; !ok {
-			return nil, apperrors.NewInternalErr("habit has invalid color")
+			return nil, apperrors.NewInternalErr(fmt.Sprintf("habit has invalid color: %v", h.Color))
 		}
 		habits = append(habits, h)
 	}
@@ -180,13 +181,13 @@ func (r pgRepo) GetByIDAndOwnerID(id int64, ownerID int64, requestedByOwner bool
 	)
 	if err != nil {
 		if err == pgx.ErrNoRows {
-			return nil, apperrors.NewNotFoundErr("couldn't find habit for specified user")
+			return nil, apperrors.NewNotFoundErr(fmt.Sprintf("couldn't find habit for user ID %v", ownerID))
 		}
 		return nil, err
 	}
 
 	if _, ok := hPkg.ColorMapping[string(h.Color)]; !ok {
-		return nil, apperrors.NewInternalErr("habit has invalid color")
+		return nil, apperrors.NewInternalErr(fmt.Sprintf("habit has invalid color: %v", h.Color))
 	}
 
 	return h, nil

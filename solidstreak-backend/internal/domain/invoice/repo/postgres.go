@@ -2,6 +2,8 @@ package repo
 
 import (
 	"context"
+	"fmt"
+	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -9,6 +11,7 @@ import (
 	apperrors "github.com/anatoliy9697/solidstreak/solidstreak-backend/pkg/errors"
 
 	invPkg "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/invoice"
+	st "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/schedulertask"
 )
 
 type pgRepo struct {
@@ -20,6 +23,81 @@ func initPGRepo(c context.Context, p *pgxpool.Pool) *pgRepo {
 	return &pgRepo{c, p}
 }
 
+func (r pgRepo) FetchSchedulerTasksWithLocking(batchSize int, lock_duration time.Duration, lock_owner_id string) ([]st.Task, error) {
+	sql := `
+		WITH batch AS (
+			SELECT
+				uuid
+			FROM invoices
+			WHERE 
+				active = true AND 
+				status = 'pending' AND 
+				expires_at <= NOW() AND 
+				(lock_owner_id IS NULL OR locked_at <= NOW() - $3 * INTERVAL '1 millisecond')
+			ORDER BY expires_at ASC
+			FOR UPDATE SKIP LOCKED
+			LIMIT $1
+		)
+		UPDATE invoices
+		SET 
+			lock_owner_id = $2,
+			locked_at = NOW()
+		WHERE uuid IN (SELECT uuid FROM batch)
+		RETURNING
+			active,
+			uuid,
+			status,
+			currency,
+			amount,
+			user_id,
+			tg_chat_id,
+			tg_message_id,
+			tg_payment_charge_id,
+			expires_at,
+			created_at,
+			updated_at
+	`
+	rows, err := r.p.Query(r.c, sql, batchSize, lock_owner_id, int(lock_duration.Milliseconds()))
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	tasks := []st.Task{}
+	for rows.Next() {
+		i := &invPkg.Invoice{}
+		err = rows.Scan(
+			&i.Active,
+			&i.UUID,
+			&i.Status,
+			&i.Currency,
+			&i.Amount,
+			&i.UserID,
+			&i.TgChatID,
+			&i.TgMessageID,
+			&i.TgPaymentChargeID,
+			&i.ExpiresAt,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+		if _, ok := invPkg.InvoiceStatusMapping[string(i.Status)]; !ok {
+			return nil, apperrors.NewInternalErr(fmt.Sprintf("invoice has invalid status: %v", i.Status))
+		}
+		if _, ok := invPkg.CurrencyMapping[string(i.Currency)]; !ok {
+			return nil, apperrors.NewInternalErr(fmt.Sprintf("invoice has invalid currency: %v", i.Currency))
+		}
+		tasks = append(tasks, invPkg.ProcessExpiredInvoiceTask{Invoice: i})
+	}
+	if rows.Err() != nil {
+		return nil, rows.Err()
+	}
+
+	return tasks, nil
+}
+
 func (r pgRepo) Create(i *invPkg.Invoice) error {
 	sql := `
 		INSERT INTO invoices (
@@ -29,13 +107,14 @@ func (r pgRepo) Create(i *invPkg.Invoice) error {
 			currency, 
 			amount, 
 			user_id, 
+			tg_chat_id,
 			tg_message_id, 
 			tg_payment_charge_id, 
 			expires_at, 
 			created_at, 
 			updated_at
 		)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
 	`
 	_, err := r.p.Exec(r.c, sql,
 		i.Active,
@@ -44,6 +123,7 @@ func (r pgRepo) Create(i *invPkg.Invoice) error {
 		i.Currency,
 		i.Amount,
 		i.UserID,
+		i.TgChatID,
 		i.TgMessageID,
 		i.TgPaymentChargeID,
 		i.ExpiresAt,
@@ -62,12 +142,15 @@ func (r pgRepo) Update(i *invPkg.Invoice) error {
 			currency = $3,
 			amount = $4,
 			user_id = $5,
-			tg_message_id = $6,
-			tg_payment_charge_id = $7,
-			expires_at = $8,
-			created_at = $9,
-			updated_at = $10
-		WHERE uuid = $11
+			tg_chat_id = $6,
+			tg_message_id = $7,
+			tg_payment_charge_id = $8,
+			expires_at = $9,
+			lock_owner_id = NULL,
+			locked_at = NULL,
+			created_at = $10,
+			updated_at = $11
+		WHERE uuid = $12
 	`
 	_, err := r.p.Exec(r.c, sql,
 		i.Active,
@@ -75,6 +158,7 @@ func (r pgRepo) Update(i *invPkg.Invoice) error {
 		i.Currency,
 		i.Amount,
 		i.UserID,
+		i.TgChatID,
 		i.TgMessageID,
 		i.TgPaymentChargeID,
 		i.ExpiresAt,
@@ -97,6 +181,7 @@ func (r pgRepo) GetActiveNotExpiredByUserIDAndStatuses(userID int64, statuses []
 			currency,
 			amount,
 			user_id,
+			tg_chat_id,
 			tg_message_id,
 			tg_payment_charge_id,
 			expires_at,
@@ -122,6 +207,7 @@ func (r pgRepo) GetActiveNotExpiredByUserIDAndStatuses(userID int64, statuses []
 		&i.Currency,
 		&i.Amount,
 		&i.UserID,
+		&i.TgChatID,
 		&i.TgMessageID,
 		&i.TgPaymentChargeID,
 		&i.ExpiresAt,
@@ -130,17 +216,17 @@ func (r pgRepo) GetActiveNotExpiredByUserIDAndStatuses(userID int64, statuses []
 	)
 	if err != nil {
 		if err == pgx.ErrNoRows {
-			return nil, apperrors.NewNotFoundErr("couldn't find active and not expired invoice by user id and statuses")
+			return nil, apperrors.NewNotFoundErr(fmt.Sprintf("couldn't find active and not expired invoice by user ID %v and statuses %v", userID, statuses))
 		}
 		return nil, err
 	}
 
 	if _, ok := invPkg.InvoiceStatusMapping[string(i.Status)]; !ok {
-		return nil, apperrors.NewInternalErr("invoice has invalid status")
+		return nil, apperrors.NewInternalErr(fmt.Sprintf("invoice has invalid status: %v", i.Status))
 	}
 
 	if _, ok := invPkg.CurrencyMapping[string(i.Currency)]; !ok {
-		return nil, apperrors.NewInternalErr("invoice has invalid currency")
+		return nil, apperrors.NewInternalErr(fmt.Sprintf("invoice has invalid currency: %v", i.Currency))
 	}
 
 	return i, nil
@@ -157,6 +243,7 @@ func (r pgRepo) GetActiveNotExpiredByUUIDAndStatuses(uuid string, statuses []inv
 			currency,
 			amount,
 			user_id,
+			tg_chat_id,
 			tg_message_id,
 			tg_payment_charge_id,
 			expires_at,
@@ -182,6 +269,7 @@ func (r pgRepo) GetActiveNotExpiredByUUIDAndStatuses(uuid string, statuses []inv
 		&i.Currency,
 		&i.Amount,
 		&i.UserID,
+		&i.TgChatID,
 		&i.TgMessageID,
 		&i.TgPaymentChargeID,
 		&i.ExpiresAt,
@@ -190,17 +278,17 @@ func (r pgRepo) GetActiveNotExpiredByUUIDAndStatuses(uuid string, statuses []inv
 	)
 	if err != nil {
 		if err == pgx.ErrNoRows {
-			return nil, apperrors.NewNotFoundErr("couldn't find active and not expired invoice by uuid and statuses")
+			return nil, apperrors.NewNotFoundErr(fmt.Sprintf("couldn't find active and not expired invoice by uuid %v and statuses %v", uuid, statuses))
 		}
 		return nil, err
 	}
 
 	if _, ok := invPkg.InvoiceStatusMapping[string(i.Status)]; !ok {
-		return nil, apperrors.NewInternalErr("invoice has invalid status")
+		return nil, apperrors.NewInternalErr(fmt.Sprintf("invoice has invalid status: %v", i.Status))
 	}
 
 	if _, ok := invPkg.CurrencyMapping[string(i.Currency)]; !ok {
-		return nil, apperrors.NewInternalErr("invoice has invalid currency")
+		return nil, apperrors.NewInternalErr(fmt.Sprintf("invoice has invalid currency: %v", i.Currency))
 	}
 
 	return i, nil

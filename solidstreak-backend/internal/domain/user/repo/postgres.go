@@ -2,6 +2,7 @@ package repo
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -121,7 +122,7 @@ func (r pgRepo) GetByID(ID int64) (*usrPkg.User, error) {
 	)
 	if err != nil {
 		if err == pgx.ErrNoRows {
-			return nil, apperrors.NewNotFoundErr("couldn't find user")
+			return nil, apperrors.NewNotFoundErr(fmt.Sprintf("couldn't find user by ID %d", ID))
 		}
 		return nil, err
 	}
@@ -153,7 +154,7 @@ func (r pgRepo) GetByTgID(tgID int64) (*usrPkg.User, error) {
 	)
 	if err != nil {
 		if err == pgx.ErrNoRows {
-			return nil, apperrors.NewNotFoundErr("couldn't find user")
+			return nil, apperrors.NewNotFoundErr(fmt.Sprintf("couldn't find user by TgID %d", tgID))
 		}
 		return nil, err
 	}

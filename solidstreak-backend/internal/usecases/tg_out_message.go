@@ -20,7 +20,7 @@ func NewErrorTgMessageParams(r common.Resources, tcTgID int64, lang string) *tgb
 
 	return tu.Message(
 		tu.ID(tcTgID),
-		common.MESSAGES[lang]["smthWrong"],
+		common.MESSAGES[lang]["smthWrongMsg"],
 	)
 }
 
@@ -126,7 +126,7 @@ func NewTgAnswerPreCheckoutQuery(pcqID string, ok bool, lang string) *tgbotapi.A
 	}
 
 	if !ok {
-		params.ErrorMessage = common.MESSAGES[lang]["smthWrong"]
+		params.ErrorMessage = common.MESSAGES[lang]["smthWrongMsg"]
 	}
 
 	return params
@@ -141,4 +141,26 @@ func buildSubscriptionPeriodLabel(lang string, subscriptionPeriodUnit subPkg.Sub
 		return common.MESSAGES[lang]["lifetime"]
 	}
 	return common.MESSAGES[lang]["for"] + " " + fmt.Sprint(subscriptionPeriodCount) + " " + common.MESSAGES[lang][string(subscriptionPeriodUnit)+"Short"]
+}
+
+func NewDeleteTgMessageParams(tcTgID int64, tgMessageID int) *tgbotapi.DeleteMessageParams {
+	return &tgbotapi.DeleteMessageParams{
+		ChatID:    tgbotapi.ChatID{ID: tcTgID},
+		MessageID: tgMessageID,
+	}
+}
+
+func DeleteTgMessage(ctx context.Context, tgBotAPI *tgbotapi.Bot, params *tgbotapi.DeleteMessageParams) error {
+	return tgBotAPI.DeleteMessage(ctx, params)
+}
+
+func NewExpiredInvoiceTgMessageParams(r common.Resources, tcTgID int64, lang string) *tgbotapi.SendMessageParams {
+	if lang == "" {
+		lang = common.GetDefaultLang()
+	}
+
+	return tu.Message(
+		tu.ID(tcTgID),
+		common.MESSAGES[lang]["expiredInvoiceMsg"],
+	)
 }

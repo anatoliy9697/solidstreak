@@ -63,13 +63,13 @@ type SubscriptionEventStatus string
 const (
 	SubscriptionEventStatusInProgress     SubscriptionEventStatus = "in_progress"
 	SubscriptionEventStatusCompleted      SubscriptionEventStatus = "completed"
-	SubscriptionEventStatusPaymentTimeOut SubscriptionEventStatus = "payment_timeout"
+	SubscriptionEventStatusPaymentTimeout SubscriptionEventStatus = "payment_timeout"
 )
 
 var SubscriptionEventStatusMapping = map[string]SubscriptionEventStatus{
 	string(SubscriptionEventStatusInProgress):     SubscriptionEventStatusInProgress,
 	string(SubscriptionEventStatusCompleted):      SubscriptionEventStatusCompleted,
-	string(SubscriptionEventStatusPaymentTimeOut): SubscriptionEventStatusPaymentTimeOut,
+	string(SubscriptionEventStatusPaymentTimeout): SubscriptionEventStatusPaymentTimeout,
 }
 
 type SubscriptionOrigin string
@@ -238,5 +238,10 @@ func (se *SubscriptionEvent) SetSubscriptionID(subscriptionID *int64) {
 
 func (se *SubscriptionEvent) MarkAsCompleted() {
 	se.Status = SubscriptionEventStatusCompleted
+	se.UpdatedAt = time.Now().UTC()
+}
+
+func (se *SubscriptionEvent) SetStatus(status SubscriptionEventStatus) {
+	se.Status = status
 	se.UpdatedAt = time.Now().UTC()
 }

@@ -2,7 +2,7 @@ package common
 
 var MESSAGES = map[string]map[string]string{
 	"en": {
-		"smthWrong":                "Something went wrong\nPlease try again later or contact support (@solidstreak_chat, @avasin_dev)",
+		"smthWrongMsg":             "Something went wrong\nPlease try again later or contact support (@solidstreak_chat, @avasin_dev)",
 		"helloMsg":                 "Hello, %s!\nPush \"Open\" button to start using bot",
 		"open":                     "Open",
 		"premiumSubscription":      "Premium subscription",
@@ -17,9 +17,10 @@ var MESSAGES = map[string]map[string]string{
 		"purchased":                "purchased",
 		"renewed":                  "renewed",
 		"subscriptionActiveUntil":  "Your subscription is active until %s",
+		"expiredInvoiceMsg":        "Your invoice has expired\nPlease try again to purchase or renew your subscription",
 	},
 	"ru": {
-		"smthWrong":                "Что-то пошло не так\nПожалуйста, попробуйте позже или обратитесь в поддержку (@solidstreak_chat, @avasin_dev)",
+		"smthWrongMsg":             "Что-то пошло не так\nПожалуйста, попробуйте позже или обратитесь в поддержку (@solidstreak_chat, @avasin_dev)",
 		"helloMsg":                 "Привет, %s!\nНажмите кнопку \"Открыть\", чтобы начать пользоваться ботом",
 		"open":                     "Открыть",
 		"premiumSubscription":      "Premium-подписка",
@@ -34,6 +35,7 @@ var MESSAGES = map[string]map[string]string{
 		"purchased":                "приобрели",
 		"renewed":                  "продлили",
 		"subscriptionActiveUntil":  "Ваша подписка действует до %s",
+		"expiredInvoiceMsg":        "Ваш счет просрочен\nПожалуйста, попробуйте снова приобрести или продлить подписку",
 	},
 }
 

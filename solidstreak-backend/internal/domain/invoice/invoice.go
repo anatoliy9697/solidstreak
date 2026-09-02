@@ -1,6 +1,10 @@
 package invoice
 
-import "time"
+import (
+	"time"
+
+	st "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/schedulertask"
+)
 
 type Currency string
 
@@ -33,6 +37,7 @@ type Invoice struct {
 	Currency          Currency      `json:"currency"`
 	Amount            int64         `json:"amount"`
 	UserID            int64         `json:"userId"`
+	TgChatID          int64         `json:"-"`
 	TgMessageID       int           `json:"-"`
 	TgPaymentChargeID string        `json:"-"`
 	ExpiresAt         time.Time     `json:"expiresAt"`
@@ -40,11 +45,16 @@ type Invoice struct {
 	UpdatedAt         time.Time     `json:"updatedAt"`
 }
 
+type ProcessExpiredInvoiceTask struct {
+	Invoice *Invoice
+}
+
 func NewInvoice(
 	uuid string,
 	currency Currency,
 	amount int64,
 	userID int64,
+	tgChatID int64,
 	expiresAt time.Time,
 ) *Invoice {
 	return &Invoice{
@@ -54,6 +64,7 @@ func NewInvoice(
 		Currency:  currency,
 		Amount:    amount,
 		UserID:    userID,
+		TgChatID:  tgChatID,
 		ExpiresAt: expiresAt,
 		CreatedAt: time.Now().UTC(),
 		UpdatedAt: time.Now().UTC(),
@@ -69,4 +80,13 @@ func (i *Invoice) MarkAsPaid(tgPaymentChargeID string) {
 	i.Status = InvoiceStatusPaid
 	i.TgPaymentChargeID = tgPaymentChargeID
 	i.UpdatedAt = time.Now().UTC()
+}
+
+func (i *Invoice) SetStatus(status InvoiceStatus) {
+	i.Status = status
+	i.UpdatedAt = time.Now().UTC()
+}
+
+func (peit ProcessExpiredInvoiceTask) Type() st.TaskType {
+	return st.TaskTypeProcessExpiredInvoice
 }

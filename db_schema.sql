@@ -131,9 +131,12 @@ CREATE TABLE invoices (
 	currency VARCHAR(32) NOT NULL CHECK (currency IN ('XTR')),
 	amount BIGINT NOT NULL,
 	user_id INTEGER NOT NULL REFERENCES users(id),
+	tg_chat_id BIGINT NOT NULL REFERENCES tg_chats(tg_id),
 	tg_message_id INTEGER NOT NULL,
 	tg_payment_charge_id VARCHAR(256),
 	expires_at TIMESTAMPTZ NOT NULL,
+	lock_owner_id VARCHAR(8),
+	locked_at TIMESTAMPTZ,
 	created_at TIMESTAMPTZ NOT NULL,
 	updated_at TIMESTAMPTZ NOT NULL
 );
