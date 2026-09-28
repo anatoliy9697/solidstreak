@@ -14,8 +14,8 @@ type Repo interface {
 	FetchSchedulerTasksWithLocking(int, time.Duration, string) ([]st.Task, error)
 	Create(*invPkg.Invoice) error
 	Update(*invPkg.Invoice) error
-	GetActiveNotExpiredByUserIDAndStatuses(int64, []invPkg.InvoiceStatus) (*invPkg.Invoice, error)
-	GetActiveNotExpiredByUUIDAndStatuses(string, []invPkg.InvoiceStatus) (*invPkg.Invoice, error)
+	GetActiveByUserIDAndStatuses(int64, []invPkg.InvoiceStatus, bool) (*invPkg.Invoice, error)
+	GetActiveByUUIDAndStatuses(string, []invPkg.InvoiceStatus, bool) (*invPkg.Invoice, error)
 }
 
 func Init(c context.Context, p *pgxpool.Pool) Repo {

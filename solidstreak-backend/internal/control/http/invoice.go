@@ -12,6 +12,7 @@ import (
 	subPkg "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/subscription"
 	tcPkg "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/tgchat"
 	usrPkg "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/user"
+
 	"github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/usecases"
 )
 
@@ -27,6 +28,14 @@ type PostInvoiceRequest struct {
 }
 
 type PostInvoiceResponse struct {
+	Data *invPkg.Invoice `json:"data"`
+}
+
+type GetInvoiceResponse struct {
+	Data *invPkg.Invoice `json:"data"`
+}
+
+type GetPendingInvoiceResponse struct {
 	Data *invPkg.Invoice `json:"data"`
 }
 
@@ -148,7 +157,7 @@ func (s Server) postInvoice(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var invoice *invPkg.Invoice
-	if invoice, err = s.Res.InvRepo.GetActiveNotExpiredByUserIDAndStatuses(userID, []invPkg.InvoiceStatus{invPkg.InvoiceStatusPending}); err != nil && !errors.Is(err, apperrors.ErrNotFound) {
+	if invoice, err = s.Res.InvRepo.GetActiveByUserIDAndStatuses(userID, []invPkg.InvoiceStatus{invPkg.InvoiceStatusPending}, true); err != nil && !errors.Is(err, apperrors.ErrNotFound) {
 		return
 	}
 	if invoice != nil {
@@ -161,6 +170,78 @@ func (s Server) postInvoice(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response := PostInvoiceResponse{Data: invoice}
+
+	json.NewEncoder(w).Encode(response)
+}
+
+func (s *Server) getInvoice(w http.ResponseWriter, r *http.Request) {
+	var err error
+
+	logger := s.Res.Logger
+
+	// Adding request ID to request context
+	reqID, _ := r.Context().Value(ctxKeyRequestID{}).(string)
+	if reqID != "" {
+		logger = logger.With("requestId", reqID)
+	}
+
+	defer func() {
+		if err != nil {
+			processError(w, logger, err)
+		}
+	}()
+
+	userTgID, ok := r.Context().Value(ctxKeyUserTgID{}).(int64)
+	if !ok {
+		err = apperrors.NewUnauthorizedErr("couldn't identify user")
+		return
+	}
+
+	var userID int64
+	userID, err = getInt64FromURLParams(r, "userID", true)
+	if err != nil {
+		return
+	}
+
+	var selector string
+	selector, err = getStringFromURLParams(r, "selector", true)
+	if err != nil {
+		return
+	}
+
+	var user *usrPkg.User
+	if user, err = s.Res.UsrRepo.GetByID(userID); err != nil {
+		return
+	}
+
+	if user.TgID != userTgID {
+		err = apperrors.NewForbiddenErr("couldn't get invoice for another user")
+		return
+	}
+
+	var invoiceStatus invPkg.InvoiceStatus
+	invoiceStatus, _ = invPkg.InvoiceStatusMapping[selector]
+
+	var invoice *invPkg.Invoice
+	if invoiceStatus != "" {
+		var notExpired bool
+		if invoiceStatus == invPkg.InvoiceStatusPending {
+			notExpired = true
+		}
+		invoice, err = s.Res.InvRepo.GetActiveByUserIDAndStatuses(userID, []invPkg.InvoiceStatus{invoiceStatus}, notExpired)
+	} else {
+		invoice, err = s.Res.InvRepo.GetActiveByUUIDAndStatuses(selector, invPkg.InvoiceStatusAll, false)
+	}
+	if err != nil {
+		return
+	}
+
+	if invoice.UserID != userID {
+		err = apperrors.NewForbiddenErr("couldn't get invoice for another user")
+		return
+	}
+
+	response := GetPendingInvoiceResponse{Data: invoice}
 
 	json.NewEncoder(w).Encode(response)
 }

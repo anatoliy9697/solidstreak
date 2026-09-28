@@ -67,5 +67,5 @@ loop:
 		delete(handlers, handlerCode)
 	}
 
-	ef.Res.Logger.Info("event fetcher stopped")
+	ef.Res.Logger.Info("event fetcher execution completed")
 }

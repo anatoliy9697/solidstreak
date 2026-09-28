@@ -170,7 +170,7 @@ func (r pgRepo) Update(i *invPkg.Invoice) error {
 	return err
 }
 
-func (r pgRepo) GetActiveNotExpiredByUserIDAndStatuses(userID int64, statuses []invPkg.InvoiceStatus) (*invPkg.Invoice, error) {
+func (r pgRepo) GetActiveByUserIDAndStatuses(userID int64, statuses []invPkg.InvoiceStatus, notExpired bool) (*invPkg.Invoice, error) {
 	i := &invPkg.Invoice{}
 
 	sql := `
@@ -190,9 +190,9 @@ func (r pgRepo) GetActiveNotExpiredByUserIDAndStatuses(userID int64, statuses []
 		FROM invoices
 		WHERE 
 			active = true AND 
-			expires_at > NOW() AND 
 			user_id = $1 AND 
-			status = ANY($2) 
+			status = ANY($2) AND
+			($3 = false OR expires_at > NOW()) 
 		LIMIT 1
 	`
 	err := r.p.QueryRow(
@@ -200,6 +200,7 @@ func (r pgRepo) GetActiveNotExpiredByUserIDAndStatuses(userID int64, statuses []
 		sql,
 		userID,
 		statuses,
+		notExpired,
 	).Scan(
 		&i.Active,
 		&i.UUID,
@@ -216,7 +217,11 @@ func (r pgRepo) GetActiveNotExpiredByUserIDAndStatuses(userID int64, statuses []
 	)
 	if err != nil {
 		if err == pgx.ErrNoRows {
-			return nil, apperrors.NewNotFoundErr(fmt.Sprintf("couldn't find active and not expired invoice by user ID %v and statuses %v", userID, statuses))
+			var notExpiredLabel string
+			if notExpired {
+				notExpiredLabel = " and not expired"
+			}
+			return nil, apperrors.NewNotFoundErr(fmt.Sprintf("couldn't find active%s invoice by user ID %v and statuses %v", notExpiredLabel, userID, statuses))
 		}
 		return nil, err
 	}
@@ -232,7 +237,7 @@ func (r pgRepo) GetActiveNotExpiredByUserIDAndStatuses(userID int64, statuses []
 	return i, nil
 }
 
-func (r pgRepo) GetActiveNotExpiredByUUIDAndStatuses(uuid string, statuses []invPkg.InvoiceStatus) (*invPkg.Invoice, error) {
+func (r pgRepo) GetActiveByUUIDAndStatuses(uuid string, statuses []invPkg.InvoiceStatus, notExpired bool) (*invPkg.Invoice, error) {
 	i := &invPkg.Invoice{}
 
 	sql := `
@@ -252,9 +257,9 @@ func (r pgRepo) GetActiveNotExpiredByUUIDAndStatuses(uuid string, statuses []inv
 		FROM invoices
 		WHERE 
 			active = true AND 
-			expires_at > NOW() AND 
 			uuid = $1 AND 
-			status = ANY($2) 
+			status = ANY($2) AND
+			($3 = false OR expires_at > NOW()) 
 		LIMIT 1
 	`
 	err := r.p.QueryRow(
@@ -262,6 +267,7 @@ func (r pgRepo) GetActiveNotExpiredByUUIDAndStatuses(uuid string, statuses []inv
 		sql,
 		uuid,
 		statuses,
+		notExpired,
 	).Scan(
 		&i.Active,
 		&i.UUID,
@@ -278,7 +284,11 @@ func (r pgRepo) GetActiveNotExpiredByUUIDAndStatuses(uuid string, statuses []inv
 	)
 	if err != nil {
 		if err == pgx.ErrNoRows {
-			return nil, apperrors.NewNotFoundErr(fmt.Sprintf("couldn't find active and not expired invoice by uuid %v and statuses %v", uuid, statuses))
+			var notExpiredLabel string
+			if notExpired {
+				notExpiredLabel = " and not expired"
+			}
+			return nil, apperrors.NewNotFoundErr(fmt.Sprintf("couldn't find active%s invoice by uuid %v and statuses %v", notExpiredLabel, uuid, statuses))
 		}
 		return nil, err
 	}

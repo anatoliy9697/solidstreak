@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { usePrimeVue } from 'primevue/config'
 import { useToast } from 'primevue/usetoast'
@@ -10,9 +10,11 @@ import { getHeatmapLocale } from '@/i18n'
 import { type Theme } from '@/models/theme'
 import { dateToISO8601String } from '@/utils/date'
 import { ApiFetcher } from '@/api/request'
+import { useClockStore } from '@/stores/clock'
 import { useSubscriptionStore } from '@/stores/subscription'
 import { useUserStore } from '@/stores/user'
 import { useHabitStore } from '@/stores/habit'
+import { useInvoiceStore } from '@/stores/invoice'
 import { type Color, GRAY, ORANGE, generateColorGradient } from '@/models/color'
 import ConfirmDialog from '@/components/confirm-dialog/ConfirmDialog.vue'
 import TopPanel from '@/components/top-panel/TopPanel.vue'
@@ -28,9 +30,11 @@ import SubscriptionPurchaseDialog from '@/components/subscription-purchase-dialo
 const { t, locale } = useI18n()
 const primeVue = usePrimeVue()
 const toast = useToast()
+const clockStore = useClockStore()
 const subscriptionStore = useSubscriptionStore()
 const userStore = useUserStore()
 const habitStore = useHabitStore()
+const invoiceStore = useInvoiceStore()
 const init = ref<boolean>(true)
 const initErrorMsg = ref<string | null>(null)
 const view = ref<'active' | 'archived'>('active')
@@ -158,6 +162,8 @@ onMounted(async (): Promise<void> => {
     window.Telegram?.WebApp?.ready()
   }
 
+  clockStore.start()
+
   locale.value = userStore.lang
   setPrimeVueLocale(t)
 
@@ -179,15 +185,20 @@ onMounted(async (): Promise<void> => {
     return
   }
 
-  console.log('subscriptionStore.planByCode("basic")', subscriptionStore.planByCode('basic'))
-  console.log('subscriptionStore.planByCode("premium")', subscriptionStore.planByCode('premium'))
-
   userStore.init(apiFetcher, subscriptionStore.default)
   const upsertUserInfoResult = await userStore.upsertUserInfo(user, chat || { id: user.id }) // Use personal chat with user if no other chat info
   if (!upsertUserInfoResult.success) {
     finishInitialization(t('app.initFailed', 'Initialization failed'))
     return
   }
+
+  invoiceStore.init(apiFetcher)
+  const fetchPendingInvoiceResult = await invoiceStore.fetchPendingInvoice(userStore.id)
+  if (!fetchPendingInvoiceResult.success) {
+    finishInitialization(t('app.initFailed', 'Initialization failed'))
+    return
+  }
+  if (invoiceStore.pendingInvoice) invoiceStore.startPollingInvoiceWhilePending()
 
   applyTheme(userStore.theme)
 
@@ -204,6 +215,10 @@ onMounted(async (): Promise<void> => {
   userStore.setAvatarUrl(user.photo_url || '')
 
   finishInitialization()
+})
+
+onUnmounted(() => {
+  clockStore.stop()
 })
 </script>
 

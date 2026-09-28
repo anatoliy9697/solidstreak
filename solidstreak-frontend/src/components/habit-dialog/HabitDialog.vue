@@ -7,11 +7,11 @@ import Dialog from 'primevue/dialog'
 import InputText from 'primevue/inputtext'
 import Textarea from 'primevue/textarea'
 
+import type { RequestResult } from '@/api/request'
+import { type Color, COLORS, GREEN } from '@/models/color'
 import { useUserStore } from '@/stores/user'
 import { useHabitStore } from '@/stores/habit'
 import type { Habit } from '@/models/habit'
-import type { RequestResult } from '@/api/request'
-import { type Color, COLORS, GREEN } from '@/models/color'
 import ColorPicker from '@/components/color-picker/ColorPicker.vue'
 
 // ─────────────────────────────────────────────

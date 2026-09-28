@@ -57,13 +57,13 @@ func NewSubscriptionPurchaseSuccessTgMessageParams(r common.Resources, tcTgID in
 
 	var subscriptionActiveUntilLabel string
 	if subscriptionEvent.SubscriptionPeriodUnit != subPkg.SubscriptionPeriodUnitLifetime {
-		subscriptionActiveUntilLabel = fmt.Sprintf(common.MESSAGES[lang]["subscriptionActiveUntil"], subscriptionEvent.SubscriptionPeriodFinishDate.DDMMYYYYString()) + " (UTC)\n\n"
+		subscriptionActiveUntilLabel = "\n\n" + fmt.Sprintf(common.MESSAGES[lang]["subscriptionActiveUntil"], subscriptionEvent.SubscriptionPeriodFinishDate.DDMMYYYYString()) + " (UTC)\n\n"
 	}
 
 	return tu.Message(
 		tu.ID(tcTgID),
 		fmt.Sprintf(
-			common.MESSAGES[lang]["subscriptionPurchasedMsg"],
+			common.MESSAGES[lang]["subscriptionPurchasedMsg"]+"%s",
 			actionLabel,
 			subscriptionPlanLabel,
 			subscriptionPeriodLabel,

@@ -26,6 +26,8 @@ func (eh EventHandler) Run(ctx context.Context, doneCh chan string, upd *tgbotap
 
 	eh.Res.Logger = eh.Res.Logger.With("handlerCode", eh.Code)
 
+	eh.Res.Logger.Debug("event handler started")
+
 	switch {
 	case upd.Message != nil && upd.Message.SuccessfulPayment == nil:
 		eh.handleMessage(ctx, upd.Message)
@@ -34,6 +36,8 @@ func (eh EventHandler) Run(ctx context.Context, doneCh chan string, upd *tgbotap
 	case upd.Message != nil && upd.Message.SuccessfulPayment != nil:
 		eh.handleSuccessfulPayment(ctx, upd.Message.SuccessfulPayment)
 	}
+
+	eh.Res.Logger.Debug("event handler finished")
 }
 
 func (eh EventHandler) handleMessage(ctx context.Context, msg *tgbotapi.Message) {
@@ -123,7 +127,7 @@ func (eh EventHandler) handlePreCheckoutQuery(ctx context.Context, pcq *tgbotapi
 	}
 
 	var invoice *invPkg.Invoice
-	if invoice, err = eh.Res.InvRepo.GetActiveNotExpiredByUUIDAndStatuses(invoiceUUID, []invPkg.InvoiceStatus{invPkg.InvoiceStatusPending}); err != nil {
+	if invoice, err = eh.Res.InvRepo.GetActiveByUUIDAndStatuses(invoiceUUID, []invPkg.InvoiceStatus{invPkg.InvoiceStatusPending}, true); err != nil {
 		return
 	}
 
@@ -192,7 +196,7 @@ func (eh EventHandler) handleSuccessfulPayment(ctx context.Context, pmt *tgbotap
 	}
 
 	var invoice *invPkg.Invoice
-	if invoice, err = eh.Res.InvRepo.GetActiveNotExpiredByUUIDAndStatuses(invoiceUUID, []invPkg.InvoiceStatus{invPkg.InvoiceStatusPending}); err != nil {
+	if invoice, err = eh.Res.InvRepo.GetActiveByUUIDAndStatuses(invoiceUUID, []invPkg.InvoiceStatus{invPkg.InvoiceStatusPending}, true); err != nil {
 		return
 	}
 

@@ -47,7 +47,7 @@ export const useUserStore = defineStore('user', {
 
       const user = result.response?.data ? (result.response?.data as User) : null
 
-      if (user) {
+      if (result.success && user) {
         this.id = user.id || 0
         this.tgId = user.tgId
         this.tgUsername = user.tgUsername || ''
@@ -59,6 +59,20 @@ export const useUserStore = defineStore('user', {
         )
         localStorage.setItem('lang', this.langCode)
         this._subscription = user.subscription || this._subscription
+        if (this._subscription!.finishDate)
+          this._subscription!.finishDate = parseUTCDate(this._subscription!.finishDate) // Преобразуем в Date, т.к. по факту из API оно приходит строкой
+      }
+
+      return result
+    },
+
+    async refreshSubscription(): Promise<RequestResult> {
+      const result = await this.apiFetcher!.fetchUserSubscription(this.id)
+
+      const subscription = result.response?.data ? (result.response?.data as Subscription) : null
+
+      if (result.success && subscription) {
+        this._subscription = subscription
         if (this._subscription!.finishDate)
           this._subscription!.finishDate = parseUTCDate(this._subscription!.finishDate) // Преобразуем в Date, т.к. по факту из API оно приходит строкой
       }

@@ -1,3 +1,5 @@
+import type { Currency } from '@/models/invoice'
+
 export const SUBSCRIPTION_PERIOD_UNIT = {
   MONTH: 'month',
   YEAR: 'year',
@@ -6,12 +8,6 @@ export const SUBSCRIPTION_PERIOD_UNIT = {
 
 export type SubscriptionPeriodUnit =
   (typeof SUBSCRIPTION_PERIOD_UNIT)[keyof typeof SUBSCRIPTION_PERIOD_UNIT]
-
-export const CURRENCY = {
-  XTR: 'XTR',
-} as const
-
-export type Currency = (typeof CURRENCY)[keyof typeof CURRENCY]
 
 export interface Pricing {
   periodUnit: SubscriptionPeriodUnit

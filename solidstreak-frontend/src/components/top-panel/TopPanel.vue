@@ -80,7 +80,8 @@ watch(
           userStore._subscription!.finishDate
             ? t('common.until', 'until') +
               ' ' +
-              dateToDDMMYYYYUTCString(userStore._subscription!.finishDate) + ' UTC'
+              dateToDDMMYYYYUTCString(userStore._subscription!.finishDate) +
+              ' UTC'
             : t('common.subscription', 'subscription')
         }}
         <template

@@ -1,6 +1,6 @@
 log_level:                    -4
 max_tg_event_handlers:        10
-invoice_expires_in_min:       1 # 15
+invoice_expires_in_min:       15
 
 basic_subscription:
   price:

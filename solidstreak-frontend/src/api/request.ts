@@ -1,8 +1,9 @@
 import axios from 'axios'
 
-import type { Plan } from '@/models/subscription'
+import type { Plan, SubscriptionPeriodUnit, Subscription } from '@/models/subscription'
 import type { User } from '@/models/user'
 import type { Habit, HabitCheck } from '@/models/habit'
+import type { Invoice, Currency } from '@/models/invoice'
 
 interface Metadata {
   username: string
@@ -42,6 +43,15 @@ export interface PostHabitCheckRequest {
   data: HabitCheck
   meta?: Metadata
 }
+export interface PostInvoiceRequest {
+  data: {
+    subscriptionPlanCode: string
+    subscriptionPeriodUnit: SubscriptionPeriodUnit
+    subscriptionPeriodCount: number
+    currency: Currency
+  }
+  meta?: Metadata
+}
 
 type ApiRequest =
   | PostUserInfoRequest
@@ -49,6 +59,7 @@ type ApiRequest =
   | PostPutHabitRequest
   | DeleteHabitRequest
   | PostHabitCheckRequest
+  | PostInvoiceRequest
 
 export interface SubscriptionPlansResponse {
   data?: Plan[]
@@ -59,6 +70,11 @@ export interface UserResponse {
   data?: User
   errors?: Error[]
 }
+export interface UserSubscriptionResponse {
+  data?: Subscription
+  errors?: Error[]
+}
+
 export interface PutHabitResponse {
   data?: Habit
   errors?: Error[]
@@ -76,13 +92,25 @@ export interface PostHabitCheckResponse {
   errors?: Error[]
 }
 
+export interface PostInvoiceResponse {
+  data?: Invoice
+  errors?: Error[]
+}
+export interface GetInvoiceResponse {
+  data?: Invoice
+  errors?: Error[]
+}
+
 type ApiResponse =
   | SubscriptionPlansResponse
   | UserResponse
+  | UserSubscriptionResponse
   | PutHabitResponse
   | DeleteHabitResponse
   | GetHabitsResponse
   | PostHabitCheckResponse
+  | PostInvoiceResponse
+  | GetInvoiceResponse
 
 export interface RequestResult {
   success: boolean
@@ -166,6 +194,10 @@ export class ApiFetcher {
     return await performRequest('patch', `/api/v1/users/${userId}`, this.initData, payload)
   }
 
+  async fetchUserSubscription(userId: number): Promise<RequestResult> {
+    return await performRequest('get', `/api/v1/users/${userId}/subscription`, this.initData)
+  }
+
   async fetchHabits(userId: number): Promise<RequestResult> {
     return await performRequest(
       'get',
@@ -222,6 +254,35 @@ export class ApiFetcher {
       `/api/v1/users/${userId}/habits/${habitId}/checks`,
       this.initData,
       payload,
+    )
+  }
+
+  async postInvoice(
+    userId: number,
+    subscriptionPlanCode: string,
+    subscriptionPeriodUnit: SubscriptionPeriodUnit,
+    subscriptionPeriodCount: number,
+    currency: Currency,
+  ): Promise<RequestResult> {
+    const payload: PostInvoiceRequest = {
+      data: {
+        subscriptionPlanCode,
+        subscriptionPeriodUnit,
+        subscriptionPeriodCount,
+        currency,
+      },
+    }
+    if (this.username) {
+      payload.meta = { username: this.username } as Metadata
+    }
+    return await performRequest('post', `/api/v1/users/${userId}/invoices`, this.initData, payload)
+  }
+
+  async fetchInvoice(userId: number, selector: string): Promise<RequestResult> {
+    return await performRequest(
+      'get',
+      `/api/v1/users/${userId}/invoices/${selector}`,
+      this.initData,
     )
   }
 }

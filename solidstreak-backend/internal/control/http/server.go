@@ -43,6 +43,8 @@ func (s Server) Run(mainCtx context.Context, doneCh chan struct{}) {
 	api.Get("/users/{userID}", s.getUser)
 	api.Patch("/users/{userID}", s.patchUser)
 
+	api.Get("/users/{userID}/subscription", s.getUserSubscription)
+
 	api.Post("/users/{userID}/habits", s.postHabit)
 	api.Put("/users/{userID}/habits/{habitID}", s.putHabit)
 	api.Get("/users/{userID}/habits/{habitID}", s.getHabit)
@@ -51,7 +53,8 @@ func (s Server) Run(mainCtx context.Context, doneCh chan struct{}) {
 	api.Post("/users/{userID}/habits/{habitID}/checks", s.postUserHabitCheck)
 	api.Get("/users/{userID}/habits/{habitID}/checks", s.getUserHabitCompletedChecks)
 
-	api.Post("/users/{userID}/invoice", s.postInvoice)
+	api.Post("/users/{userID}/invoices", s.postInvoice)
+	api.Get("/users/{userID}/invoices/{selector}", s.getInvoice)
 
 	router.Mount("/api/v1", api)
 
@@ -174,4 +177,16 @@ func getBoolFromURLQuery(r *http.Request, key string, required bool) (bool, erro
 	}
 
 	return value, nil
+}
+
+func getStringFromURLParams(r *http.Request, key string, required bool) (string, error) {
+	strValue := chi.URLParam(r, key)
+	if strValue == "" {
+		if required {
+			return "", apperrors.NewBadRequestErr("missing \"" + key + "\" in URL params")
+		}
+		return "", nil
+	}
+
+	return strValue, nil
 }

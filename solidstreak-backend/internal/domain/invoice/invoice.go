@@ -24,6 +24,12 @@ const (
 	InvoiceStatusExpired InvoiceStatus = "expired"
 )
 
+var InvoiceStatusAll = []InvoiceStatus{
+	InvoiceStatusPending,
+	InvoiceStatusPaid,
+	InvoiceStatusExpired,
+}
+
 var InvoiceStatusMapping = map[string]InvoiceStatus{
 	string(InvoiceStatusPending): InvoiceStatusPending,
 	string(InvoiceStatusPaid):    InvoiceStatusPaid,

@@ -8,5 +8,10 @@
     "habitLimits": "Up to {premiumSubscriptionActiveHabitsLimit} active habits, instead of {basicSubscriptionActiveHabitsLimit} in the basic subscription",
     "noAds": "No ads",
     "futureFeatures": "Access to some upcoming features",
-    "purchase": "Purchase"
+    "purchase": "Purchase",
+    "createInvoice": "create invoice",
+    "sentInvoiceMsg": "An invoice has been sent to your private messages",
+    "pendingInvoiceMsg": "It must be paid before the timer below expires, otherwise the invoice will be automatically canceled",
+    "purchasedSubscriptionMsg": "Congratulations! Your subscription has been successfully purchased",
+    "dialogInitFailMsg": "Failed to initialize the subscription purchase dialog"
 }
