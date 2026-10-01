@@ -3,6 +3,7 @@ package tgbot
 import (
 	"context"
 	"errors"
+	"strings"
 
 	tgbotapi "github.com/mymmrac/telego"
 
@@ -29,64 +30,20 @@ func (eh EventHandler) Run(ctx context.Context, doneCh chan string, upd *tgbotap
 	eh.Res.Logger.Debug("event handler started")
 
 	switch {
-	case upd.Message != nil && upd.Message.SuccessfulPayment == nil:
-		eh.handleMessage(ctx, upd.Message)
 	case upd.PreCheckoutQuery != nil:
 		eh.handlePreCheckoutQuery(ctx, upd.PreCheckoutQuery)
+
 	case upd.Message != nil && upd.Message.SuccessfulPayment != nil:
 		eh.handleSuccessfulPayment(ctx, upd.Message.SuccessfulPayment)
+
+	case upd.Message != nil && isCmd(upd.Message, "support"):
+		eh.handleSupportCmd(ctx, upd.Message)
+
+	case upd.Message != nil:
+		eh.handleMessage(ctx, upd.Message)
 	}
 
 	eh.Res.Logger.Debug("event handler finished")
-}
-
-func (eh EventHandler) handleMessage(ctx context.Context, msg *tgbotapi.Message) {
-	var (
-		err error
-		tc  *tcPkg.Chat
-		u   *usrPkg.User
-	)
-
-	defer func() {
-		success := true
-
-		if r := recover(); r != nil {
-			success = false
-			eh.Res.Logger.Error("panic recovered in EventHandler.handleMessage", "panic", r)
-		}
-
-		if err != nil {
-			success = false
-			eh.Res.Logger.Error("event handler error", "error", err)
-		}
-
-		if !success && tc != nil {
-			var lang string
-			if u != nil {
-				lang = u.LangCode
-			} else {
-				lang = common.GetDefaultLang()
-			}
-
-			if err = usecases.SendTgMessage(ctx, eh.Res.TgBotAPI, usecases.NewErrorTgMessageParams(eh.Res, tc.TgID, lang)); err != nil {
-				eh.Res.Logger.Error("failed to send error message", "error", err)
-			}
-		}
-	}()
-
-	if u, err = usecases.MapUserToInnerAndSave(eh.Res, msg.From); err != nil {
-		return
-	}
-	eh.Res.Logger.Debug("user mapped to inner model and saved to DB", "user", u)
-
-	if tc, err = usecases.MapTgChatToInnerAndSave(eh.Res, msg.Chat, u); err != nil {
-		return
-	}
-	eh.Res.Logger.Debug("telegram chat mapped to inner model and saved to DB", "tgChat", tc)
-
-	if err = usecases.SendTgMessage(ctx, eh.Res.TgBotAPI, usecases.NewDefaultSuccessTgMessageParams(eh.Res, tc.TgID, u.TgFirstName, u.LangCode)); err != nil {
-		return
-	}
 }
 
 func (eh EventHandler) handlePreCheckoutQuery(ctx context.Context, pcq *tgbotapi.PreCheckoutQuery) {
@@ -246,4 +203,124 @@ func (eh EventHandler) handleSuccessfulPayment(ctx context.Context, pmt *tgbotap
 	if err = usecases.SendTgMessage(ctx, eh.Res.TgBotAPI, usecases.NewSubscriptionPurchaseSuccessTgMessageParams(eh.Res, tc.TgID, renew, subscriptionEvent, u.LangCode)); err != nil {
 		return
 	}
+}
+
+func (eh EventHandler) handleSupportCmd(ctx context.Context, msg *tgbotapi.Message) {
+	var (
+		err error
+		tc  *tcPkg.Chat
+		u   *usrPkg.User
+	)
+
+	defer func() {
+		success := true
+
+		if r := recover(); r != nil {
+			success = false
+			eh.Res.Logger.Error("panic recovered in EventHandler.handleMessage", "panic", r)
+		}
+
+		if err != nil {
+			success = false
+			eh.Res.Logger.Error("event handler error", "error", err)
+		}
+
+		if !success && tc != nil {
+			var lang string
+			if u != nil {
+				lang = u.LangCode
+			} else {
+				lang = common.GetDefaultLang()
+			}
+
+			if err = usecases.SendTgMessage(ctx, eh.Res.TgBotAPI, usecases.NewErrorTgMessageParams(eh.Res, tc.TgID, lang)); err != nil {
+				eh.Res.Logger.Error("failed to send error message", "error", err)
+			}
+		}
+	}()
+
+	if u, err = usecases.MapUserToInnerAndSave(eh.Res, msg.From); err != nil {
+		return
+	}
+	eh.Res.Logger.Debug("user mapped to inner model and saved to DB", "user", u)
+
+	if tc, err = usecases.MapTgChatToInnerAndSave(eh.Res, msg.Chat, u); err != nil {
+		return
+	}
+	eh.Res.Logger.Debug("telegram chat mapped to inner model and saved to DB", "tgChat", tc)
+
+	if err = usecases.SendTgMessage(ctx, eh.Res.TgBotAPI, usecases.NewSupportTgMessageParams(eh.Res, tc.TgID, u.LangCode)); err != nil {
+		return
+	}
+}
+
+func (eh EventHandler) handleMessage(ctx context.Context, msg *tgbotapi.Message) {
+	var (
+		err error
+		tc  *tcPkg.Chat
+		u   *usrPkg.User
+	)
+
+	defer func() {
+		success := true
+
+		if r := recover(); r != nil {
+			success = false
+			eh.Res.Logger.Error("panic recovered in EventHandler.handleMessage", "panic", r)
+		}
+
+		if err != nil {
+			success = false
+			eh.Res.Logger.Error("event handler error", "error", err)
+		}
+
+		if !success && tc != nil {
+			var lang string
+			if u != nil {
+				lang = u.LangCode
+			} else {
+				lang = common.GetDefaultLang()
+			}
+
+			if err = usecases.SendTgMessage(ctx, eh.Res.TgBotAPI, usecases.NewErrorTgMessageParams(eh.Res, tc.TgID, lang)); err != nil {
+				eh.Res.Logger.Error("failed to send error message", "error", err)
+			}
+		}
+	}()
+
+	if u, err = usecases.MapUserToInnerAndSave(eh.Res, msg.From); err != nil {
+		return
+	}
+	eh.Res.Logger.Debug("user mapped to inner model and saved to DB", "user", u)
+
+	if tc, err = usecases.MapTgChatToInnerAndSave(eh.Res, msg.Chat, u); err != nil {
+		return
+	}
+	eh.Res.Logger.Debug("telegram chat mapped to inner model and saved to DB", "tgChat", tc)
+
+	if err = usecases.SendTgMessage(ctx, eh.Res.TgBotAPI, usecases.NewDefaultSuccessTgMessageParams(eh.Res, tc.TgID, u.TgFirstName, u.LangCode)); err != nil {
+		return
+	}
+}
+
+func isCmd(msg *tgbotapi.Message, name string) bool {
+	if msg == nil {
+		return false
+	}
+
+	fields := strings.Fields(msg.Text)
+	if len(fields) == 0 {
+		return false
+	}
+
+	for _, entity := range msg.Entities {
+		if entity.Type != tgbotapi.EntityTypeBotCommand || entity.Offset != 0 {
+			continue
+		}
+
+		command := strings.SplitN(fields[0], "@", 2)[0]
+		return command == "/"+name
+	}
+
+	return false
 }

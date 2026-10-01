@@ -194,7 +194,7 @@ onMounted(async (): Promise<void> => {
 
   invoiceStore.init(apiFetcher)
   const fetchPendingInvoiceResult = await invoiceStore.fetchPendingInvoice(userStore.id)
-  if (!fetchPendingInvoiceResult.success) {
+  if (!fetchPendingInvoiceResult.success && fetchPendingInvoiceResult.httpCode != 404) {
     finishInitialization(t('app.initFailed', 'Initialization failed'))
     return
   }

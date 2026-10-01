@@ -164,3 +164,14 @@ func NewExpiredInvoiceTgMessageParams(r common.Resources, tcTgID int64, lang str
 		common.MESSAGES[lang]["expiredInvoiceMsg"],
 	)
 }
+
+func NewSupportTgMessageParams(r common.Resources, tcTgID int64, lang string) *tgbotapi.SendMessageParams {
+	if lang == "" {
+		lang = common.GetDefaultLang()
+	}
+
+	return tu.Message(
+		tu.ID(tcTgID),
+		common.MESSAGES[lang]["supportMsg"],
+	)
+}
