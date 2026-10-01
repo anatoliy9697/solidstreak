@@ -18,7 +18,7 @@ var MESSAGES = map[string]map[string]string{
 		"renewed":                  "renewed",
 		"subscriptionActiveUntil":  "Your subscription is active until %s",
 		"expiredInvoiceMsg":        "Your invoice has expired\nPlease try again to purchase or renew your subscription",
-		"supportMsg":               "If you have any questions or issues with the bot, please describe your question or issue in the support chat (@solidstreak_chat) or directly to the developer (@avasin_dev)\n\nIf you have problems with subscription payment, use the /paysupport command",
+		"supportMsg":               "If you have any questions or issues with the application, please describe your question or issue in the support chat (@solidstreak_chat) or directly to the developer (@avasin_dev)\n\nIf you have problems with subscription payment, use the /paysupport command",
 	},
 	"ru": {
 		"smthWrongMsg":             "Что-то пошло не так\nПожалуйста, попробуйте позже или обратитесь в поддержку (@solidstreak_chat, @avasin_dev)",
@@ -37,7 +37,7 @@ var MESSAGES = map[string]map[string]string{
 		"renewed":                  "продлили",
 		"subscriptionActiveUntil":  "Ваша подписка действует до %s",
 		"expiredInvoiceMsg":        "Ваш счет на оплату просрочен\nПожалуйста, попробуйте снова приобрести или продлить подписку",
-		"supportMsg":               "Если у вас есть вопросы или проблемы в работе бота, пожалуйста, опишите ваш вопрос или проблему в чате с поддержкой (@solidstreak_chat) или напрямую разработчику (@avasin_dev)\n\nЕсли у вас проблемы с оплатой подписки, воспользуйтесь командой /paysupport",
+		"supportMsg":               "Если у вас есть вопросы или проблемы в работе приложения, пожалуйста, опишите ваш вопрос или проблему в чате с поддержкой (@solidstreak_chat) или напрямую разработчику (@avasin_dev)\n\nЕсли у вас проблемы с оплатой подписки, воспользуйтесь командой /paysupport",
 	},
 }
 
