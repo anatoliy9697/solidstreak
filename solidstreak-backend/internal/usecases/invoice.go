@@ -29,9 +29,34 @@ func CreateAndSendInvoice(
 	pricing *subPkg.Pricing,
 	invoiceExpiresIn time.Duration,
 ) (*invPkg.Invoice, error) {
-	var err error
+	var (
+		err                      error
+		invoice                  *invPkg.Invoice
+		subscriptionEvent        *subPkg.SubscriptionEvent
+		invoiceCreated           bool
+		subscriptionEventCreated bool
+		tgInvoiceMsgSent         bool
+	)
 
-	invoice := invPkg.NewInvoice(
+	defer func() {
+		if invoiceCreated {
+			if !tgInvoiceMsgSent {
+				invoice.SetStatus(invPkg.InvoiceStatusCancelled)
+			}
+			if err = r.InvRepo.Update(invoice); err != nil {
+				r.Logger.Error("failed to update invoice", "error", err)
+			}
+		}
+
+		if subscriptionEventCreated && !tgInvoiceMsgSent {
+			subscriptionEvent.SetStatus(subPkg.SubscriptionEventStatusError)
+			if err = r.SubRepo.UpdateEvent(subscriptionEvent); err != nil {
+				r.Logger.Error("failed to update subscription event", "error", err)
+			}
+		}
+	}()
+
+	invoice = invPkg.NewInvoice(
 		uuid.NewString(),
 		pricing.Currency,
 		pricing.Price,
@@ -40,7 +65,7 @@ func CreateAndSendInvoice(
 		time.Now().UTC().Add(invoiceExpiresIn),
 	)
 
-	subscriptionEvent := subPkg.NewSubscriptionEvent(
+	subscriptionEvent = subPkg.NewSubscriptionEvent(
 		subPkg.SubscriptionEventTypeAcquisition,
 		subPkg.SubscriptionEventStatusInProgress,
 		subPkg.SubscriptionOriginPurchase,
@@ -56,20 +81,23 @@ func CreateAndSendInvoice(
 		return nil, err
 	}
 
-	var tgInvoiceMsg *tgbotapi.Message
-	if tgInvoiceMsg, err = SendTgInvoice(ctx, r.TgBotAPI, tgInvoiceParams); err != nil {
-		return nil, err
-	}
-
-	invoice.SetTgMessageID(tgInvoiceMsg.MessageID)
-
 	if err = r.InvRepo.Create(invoice); err != nil {
 		return nil, err
 	}
+	invoiceCreated = true
 
 	if err = r.SubRepo.CreateEvent(subscriptionEvent); err != nil {
 		return nil, err
 	}
+	subscriptionEventCreated = true
+
+	var tgInvoiceMsg *tgbotapi.Message
+	if tgInvoiceMsg, err = SendTgInvoice(ctx, r.TgBotAPI, tgInvoiceParams); err != nil {
+		return nil, err
+	}
+	tgInvoiceMsgSent = true
+
+	invoice.SetTgMessageID(tgInvoiceMsg.MessageID)
 
 	return invoice, nil
 }

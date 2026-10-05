@@ -127,7 +127,7 @@ CHECK (color IN (
 CREATE TABLE invoices (
 	uuid VARCHAR(64) PRIMARY KEY UNIQUE NOT NULL,
 	active BOOLEAN NOT NULL DEFAULT TRUE,
-	status VARCHAR(32) NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'paid', 'expired')),
+	status VARCHAR(32) NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'paid', 'expired', 'cancelled')),
 	currency VARCHAR(32) NOT NULL CHECK (currency IN ('XTR')),
 	amount BIGINT NOT NULL,
 	user_id INTEGER NOT NULL REFERENCES users(id),
@@ -145,7 +145,7 @@ CREATE TABLE subscription_events (
 	id BIGSERIAL PRIMARY KEY UNIQUE NOT NULL,
 	active BOOLEAN NOT NULL DEFAULT TRUE,
 	type VARCHAR(32) NOT NULL CHECK (type IN ('acquisition')),
-	status VARCHAR(32) NOT NULL CHECK (status IN ('in_progress', 'completed', 'payment_timeout')),
+	status VARCHAR(32) NOT NULL CHECK (status IN ('in_progress', 'completed', 'payment_timeout', 'error')),
 	subscription_origin VARCHAR(32) CHECK (subscription_origin IN ('purchase')),
 	subscription_plan_code VARCHAR(32) NOT NULL CHECK (subscription_plan_code IN ('basic', 'premium')),
 	subscription_period_unit VARCHAR(32) NOT NULL CHECK (subscription_period_unit IN ('month', 'year', 'lifetime')),

@@ -26,7 +26,7 @@ func GetUserSubscription(r common.Resources, u *usrPkg.User) (*subPkg.Subscripti
 	return sub, nil
 }
 
-func CalculateSubscriptionEventStartAndFinishDate(renew bool, prevEventFinishDate *date.Date, subscriptionEvent *subPkg.SubscriptionEvent) (*date.Date, *date.Date) {
+func CalculateSubscriptionEventStartAndFinishDate(renew bool, prevEventFinishDate *date.Date, se *subPkg.SubscriptionEvent) (*date.Date, *date.Date) {
 	var startDate date.Date
 	if renew && prevEventFinishDate != nil {
 		startDate = prevEventFinishDate.AddDate(0, 0, 1)
@@ -35,13 +35,13 @@ func CalculateSubscriptionEventStartAndFinishDate(renew bool, prevEventFinishDat
 	}
 
 	var finishDatePtr *date.Date
-	if subscriptionEvent.SubscriptionPeriodUnit != subPkg.SubscriptionPeriodUnitLifetime {
+	if se.SubscriptionPeriodUnit != subPkg.SubscriptionPeriodUnitLifetime {
 		var finishDate date.Date
-		switch subscriptionEvent.SubscriptionPeriodUnit {
+		switch se.SubscriptionPeriodUnit {
 		case subPkg.SubscriptionPeriodUnitYear:
-			finishDate = startDate.AddDate(int(subscriptionEvent.SubscriptionPeriodCount), 0, 0)
+			finishDate = startDate.AddDate(int(se.SubscriptionPeriodCount), 0, 0)
 		case subPkg.SubscriptionPeriodUnitMonth:
-			finishDate = startDate.AddDate(0, int(subscriptionEvent.SubscriptionPeriodCount), 0)
+			finishDate = startDate.AddDate(0, int(se.SubscriptionPeriodCount), 0)
 		}
 		finishDatePtr = &finishDate
 	}
@@ -51,29 +51,35 @@ func CalculateSubscriptionEventStartAndFinishDate(renew bool, prevEventFinishDat
 
 func CreateOrUpdateSubscription(
 	r common.Resources,
-	subscription *subPkg.Subscription,
+	s *subPkg.Subscription,
 	renew bool,
-	planCode string,
-	startDate *date.Date,
-	finishDate *date.Date,
-	userID int64,
+	se *subPkg.SubscriptionEvent,
 ) (*subPkg.Subscription, error) {
 	var err error
 
 	if renew {
-		subscription.SetFinishDt(finishDate)
-		err = r.SubRepo.Update(subscription)
+		s.SetFinishDt(se.SubscriptionPeriodFinishDate)
+		err = r.SubRepo.Update(s)
 	} else {
-		subscription = subPkg.NewSubscription(planCode, startDate, finishDate, userID)
-		err = r.SubRepo.Create(subscription)
+		s = subPkg.NewSubscription(se.SubscriptionPlanCode, se.SubscriptionPeriodStartDate, se.SubscriptionPeriodFinishDate, se.UserID)
+		err = r.SubRepo.Create(s)
 	}
 
-	return subscription, err
+	return s, err
 }
 
-func CompleteSubscriptionEvent(r common.Resources, subscriptionEvent *subPkg.SubscriptionEvent, startDate *date.Date, finishDate *date.Date, subscriptionID *int64) error {
-	subscriptionEvent.SetSubscriptionStartAndFinishDate(startDate, finishDate)
-	subscriptionEvent.SetSubscriptionID(subscriptionID)
-	subscriptionEvent.MarkAsCompleted()
-	return r.SubRepo.UpdateEvent(subscriptionEvent)
+func CompleteSubscriptionEvent(r common.Resources, se *subPkg.SubscriptionEvent) error {
+	se.MarkAsCompleted()
+	return r.SubRepo.UpdateEvent(se)
+}
+
+func RollbackSubscription(r common.Resources, s *subPkg.Subscription, renew bool, se *subPkg.SubscriptionEvent) (*subPkg.Subscription, error) {
+	if renew {
+		finishDate := se.SubscriptionPeriodFinishDate.AddDate(0, 0, -1)
+		s.SetFinishDt(&finishDate)
+	} else {
+		s.Deactivate()
+	}
+
+	return s, r.SubRepo.Update(s)
 }

@@ -52,7 +52,7 @@ watch(
       if (!invoiceStore.pendingInvoice) {
 
         const fetchPendingInvoiceResult = await invoiceStore.fetchPendingInvoice(userStore.id)
-        if (!fetchPendingInvoiceResult.success) {
+        if (!fetchPendingInvoiceResult.success && fetchPendingInvoiceResult.httpCode != 404) {
           toast.add({
             severity: 'error',
             summary: t('common.error', 'Error'),
@@ -179,7 +179,7 @@ function millisecondsToMMSSString(time: number): string {
       </template>
 
       <template v-else-if="invoiceStore.paidInvoice">
-        <span class="mb-2">{{
+        <span class="mb-4">{{
           t(
             'subscriptionPurchaseDialog.purchasedSubscriptionMsg',
             'Congratulations! Your subscription has been successfully purchased',

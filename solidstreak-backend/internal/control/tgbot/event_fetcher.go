@@ -39,8 +39,8 @@ loop:
 
 		// New update received
 		case upd := <-upds:
-			// Ignore non-message and non-pre-checkout-query updates
-			if upd.Message == nil && upd.PreCheckoutQuery == nil {
+			// Ignore non-message and non-pre-checkout-query updates or refunded payment messages
+			if (upd.Message == nil && upd.PreCheckoutQuery == nil) || (upd.Message != nil && upd.Message.RefundedPayment != nil) {
 				continue
 			}
 			ef.Res.Logger.Info("new update received", "update", upd)

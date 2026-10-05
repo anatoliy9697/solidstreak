@@ -64,12 +64,14 @@ const (
 	SubscriptionEventStatusInProgress     SubscriptionEventStatus = "in_progress"
 	SubscriptionEventStatusCompleted      SubscriptionEventStatus = "completed"
 	SubscriptionEventStatusPaymentTimeout SubscriptionEventStatus = "payment_timeout"
+	SubscriptionEventStatusError          SubscriptionEventStatus = "error"
 )
 
 var SubscriptionEventStatusMapping = map[string]SubscriptionEventStatus{
 	string(SubscriptionEventStatusInProgress):     SubscriptionEventStatusInProgress,
 	string(SubscriptionEventStatusCompleted):      SubscriptionEventStatusCompleted,
 	string(SubscriptionEventStatusPaymentTimeout): SubscriptionEventStatusPaymentTimeout,
+	string(SubscriptionEventStatusError):          SubscriptionEventStatusError,
 }
 
 type SubscriptionOrigin string
@@ -195,8 +197,14 @@ func NewSubscription(
 }
 
 func (s *Subscription) SetFinishDt(finishDate *date.Date) {
-	now := time.Now().UTC()
 	s.FinishDate = finishDate
+	now := time.Now().UTC()
+	s.UpdatedAt = &now
+}
+
+func (s *Subscription) Deactivate() {
+	s.Active = false
+	now := time.Now().UTC()
 	s.UpdatedAt = &now
 }
 

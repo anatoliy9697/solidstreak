@@ -1,7 +1,8 @@
 export const INVOICE_STATUS = {
   PENDING: 'pending',
   PAID: 'paid',
-  CANCELED: 'canceled',
+  EXPIRED: 'expired',
+  CANCELLED: 'cancelled',
 } as const
 
 export type InvoiceStatus = (typeof INVOICE_STATUS)[keyof typeof INVOICE_STATUS]

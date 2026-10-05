@@ -48,8 +48,10 @@ func (eh EventHandler) Run(ctx context.Context, doneCh chan string, upd *tgbotap
 
 func (eh EventHandler) handlePreCheckoutQuery(ctx context.Context, pcq *tgbotapi.PreCheckoutQuery) {
 	var (
-		err error
-		u   *usrPkg.User
+		err               error
+		u                 *usrPkg.User
+		invoice           *invPkg.Invoice
+		subscriptionEvent *subPkg.SubscriptionEvent
 	)
 
 	defer func() {
@@ -83,7 +85,6 @@ func (eh EventHandler) handlePreCheckoutQuery(ctx context.Context, pcq *tgbotapi
 		return
 	}
 
-	var invoice *invPkg.Invoice
 	if invoice, err = eh.Res.InvRepo.GetActiveByUUIDAndStatuses(invoiceUUID, []invPkg.InvoiceStatus{invPkg.InvoiceStatusPending}, true); err != nil {
 		return
 	}
@@ -92,7 +93,6 @@ func (eh EventHandler) handlePreCheckoutQuery(ctx context.Context, pcq *tgbotapi
 		return
 	}
 
-	var subscriptionEvent *subPkg.SubscriptionEvent
 	if subscriptionEvent, err = eh.Res.SubRepo.GetActiveEventByInvoiceUUIDAndStatuses(invoice.UUID, []subPkg.SubscriptionEventStatus{subPkg.SubscriptionEventStatusInProgress}); err != nil {
 		return
 	}
@@ -115,9 +115,14 @@ func (eh EventHandler) handlePreCheckoutQuery(ctx context.Context, pcq *tgbotapi
 
 func (eh EventHandler) handleSuccessfulPayment(ctx context.Context, pmt *tgbotapi.SuccessfulPayment) {
 	var (
-		err error
-		tc  *tcPkg.Chat
-		u   *usrPkg.User
+		err                   error
+		tc                    *tcPkg.Chat
+		u                     *usrPkg.User
+		invoice               *invPkg.Invoice
+		subscriptionEvent     *subPkg.SubscriptionEvent
+		subscription          *subPkg.Subscription
+		renew                 bool
+		subscriptionProcessed bool = false
 	)
 
 	defer func() {
@@ -133,16 +138,44 @@ func (eh EventHandler) handleSuccessfulPayment(ctx context.Context, pmt *tgbotap
 			eh.Res.Logger.Error("event handler error", "error", err)
 		}
 
-		if !success && tc != nil {
-			var lang string
+		if !success {
 			if u != nil {
-				lang = u.LangCode
-			} else {
-				lang = common.GetDefaultLang()
+				if err = usecases.RefundStarPayment(ctx, eh.Res.TgBotAPI, usecases.NewTgRefundStarPaymentParams(u.TgID, pmt.TelegramPaymentChargeID)); err != nil {
+					eh.Res.Logger.Error("failed to refund star payment", "error", err)
+				}
 			}
 
-			if err = usecases.SendTgMessage(ctx, eh.Res.TgBotAPI, usecases.NewErrorTgMessageParams(eh.Res, tc.TgID, lang)); err != nil {
-				eh.Res.Logger.Error("failed to send error message", "error", err)
+			if subscription != nil && subscriptionProcessed {
+				if _, err := usecases.RollbackSubscription(eh.Res, subscription, renew, subscriptionEvent); err != nil {
+					eh.Res.Logger.Error("failed to rollback subscription", "error", err)
+				}
+			}
+
+			if invoice != nil {
+				invoice.SetStatus(invPkg.InvoiceStatusCancelled)
+				if err = eh.Res.InvRepo.Update(invoice); err != nil {
+					eh.Res.Logger.Error("failed to mark invoice as cancelled", "error", err)
+				}
+			}
+
+			if subscriptionEvent != nil {
+				subscriptionEvent.SetStatus(subPkg.SubscriptionEventStatusError)
+				if err = eh.Res.SubRepo.UpdateEvent(subscriptionEvent); err != nil {
+					eh.Res.Logger.Error("failed to mark subscription event as error", "error", err)
+				}
+			}
+
+			if tc != nil {
+				var lang string
+				if u != nil {
+					lang = u.LangCode
+				} else {
+					lang = common.GetDefaultLang()
+				}
+
+				if err = usecases.SendTgMessage(ctx, eh.Res.TgBotAPI, usecases.NewErrorTgMessageParams(eh.Res, tc.TgID, lang)); err != nil {
+					eh.Res.Logger.Error("failed to send error message", "error", err)
+				}
 			}
 		}
 	}()
@@ -152,7 +185,6 @@ func (eh EventHandler) handleSuccessfulPayment(ctx context.Context, pmt *tgbotap
 		return
 	}
 
-	var invoice *invPkg.Invoice
 	if invoice, err = eh.Res.InvRepo.GetActiveByUUIDAndStatuses(invoiceUUID, []invPkg.InvoiceStatus{invPkg.InvoiceStatusPending}, true); err != nil {
 		return
 	}
@@ -164,7 +196,6 @@ func (eh EventHandler) handleSuccessfulPayment(ctx context.Context, pmt *tgbotap
 		return
 	}
 
-	var subscriptionEvent *subPkg.SubscriptionEvent
 	if subscriptionEvent, err = eh.Res.SubRepo.GetActiveEventByInvoiceUUIDAndStatuses(invoice.UUID, []subPkg.SubscriptionEventStatus{subPkg.SubscriptionEventStatusInProgress}); err != nil {
 		return
 	}
@@ -174,7 +205,6 @@ func (eh EventHandler) handleSuccessfulPayment(ctx context.Context, pmt *tgbotap
 		return
 	}
 
-	var subscription *subPkg.Subscription
 	if subscription, err = usecases.GetUserSubscription(eh.Res, u); err != nil {
 		return
 	}
@@ -184,19 +214,25 @@ func (eh EventHandler) handleSuccessfulPayment(ctx context.Context, pmt *tgbotap
 		return
 	}
 
-	renew := subscription.PlanCode != "basic"
+	renew = subscription.PlanCode != "basic"
 
 	startDt, finishDt := usecases.CalculateSubscriptionEventStartAndFinishDate(renew, subscription.FinishDate, subscriptionEvent)
 
-	if subscription, err = usecases.CreateOrUpdateSubscription(eh.Res, subscription, renew, subscriptionEvent.SubscriptionPlanCode, startDt, finishDt, u.ID); err != nil {
+	subscriptionEvent.SetSubscriptionStartAndFinishDate(startDt, finishDt)
+
+	if subscription, err = usecases.CreateOrUpdateSubscription(eh.Res, subscription, renew, subscriptionEvent); err != nil {
 		return
 	}
+
+	subscriptionProcessed = true
+
+	subscriptionEvent.SetSubscriptionID(subscription.ID)
 
 	if err = usecases.MarkInvoiceAsPaid(eh.Res, invoice, pmt.TelegramPaymentChargeID); err != nil {
 		return
 	}
 
-	if err = usecases.CompleteSubscriptionEvent(eh.Res, subscriptionEvent, startDt, finishDt, subscription.ID); err != nil {
+	if err = usecases.CompleteSubscriptionEvent(eh.Res, subscriptionEvent); err != nil {
 		return
 	}
 
@@ -249,7 +285,7 @@ func (eh EventHandler) handleSupportCmd(ctx context.Context, msg *tgbotapi.Messa
 	}
 	eh.Res.Logger.Debug("telegram chat mapped to inner model and saved to DB", "tgChat", tc)
 
-	if err = usecases.SendTgMessage(ctx, eh.Res.TgBotAPI, usecases.NewSupportTgMessageParams(eh.Res, tc.TgID, u.LangCode)); err != nil {
+	if err = usecases.SendTgMessage(ctx, eh.Res.TgBotAPI, usecases.NewSupportTgMessageParams(tc.TgID, u.LangCode)); err != nil {
 		return
 	}
 }

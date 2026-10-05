@@ -154,7 +154,7 @@ func DeleteTgMessage(ctx context.Context, tgBotAPI *tgbotapi.Bot, params *tgbota
 	return tgBotAPI.DeleteMessage(ctx, params)
 }
 
-func NewExpiredInvoiceTgMessageParams(r common.Resources, tcTgID int64, lang string) *tgbotapi.SendMessageParams {
+func NewExpiredInvoiceTgMessageParams(tcTgID int64, lang string) *tgbotapi.SendMessageParams {
 	if lang == "" {
 		lang = common.GetDefaultLang()
 	}
@@ -165,7 +165,7 @@ func NewExpiredInvoiceTgMessageParams(r common.Resources, tcTgID int64, lang str
 	)
 }
 
-func NewSupportTgMessageParams(r common.Resources, tcTgID int64, lang string) *tgbotapi.SendMessageParams {
+func NewSupportTgMessageParams(tcTgID int64, lang string) *tgbotapi.SendMessageParams {
 	if lang == "" {
 		lang = common.GetDefaultLang()
 	}
@@ -174,4 +174,15 @@ func NewSupportTgMessageParams(r common.Resources, tcTgID int64, lang string) *t
 		tu.ID(tcTgID),
 		common.MESSAGES[lang]["supportMsg"],
 	)
+}
+
+func NewTgRefundStarPaymentParams(userTgID int64, tgPaymentChargeID string) *tgbotapi.RefundStarPaymentParams {
+	return &tgbotapi.RefundStarPaymentParams{
+		UserID:                  userTgID,
+		TelegramPaymentChargeID: tgPaymentChargeID,
+	}
+}
+
+func RefundStarPayment(ctx context.Context, tgBotAPI *tgbotapi.Bot, params *tgbotapi.RefundStarPaymentParams) error {
+	return tgBotAPI.RefundStarPayment(ctx, params)
 }

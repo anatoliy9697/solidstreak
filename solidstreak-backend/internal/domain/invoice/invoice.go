@@ -19,21 +19,24 @@ var CurrencyMapping = map[string]Currency{
 type InvoiceStatus string
 
 const (
-	InvoiceStatusPending InvoiceStatus = "pending"
-	InvoiceStatusPaid    InvoiceStatus = "paid"
-	InvoiceStatusExpired InvoiceStatus = "expired"
+	InvoiceStatusPending   InvoiceStatus = "pending"
+	InvoiceStatusPaid      InvoiceStatus = "paid"
+	InvoiceStatusExpired   InvoiceStatus = "expired"
+	InvoiceStatusCancelled InvoiceStatus = "cancelled"
 )
 
 var InvoiceStatusAll = []InvoiceStatus{
 	InvoiceStatusPending,
 	InvoiceStatusPaid,
 	InvoiceStatusExpired,
+	InvoiceStatusCancelled,
 }
 
 var InvoiceStatusMapping = map[string]InvoiceStatus{
-	string(InvoiceStatusPending): InvoiceStatusPending,
-	string(InvoiceStatusPaid):    InvoiceStatusPaid,
-	string(InvoiceStatusExpired): InvoiceStatusExpired,
+	string(InvoiceStatusPending):   InvoiceStatusPending,
+	string(InvoiceStatusPaid):      InvoiceStatusPaid,
+	string(InvoiceStatusExpired):   InvoiceStatusExpired,
+	string(InvoiceStatusCancelled): InvoiceStatusCancelled,
 }
 
 type Invoice struct {
