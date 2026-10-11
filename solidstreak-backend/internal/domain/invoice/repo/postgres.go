@@ -148,9 +148,8 @@ func (r pgRepo) Update(i *invPkg.Invoice) error {
 			expires_at = $9,
 			lock_owner_id = NULL,
 			locked_at = NULL,
-			created_at = $10,
-			updated_at = $11
-		WHERE uuid = $12
+			updated_at = $10
+		WHERE uuid = $11
 	`
 	_, err := r.p.Exec(r.c, sql,
 		i.Active,
@@ -162,7 +161,6 @@ func (r pgRepo) Update(i *invPkg.Invoice) error {
 		i.TgMessageID,
 		i.TgPaymentChargeID,
 		i.ExpiresAt,
-		i.CreatedAt,
 		i.UpdatedAt,
 		i.UUID,
 	)

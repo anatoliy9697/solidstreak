@@ -145,7 +145,7 @@ CREATE TABLE subscription_events (
 	id BIGSERIAL PRIMARY KEY UNIQUE NOT NULL,
 	active BOOLEAN NOT NULL DEFAULT TRUE,
 	type VARCHAR(32) NOT NULL CHECK (type IN ('acquisition')),
-	status VARCHAR(32) NOT NULL CHECK (status IN ('in_progress', 'completed', 'payment_timeout', 'error')),
+	status VARCHAR(32) NOT NULL DEFAULT 'in_progress' CHECK (status IN ('in_progress', 'completed', 'payment_timeout', 'error')),
 	subscription_origin VARCHAR(32) CHECK (subscription_origin IN ('purchase')),
 	subscription_plan_code VARCHAR(32) NOT NULL CHECK (subscription_plan_code IN ('basic', 'premium')),
 	subscription_period_unit VARCHAR(32) NOT NULL CHECK (subscription_period_unit IN ('month', 'year', 'lifetime')),
@@ -171,3 +171,18 @@ ALTER TABLE habits
 
 ALTER TABLE user_habit_checks
 	ALTER COLUMN checked_at TYPE TIMESTAMPTZ USING checked_at AT TIME ZONE 'UTC';
+
+CREATE TABLE support_tickets (
+    uuid VARCHAR(64) PRIMARY KEY UNIQUE NOT NULL,
+    active BOOLEAN NOT NULL DEFAULT TRUE,
+    status VARCHAR(32) NOT NULL DEFAULT 'new'
+        CHECK (status IN ('new', 'closed')),
+    user_id BIGINT NOT NULL REFERENCES users(id),
+    tg_chat_id BIGINT NOT NULL REFERENCES tg_chats(tg_id),
+    ticket_message TEXT NOT NULL,
+    ticket_message_tg_id INTEGER NOT NULL,
+    ticket_answer TEXT,
+    ticket_answer_tg_id INTEGER,
+    created_at TIMESTAMPTZ NOT NULL,
+    updated_at TIMESTAMPTZ NOT NULL
+);

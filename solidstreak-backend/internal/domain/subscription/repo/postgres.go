@@ -58,9 +58,8 @@ func (r pgRepo) Update(s *subPkg.Subscription) error {
 			start_date = $3,
 			finish_date = $4,
 			user_id = $5,
-			created_at = $6,
-			updated_at = $7
-		WHERE id = $8
+			updated_at = $6
+		WHERE id = $7
 	`
 	_, err := r.pool.Exec(
 		r.ctx,
@@ -70,7 +69,6 @@ func (r pgRepo) Update(s *subPkg.Subscription) error {
 		s.StartDate,
 		s.FinishDate,
 		s.UserID,
-		s.CreatedAt,
 		s.UpdatedAt,
 		s.ID,
 	)
@@ -177,9 +175,8 @@ func (r pgRepo) UpdateEvent(se *subPkg.SubscriptionEvent) error {
 			user_id = $10,
 			subscription_id = $11,
 			invoice_uuid = $12,
-			created_at = $13,
-			updated_at = $14
-		WHERE id = $15
+			updated_at = $13
+		WHERE id = $14
 	`
 	_, err := r.pool.Exec(
 		r.ctx,
@@ -196,7 +193,6 @@ func (r pgRepo) UpdateEvent(se *subPkg.SubscriptionEvent) error {
 		se.UserID,
 		se.SubscriptionID,
 		se.InvoiceUUID,
-		se.CreatedAt,
 		se.UpdatedAt,
 		se.ID,
 	)

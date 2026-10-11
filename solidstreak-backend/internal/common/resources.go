@@ -8,6 +8,7 @@ import (
 	h "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/habit/repo"
 	inv "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/invoice/repo"
 	sub "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/subscription/repo"
+	st "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/supportticket/repo"
 	tc "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/tgchat/repo"
 	usr "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/user/repo"
 )
@@ -21,4 +22,5 @@ type Resources struct {
 	TCRepo    tc.Repo
 	HabitRepo h.Repo
 	InvRepo   inv.Repo
+	STRepo    st.Repo
 }

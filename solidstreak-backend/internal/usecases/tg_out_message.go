@@ -170,10 +170,27 @@ func NewSupportTgMessageParams(tcTgID int64, lang string) *tgbotapi.SendMessageP
 		lang = common.GetDefaultLang()
 	}
 
-	return tu.Message(
+	msgParams := tu.Message(
 		tu.ID(tcTgID),
 		common.MESSAGES[lang]["supportMsg"],
 	)
+	msgParams.ParseMode = "HTML"
+
+	return msgParams
+}
+
+func NewPaySupportTgMessageParams(tcTgID int64, lang string) *tgbotapi.SendMessageParams {
+	if lang == "" {
+		lang = common.GetDefaultLang()
+	}
+
+	msgParams := tu.Message(
+		tu.ID(tcTgID),
+		common.MESSAGES[lang]["paySupportMsg"],
+	)
+	msgParams.ParseMode = "HTML"
+
+	return msgParams
 }
 
 func NewTgRefundStarPaymentParams(userTgID int64, tgPaymentChargeID string) *tgbotapi.RefundStarPaymentParams {
@@ -185,4 +202,32 @@ func NewTgRefundStarPaymentParams(userTgID int64, tgPaymentChargeID string) *tgb
 
 func RefundStarPayment(ctx context.Context, tgBotAPI *tgbotapi.Bot, params *tgbotapi.RefundStarPaymentParams) error {
 	return tgBotAPI.RefundStarPayment(ctx, params)
+}
+
+func NewPaySupportTicketCreatedTgMessageParams(tcTgID int64, ticketUUID string, lang string) *tgbotapi.SendMessageParams {
+	if lang == "" {
+		lang = common.GetDefaultLang()
+	}
+
+	msgParams := tu.Message(
+		tu.ID(tcTgID),
+		fmt.Sprintf(common.MESSAGES[lang]["paySupportTicketCreatedMsg"], ticketUUID),
+	)
+	msgParams.ParseMode = "HTML"
+
+	return msgParams
+}
+
+func NewAlreadyOpenTicketTgMessageParams(tcTgID int64, ticketUUID string, lang string) *tgbotapi.SendMessageParams {
+	if lang == "" {
+		lang = common.GetDefaultLang()
+	}
+
+	msgParams := tu.Message(
+		tu.ID(tcTgID),
+		fmt.Sprintf(common.MESSAGES[lang]["alreadyOpenTicketMsg"], ticketUUID),
+	)
+	msgParams.ParseMode = "HTML"
+
+	return msgParams
 }

@@ -24,6 +24,7 @@ import (
 	st "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/schedulertask"
 	subPkg "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/subscription"
 	subRepo "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/subscription/repo"
+	stRepo "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/supportticket/repo"
 	tcRepo "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/tgchat/repo"
 	usrRepo "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/user/repo"
 )
@@ -95,6 +96,7 @@ func main() {
 		TCRepo:    tcRepo.Init(mainCtx, pgPool),
 		HabitRepo: hRepo.Init(mainCtx, pgPool),
 		InvRepo:   invRepoInstance,
+		STRepo:    stRepo.Init(mainCtx, pgPool),
 	}
 
 	goroutineDoneCh := make(chan struct{}, 2)
