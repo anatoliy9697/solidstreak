@@ -95,8 +95,8 @@ func NewTgInvoiceParams(
 	subscriptionPeriodLabel := buildSubscriptionPeriodLabel(lang, subscriptionEvent.SubscriptionPeriodUnit, subscriptionEvent.SubscriptionPeriodCount)
 	return &tgbotapi.SendInvoiceParams{
 		ChatID:        tgbotapi.ChatID{ID: tcTgID},
-		Title:         common.MESSAGES[lang]["premiumSubscription"],                                                                                                                                  // Если появятся другие планы, то нужно будет формировать динамически
-		Description:   common.MESSAGES[lang]["accessToPremium"] + " " + subscriptionPeriodLabel + ". " + fmt.Sprintf(common.MESSAGES[lang]["invoiceExpirationMsg"], int(invoiceExpiresIn.Minutes())), // Если появятся другие планы, то нужно будет формировать динамически
+		Title:         common.MESSAGES[lang]["premiumSubscription"],                                                                                                                                                // Если появятся другие планы, то нужно будет формировать динамически
+		Description:   common.MESSAGES[lang]["accessToPremium"] + " " + subscriptionPeriodLabel + ". " + fmt.Sprintf(common.MESSAGES[lang]["invoiceExpirationMsg"], invoice.UUID, int(invoiceExpiresIn.Minutes())), // Если появятся другие планы, то нужно будет формировать динамически
 		Payload:       payload,
 		ProviderToken: "", // Для Stars должен быть пустой
 		Currency:      string(invoice.Currency),
@@ -226,6 +226,20 @@ func NewAlreadyOpenTicketTgMessageParams(tcTgID int64, ticketUUID string, lang s
 	msgParams := tu.Message(
 		tu.ID(tcTgID),
 		fmt.Sprintf(common.MESSAGES[lang]["alreadyOpenTicketMsg"], ticketUUID),
+	)
+	msgParams.ParseMode = "HTML"
+
+	return msgParams
+}
+
+func NewRefundTgMessageParams(tcTgID int64, invoice *invPkg.Invoice, lang string) *tgbotapi.SendMessageParams {
+	if lang == "" {
+		lang = common.GetDefaultLang()
+	}
+
+	msgParams := tu.Message(
+		tu.ID(tcTgID),
+		fmt.Sprintf(common.MESSAGES[lang]["refundMsg"], invoice.Amount, invoice.Currency, invoice.UUID),
 	)
 	msgParams.ParseMode = "HTML"
 

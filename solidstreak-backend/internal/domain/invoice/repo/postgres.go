@@ -286,7 +286,73 @@ func (r pgRepo) GetActiveByUUIDAndStatuses(uuid string, statuses []invPkg.Invoic
 			if notExpired {
 				notExpiredLabel = " and not expired"
 			}
-			return nil, apperrors.NewNotFoundErr(fmt.Sprintf("couldn't find active%s invoice by uuid %v and statuses %v", notExpiredLabel, uuid, statuses))
+			return nil, apperrors.NewNotFoundErr(fmt.Sprintf("couldn't find active%s invoice by UUID %v and statuses %v", notExpiredLabel, uuid, statuses))
+		}
+		return nil, err
+	}
+
+	if _, ok := invPkg.InvoiceStatusMapping[string(i.Status)]; !ok {
+		return nil, apperrors.NewInternalErr(fmt.Sprintf("invoice has invalid status: %v", i.Status))
+	}
+
+	if _, ok := invPkg.CurrencyMapping[string(i.Currency)]; !ok {
+		return nil, apperrors.NewInternalErr(fmt.Sprintf("invoice has invalid currency: %v", i.Currency))
+	}
+
+	return i, nil
+}
+
+func (r pgRepo) GetActiveLastPaidByUserIDAndUUID(userID int64, uuid string) (*invPkg.Invoice, error) {
+	i := &invPkg.Invoice{}
+
+	sql := `
+		SELECT
+			active,
+			uuid,
+			status,
+			currency,
+			amount,
+			user_id,
+			tg_chat_id,
+			tg_message_id,
+			tg_payment_charge_id,
+			expires_at,
+			created_at,
+			updated_at
+		FROM (
+			SELECT *
+			FROM invoices
+			WHERE
+				active = true
+				AND status = 'paid'
+				AND user_id = $1
+			ORDER BY created_at DESC
+			LIMIT 1
+		) latest
+		WHERE latest.uuid = $2
+	`
+	err := r.p.QueryRow(
+		r.c,
+		sql,
+		userID,
+		uuid,
+	).Scan(
+		&i.Active,
+		&i.UUID,
+		&i.Status,
+		&i.Currency,
+		&i.Amount,
+		&i.UserID,
+		&i.TgChatID,
+		&i.TgMessageID,
+		&i.TgPaymentChargeID,
+		&i.ExpiresAt,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			return nil, apperrors.NewNotFoundErr(fmt.Sprintf("couldn't find active last paid invoice by user ID %v and UUID %v", userID, uuid))
 		}
 		return nil, err
 	}

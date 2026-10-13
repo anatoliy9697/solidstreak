@@ -9,6 +9,7 @@ import (
 	"errors"
 	"net/http"
 	"net/url"
+	"slices"
 	"sort"
 	"strings"
 
@@ -47,6 +48,24 @@ func (s Server) ValidateTelegramInitData() func(http.Handler) http.Handler {
 			next.ServeHTTP(w, r)
 		})
 	}
+}
+
+func (s Server) RequireAdmin(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		userTgID, ok := r.Context().Value(ctxKeyUserTgID{}).(int64)
+
+		if !ok {
+			processError(w, s.Res.Logger, apperrors.NewUnauthorizedErr("missing user Telegram ID"))
+			return
+		}
+
+		if !slices.Contains(s.AdminsTgIDs, userTgID) {
+			processError(w, s.Res.Logger, apperrors.NewForbiddenErr("admin access required"))
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
 }
 
 func sign(payload, key string) string {

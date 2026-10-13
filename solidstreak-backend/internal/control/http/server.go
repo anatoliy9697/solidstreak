@@ -20,6 +20,7 @@ type Server struct {
 	KeyFilePath      string
 	Addr             string
 	InvoiceExpiresIn time.Duration
+	AdminsTgIDs      []int64
 	Res              common.Resources
 	s                *http.Server
 }
@@ -55,6 +56,11 @@ func (s Server) Run(mainCtx context.Context, doneCh chan struct{}) {
 
 	api.Post("/users/{userID}/invoices", s.postInvoice)
 	api.Get("/users/{userID}/invoices/{selector}", s.getInvoice)
+
+	api.Route("/admin", func(admin chi.Router) {
+		admin.Use(s.RequireAdmin)
+		admin.Post("/users/{userID}/invoices/{invoiceUUID}/refund", s.postInvoiceRefund)
+	})
 
 	router.Mount("/api/v1", api)
 

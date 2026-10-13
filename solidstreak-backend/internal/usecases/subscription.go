@@ -73,13 +73,13 @@ func CompleteSubscriptionEvent(r common.Resources, se *subPkg.SubscriptionEvent)
 	return r.SubRepo.UpdateEvent(se)
 }
 
-func RollbackSubscription(r common.Resources, s *subPkg.Subscription, renew bool, se *subPkg.SubscriptionEvent) (*subPkg.Subscription, error) {
-	if renew {
-		finishDate := se.SubscriptionPeriodFinishDate.AddDate(0, 0, -1)
-		s.SetFinishDt(&finishDate)
-	} else {
+func RollbackSubscription(r common.Resources, s *subPkg.Subscription, se *subPkg.SubscriptionEvent) error {
+	if s.StartDate.String() == se.SubscriptionPeriodStartDate.String() {
 		s.Deactivate()
+	} else {
+		finishDate := se.SubscriptionPeriodStartDate.AddDate(0, 0, -1)
+		s.SetFinishDt(&finishDate)
 	}
 
-	return s, r.SubRepo.Update(s)
+	return r.SubRepo.Update(s)
 }

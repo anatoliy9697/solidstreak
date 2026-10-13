@@ -39,6 +39,10 @@ type GetPendingInvoiceResponse struct {
 	Data *invPkg.Invoice `json:"data"`
 }
 
+type PostInvoiceRefundResponse struct {
+	Data *invPkg.Invoice `json:"data"`
+}
+
 func (s Server) postInvoice(w http.ResponseWriter, r *http.Request) {
 	var err error
 
@@ -242,6 +246,110 @@ func (s *Server) getInvoice(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response := GetPendingInvoiceResponse{Data: invoice}
+
+	json.NewEncoder(w).Encode(response)
+}
+
+func (s *Server) postInvoiceRefund(w http.ResponseWriter, r *http.Request) {
+	var (
+		err                      error
+		subscriptionEvent        *subPkg.SubscriptionEvent
+		subscriptionEventCreated bool
+	)
+
+	logger := s.Res.Logger
+
+	// Adding request ID to request context
+	reqID, _ := r.Context().Value(ctxKeyRequestID{}).(string)
+	if reqID != "" {
+		logger = logger.With("requestId", reqID)
+	}
+
+	defer func() {
+		if err != nil {
+			if subscriptionEventCreated {
+				subscriptionEvent.SetStatus(subPkg.SubscriptionEventStatusError)
+				if err = s.Res.SubRepo.UpdateEvent(subscriptionEvent); err != nil {
+					s.Res.Logger.Error("failed to mark subscription event as error", "error", err)
+				}
+			}
+
+			processError(w, logger, err)
+		}
+	}()
+
+	var userID int64
+	userID, err = getInt64FromURLParams(r, "userID", true)
+	if err != nil {
+		return
+	}
+
+	var invoiceUUID string
+	invoiceUUID, err = getStringFromURLParams(r, "invoiceUUID", true)
+	if err != nil {
+		return
+	}
+
+	var user *usrPkg.User
+	if user, err = s.Res.UsrRepo.GetByID(userID); err != nil {
+		return
+	}
+
+	var invoice *invPkg.Invoice
+	if invoice, err = s.Res.InvRepo.GetActiveLastPaidByUserIDAndUUID(user.ID, invoiceUUID); err != nil {
+		return
+	}
+
+	var prevSubscriptionEvent *subPkg.SubscriptionEvent
+	if prevSubscriptionEvent, err = s.Res.SubRepo.GetActiveEventByInvoiceUUIDAndStatuses(invoice.UUID, []subPkg.SubscriptionEventStatus{subPkg.SubscriptionEventStatusCompleted}); err != nil {
+		return
+	}
+
+	var subscription *subPkg.Subscription
+	if subscription, err = s.Res.SubRepo.GetActiveByID(*prevSubscriptionEvent.SubscriptionID); err != nil {
+		return
+	}
+
+	subscriptionEvent = subPkg.NewSubscriptionEvent(
+		subPkg.SubscriptionEventTypeRefund,
+		subPkg.SubscriptionEventStatusInProgress,
+		nil,
+		prevSubscriptionEvent.SubscriptionPlanCode,
+		prevSubscriptionEvent.SubscriptionPeriodUnit,
+		-prevSubscriptionEvent.SubscriptionPeriodCount,
+		prevSubscriptionEvent.SubscriptionPeriodFinishDate,
+		prevSubscriptionEvent.SubscriptionPeriodStartDate,
+		user.ID,
+		invoice.UUID,
+	)
+	if err = s.Res.SubRepo.CreateEvent(subscriptionEvent); err != nil {
+		return
+	}
+	subscriptionEventCreated = true
+
+	if err = usecases.RefundStarPayment(r.Context(), s.Res.TgBotAPI, usecases.NewTgRefundStarPaymentParams(user.TgID, invoice.TgPaymentChargeID)); err != nil {
+		return
+	}
+
+	if err = usecases.RollbackSubscription(s.Res, subscription, prevSubscriptionEvent); err != nil {
+		return
+	}
+
+	if err = usecases.MarkInvoiceAsRefunded(s.Res, invoice); err != nil {
+		return
+	}
+
+	if err = usecases.SendTgMessage(r.Context(), s.Res.TgBotAPI, usecases.NewRefundTgMessageParams(user.TgID, invoice, user.LangCode)); err != nil {
+		s.Res.Logger.Error("failed to send refund message to user", "error", err)
+		err = nil
+	}
+
+	subscriptionEvent.SetStatus(subPkg.SubscriptionEventStatusCompleted)
+	if err = s.Res.SubRepo.UpdateEvent(subscriptionEvent); err != nil {
+		return
+	}
+
+	response := PostInvoiceRefundResponse{Data: invoice}
 
 	json.NewEncoder(w).Encode(response)
 }

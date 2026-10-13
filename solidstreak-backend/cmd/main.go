@@ -7,6 +7,8 @@ import (
 	"log/slog"
 	"os"
 	"os/signal"
+	"strconv"
+	"strings"
 	"syscall"
 	"time"
 
@@ -37,7 +39,7 @@ func main() {
 		log.Fatal("error reading config file: " + err.Error())
 	}
 	if err = validateConfigParams(); err != nil {
-		log.Fatal("invalid config parameter: " + err.Error())
+		log.Fatal("invalid config parameters: " + err.Error())
 	}
 
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.Level(viper.GetInt("log_level"))}))
@@ -56,7 +58,11 @@ func main() {
 		return
 	}
 	if err = validateEnvParams(); err != nil {
-		log.Fatal("invalid env parameter: " + err.Error())
+		log.Fatal("invalid env parameters: " + err.Error())
+	}
+	var adminsTgIDs []int64
+	if adminsTgIDs, err = parseAdminsTgIDs(os.Getenv("ADMINS_TG_IDS")); err != nil {
+		log.Fatal("invalid ADMINS_TG_IDS env parameter: " + err.Error())
 	}
 
 	// creating main context that will be cancelled on SIGINT or SIGTERM
@@ -124,6 +130,7 @@ func main() {
 		KeyFilePath:      os.Getenv("KEY_FILE_PATH"),
 		Addr:             os.Getenv("SERVER_ADDR"),
 		InvoiceExpiresIn: time.Duration(viper.GetInt("invoice_expires_in_min")) * time.Minute,
+		AdminsTgIDs:      adminsTgIDs,
 		Res:              resources,
 	}
 	go webServer.Run(mainCtx, goroutineDoneCh)
@@ -196,4 +203,18 @@ func validateEnvParams() error {
 	}
 
 	return nil
+}
+
+func parseAdminsTgIDs(adminsTgIDsStr string) ([]int64, error) {
+	adminsTgIDsParts := strings.Split(adminsTgIDsStr, ",")
+	adminsTgIDs := make([]int64, 0, len(adminsTgIDsParts))
+	for _, part := range adminsTgIDsParts {
+		tgID, err := strconv.ParseInt(strings.TrimSpace(part), 10, 64)
+		if err != nil {
+			return nil, errors.New("failed to parse admin Telegram ID as int64")
+		}
+		adminsTgIDs = append(adminsTgIDs, tgID)
+	}
+
+	return adminsTgIDs, nil
 }

@@ -52,10 +52,12 @@ type SubscriptionEventType string
 
 const (
 	SubscriptionEventTypeAcquisition SubscriptionEventType = "acquisition"
+	SubscriptionEventTypeRefund      SubscriptionEventType = "refund"
 )
 
 var SubscriptionEventTypeMapping = map[string]SubscriptionEventType{
 	string(SubscriptionEventTypeAcquisition): SubscriptionEventTypeAcquisition,
+	string(SubscriptionEventTypeRefund):      SubscriptionEventTypeRefund,
 }
 
 type SubscriptionEventStatus string
@@ -89,7 +91,7 @@ type SubscriptionEvent struct {
 	Active                       bool
 	Type                         SubscriptionEventType
 	Status                       SubscriptionEventStatus
-	SubscriptionOrigin           SubscriptionOrigin
+	SubscriptionOrigin           *SubscriptionOrigin
 	SubscriptionPlanCode         string
 	SubscriptionPeriodUnit       SubscriptionPeriodUnit
 	SubscriptionPeriodCount      int64
@@ -211,25 +213,29 @@ func (s *Subscription) Deactivate() {
 func NewSubscriptionEvent(
 	eventType SubscriptionEventType,
 	status SubscriptionEventStatus,
-	subscriptionOrigin SubscriptionOrigin,
+	subscriptionOrigin *SubscriptionOrigin,
 	subscriptionPlanCode string,
 	subscriptionPeriodUnit SubscriptionPeriodUnit,
 	subscriptionPeriodCount int64,
+	subscriptionPeriodStartDate *date.Date,
+	subscriptionPeriodFinishDate *date.Date,
 	userID int64,
 	invoiceUUID string,
 ) *SubscriptionEvent {
 	return &SubscriptionEvent{
-		Active:                  true,
-		Type:                    eventType,
-		Status:                  status,
-		SubscriptionOrigin:      subscriptionOrigin,
-		SubscriptionPlanCode:    subscriptionPlanCode,
-		SubscriptionPeriodUnit:  subscriptionPeriodUnit,
-		SubscriptionPeriodCount: subscriptionPeriodCount,
-		UserID:                  userID,
-		InvoiceUUID:             invoiceUUID,
-		CreatedAt:               time.Now().UTC(),
-		UpdatedAt:               time.Now().UTC(),
+		Active:                       true,
+		Type:                         eventType,
+		Status:                       status,
+		SubscriptionOrigin:           subscriptionOrigin,
+		SubscriptionPlanCode:         subscriptionPlanCode,
+		SubscriptionPeriodUnit:       subscriptionPeriodUnit,
+		SubscriptionPeriodCount:      subscriptionPeriodCount,
+		SubscriptionPeriodStartDate:  subscriptionPeriodStartDate,
+		SubscriptionPeriodFinishDate: subscriptionPeriodFinishDate,
+		UserID:                       userID,
+		InvoiceUUID:                  invoiceUUID,
+		CreatedAt:                    time.Now().UTC(),
+		UpdatedAt:                    time.Now().UTC(),
 	}
 }
 

@@ -76,6 +76,47 @@ func (r pgRepo) Update(s *subPkg.Subscription) error {
 	return err
 }
 
+func (r pgRepo) GetActiveByID(id int64) (*subPkg.Subscription, error) {
+	s := &subPkg.Subscription{}
+
+	sql := `
+		SELECT id, active, plan_code, start_date, finish_date, user_id, created_at, updated_at
+		FROM user_subscriptions 
+		WHERE 
+			active IS TRUE
+			AND id = $1
+			AND start_date <= (NOW() AT TIME ZONE 'UTC')::date
+			AND (finish_date IS NULL OR finish_date + interval '1 day' > (NOW() AT TIME ZONE 'UTC')::date)
+		LIMIT 1
+	`
+	err := r.pool.QueryRow(
+		r.ctx,
+		sql,
+		id,
+	).Scan(
+		&s.ID,
+		&s.Active,
+		&s.PlanCode,
+		&s.StartDate,
+		&s.FinishDate,
+		&s.UserID,
+		&s.CreatedAt,
+		&s.UpdatedAt,
+	)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			return nil, apperrors.NewNotFoundErr(fmt.Sprintf("couldn't find user subscription for ID %v", id))
+		}
+		return nil, err
+	}
+
+	if _, ok := r.subPlans[s.PlanCode]; !ok {
+		return nil, apperrors.NewInternalErr(fmt.Sprintf("subscription has invalid plan code: %v", s.PlanCode))
+	}
+
+	return s, nil
+}
+
 func (r pgRepo) GetActiveByUserID(userID int64) (*subPkg.Subscription, error) {
 	s := &subPkg.Subscription{}
 
@@ -262,7 +303,7 @@ func (r pgRepo) GetActiveEventByInvoiceUUIDAndStatuses(invoiceUUID string, statu
 	if _, ok := subPkg.SubscriptionEventStatusMapping[string(se.Status)]; !ok {
 		return nil, apperrors.NewInternalErr(fmt.Sprintf("subscription event has invalid status: %v", se.Status))
 	}
-	if _, ok := subPkg.SubscriptionOriginMapping[string(se.SubscriptionOrigin)]; !ok {
+	if _, ok := subPkg.SubscriptionOriginMapping[string(*se.SubscriptionOrigin)]; !ok {
 		return nil, apperrors.NewInternalErr(fmt.Sprintf("subscription event has invalid subscription origin: %v", se.SubscriptionOrigin))
 	}
 	if _, ok := r.subPlans[string(se.SubscriptionPlanCode)]; !ok {

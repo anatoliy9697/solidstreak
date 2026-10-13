@@ -23,6 +23,7 @@ const (
 	InvoiceStatusPaid      InvoiceStatus = "paid"
 	InvoiceStatusExpired   InvoiceStatus = "expired"
 	InvoiceStatusCancelled InvoiceStatus = "cancelled"
+	InvoiceStatusRefunded  InvoiceStatus = "refunded"
 )
 
 var InvoiceStatusAll = []InvoiceStatus{
@@ -30,6 +31,7 @@ var InvoiceStatusAll = []InvoiceStatus{
 	InvoiceStatusPaid,
 	InvoiceStatusExpired,
 	InvoiceStatusCancelled,
+	InvoiceStatusRefunded,
 }
 
 var InvoiceStatusMapping = map[string]InvoiceStatus{
@@ -37,6 +39,7 @@ var InvoiceStatusMapping = map[string]InvoiceStatus{
 	string(InvoiceStatusPaid):      InvoiceStatusPaid,
 	string(InvoiceStatusExpired):   InvoiceStatusExpired,
 	string(InvoiceStatusCancelled): InvoiceStatusCancelled,
+	string(InvoiceStatusRefunded):  InvoiceStatusRefunded,
 }
 
 type Invoice struct {

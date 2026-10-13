@@ -154,7 +154,7 @@ func (eh EventHandler) handleSuccessfulPayment(ctx context.Context, pmt *tgbotap
 			}
 
 			if subscription != nil && subscriptionProcessed {
-				if _, err := usecases.RollbackSubscription(eh.Res, subscription, renew, subscriptionEvent); err != nil {
+				if err := usecases.RollbackSubscription(eh.Res, subscription, subscriptionEvent); err != nil {
 					eh.Res.Logger.Error("failed to rollback subscription", "error", err)
 				}
 			}

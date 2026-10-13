@@ -65,13 +65,16 @@ func CreateAndSendInvoice(
 		time.Now().UTC().Add(invoiceExpiresIn),
 	)
 
+	subscriptionOrigin := subPkg.SubscriptionOriginPurchase
 	subscriptionEvent = subPkg.NewSubscriptionEvent(
 		subPkg.SubscriptionEventTypeAcquisition,
 		subPkg.SubscriptionEventStatusInProgress,
-		subPkg.SubscriptionOriginPurchase,
+		&subscriptionOrigin,
 		plan.Code,
 		subscriptionPeriodUnit,
 		subscriptionPeriodCount,
+		nil,
+		nil,
 		u.ID,
 		invoice.UUID,
 	)
@@ -117,5 +120,10 @@ func ExtractInvoiceUUIDFromPayload(invoicePayload string) (string, error) {
 
 func MarkInvoiceAsPaid(r common.Resources, invoice *invPkg.Invoice, telegramPaymentChargeID string) error {
 	invoice.MarkAsPaid(telegramPaymentChargeID)
+	return r.InvRepo.Update(invoice)
+}
+
+func MarkInvoiceAsRefunded(r common.Resources, invoice *invPkg.Invoice) error {
+	invoice.SetStatus(invPkg.InvoiceStatusRefunded)
 	return r.InvRepo.Update(invoice)
 }

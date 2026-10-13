@@ -11,6 +11,7 @@ import (
 type Repo interface {
 	Create(*subPkg.Subscription) error
 	Update(*subPkg.Subscription) error
+	GetActiveByID(int64) (*subPkg.Subscription, error)
 	GetActiveByUserID(int64) (*subPkg.Subscription, error)
 	GetBasic() (*subPkg.Subscription, error)
 	GetPlanByCode(string) (*subPkg.Plan, error)

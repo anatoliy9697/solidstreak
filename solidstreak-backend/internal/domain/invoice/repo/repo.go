@@ -16,6 +16,7 @@ type Repo interface {
 	Update(*invPkg.Invoice) error
 	GetActiveByUserIDAndStatuses(int64, []invPkg.InvoiceStatus, bool) (*invPkg.Invoice, error)
 	GetActiveByUUIDAndStatuses(string, []invPkg.InvoiceStatus, bool) (*invPkg.Invoice, error)
+	GetActiveLastPaidByUserIDAndUUID(int64, string) (*invPkg.Invoice, error)
 }
 
 func Init(c context.Context, p *pgxpool.Pool) Repo {
