@@ -339,7 +339,7 @@ func (s *Server) postInvoiceRefund(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err = usecases.SendTgMessage(r.Context(), s.Res.TgBotAPI, usecases.NewRefundTgMessageParams(user.TgID, invoice, user.LangCode)); err != nil {
+	if _, err = usecases.SendTgMessage(r.Context(), s.Res.TgBotAPI, usecases.NewRefundTgMessageParams(user.TgID, invoice, user.LangCode)); err != nil {
 		s.Res.Logger.Error("failed to send refund message to user", "error", err)
 		err = nil
 	}

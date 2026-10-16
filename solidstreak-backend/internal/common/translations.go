@@ -74,6 +74,8 @@ var MESSAGES = map[string]map[string]string{
 		"paySupportMsg":              paySupportMsgEn,
 		"paySupportTicketCreatedMsg": paySupportTicketCreatedMsgEn,
 		"alreadyOpenTicketMsg":       alreadyOpenTicketMsgEn,
+		"supportTicketAnswerMsg":     "Our support team has replied to your ticket <code>%s</code>:\n\n<b>%s</b>\n\nTicket status: <b>%s</b>\n\nIf your issue is still unresolved or you have any questions, create a new ticket using the <code>/paysupport</code> command.",
+		"supportTicketStatusClosed":  "closed",
 		"refundMsg":                  "Refund of %d %s has been processed for invoice <code>%s</code>",
 	},
 	"ru": {
@@ -98,6 +100,8 @@ var MESSAGES = map[string]map[string]string{
 		"paySupportTicketCreatedMsg": paySupportTicketCreatedMsgRu,
 		"alreadyOpenTicketMsg":       alreadyOpenTicketMsgRu,
 		"refundMsg":                  "Выполнен возврат в размере %d %s по счёту <code>%s</code>",
+		"supportTicketAnswerMsg":     "Команда поддержки ответила на ваше обращение <code>%s</code>:\n\n<b>%s</b>\n\nСтатус обращения: <b>%s</b>\n\nЕсли проблема не решена или у вас остались вопросы, создайте новое обращение командой <code>/paysupport</code>.",
+		"supportTicketStatusClosed":  "закрыто",
 	},
 }
 

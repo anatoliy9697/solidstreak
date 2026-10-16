@@ -72,10 +72,10 @@ func NewSubscriptionPurchaseSuccessTgMessageParams(r common.Resources, tcTgID in
 	)
 }
 
-func SendTgMessage(ctx context.Context, tgBotAPI *tgbotapi.Bot, params *tgbotapi.SendMessageParams) error {
-	_, err := tgBotAPI.SendMessage(ctx, params)
+func SendTgMessage(ctx context.Context, tgBotAPI *tgbotapi.Bot, params *tgbotapi.SendMessageParams) (*tgbotapi.Message, error) {
+	msg, err := tgBotAPI.SendMessage(ctx, params)
 
-	return err
+	return msg, err
 }
 
 func NewTgInvoiceParams(
@@ -240,6 +240,24 @@ func NewRefundTgMessageParams(tcTgID int64, invoice *invPkg.Invoice, lang string
 	msgParams := tu.Message(
 		tu.ID(tcTgID),
 		fmt.Sprintf(common.MESSAGES[lang]["refundMsg"], invoice.Amount, invoice.Currency, invoice.UUID),
+	)
+	msgParams.ParseMode = "HTML"
+
+	return msgParams
+}
+
+func NewSupportTicketAnswerTgMessageParams(tcTgID int64, ticketUUID string, ticketAnswer string, ticketStatusStr string, lang string) *tgbotapi.SendMessageParams {
+	if lang == "" {
+		lang = common.GetDefaultLang()
+	}
+
+	if ticketStatusStr == "closed" {
+		ticketStatusStr = common.MESSAGES[lang]["supportTicketStatusClosed"]
+	}
+
+	msgParams := tu.Message(
+		tu.ID(tcTgID),
+		fmt.Sprintf(common.MESSAGES[lang]["supportTicketAnswerMsg"], ticketUUID, ticketAnswer, ticketStatusStr),
 	)
 	msgParams.ParseMode = "HTML"
 

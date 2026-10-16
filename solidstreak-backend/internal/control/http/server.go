@@ -60,6 +60,7 @@ func (s Server) Run(mainCtx context.Context, doneCh chan struct{}) {
 	api.Route("/admin", func(admin chi.Router) {
 		admin.Use(s.RequireAdmin)
 		admin.Post("/users/{userID}/invoices/{invoiceUUID}/refund", s.postInvoiceRefund)
+		admin.Post("/support-tickets/{ticketUUID}/action", s.postSupportTicketAction)
 	})
 
 	router.Mount("/api/v1", api)

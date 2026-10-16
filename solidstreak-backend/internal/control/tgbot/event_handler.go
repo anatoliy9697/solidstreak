@@ -181,7 +181,7 @@ func (eh EventHandler) handleSuccessfulPayment(ctx context.Context, pmt *tgbotap
 					lang = common.GetDefaultLang()
 				}
 
-				if err = usecases.SendTgMessage(ctx, eh.Res.TgBotAPI, usecases.NewErrorTgMessageParams(eh.Res, tc.TgID, lang)); err != nil {
+				if _, err = usecases.SendTgMessage(ctx, eh.Res.TgBotAPI, usecases.NewErrorTgMessageParams(eh.Res, tc.TgID, lang)); err != nil {
 					eh.Res.Logger.Error("failed to send error message", "error", err)
 				}
 			}
@@ -244,7 +244,7 @@ func (eh EventHandler) handleSuccessfulPayment(ctx context.Context, pmt *tgbotap
 		return
 	}
 
-	if err = usecases.SendTgMessage(ctx, eh.Res.TgBotAPI, usecases.NewSubscriptionPurchaseSuccessTgMessageParams(eh.Res, tc.TgID, renew, subscriptionEvent, u.LangCode)); err != nil {
+	if _, err = usecases.SendTgMessage(ctx, eh.Res.TgBotAPI, usecases.NewSubscriptionPurchaseSuccessTgMessageParams(eh.Res, tc.TgID, renew, subscriptionEvent, u.LangCode)); err != nil {
 		return
 	}
 }
@@ -277,7 +277,7 @@ func (eh EventHandler) handleSupportCmd(ctx context.Context, msg *tgbotapi.Messa
 				lang = common.GetDefaultLang()
 			}
 
-			if err = usecases.SendTgMessage(ctx, eh.Res.TgBotAPI, usecases.NewErrorTgMessageParams(eh.Res, tc.TgID, lang)); err != nil {
+			if _, err = usecases.SendTgMessage(ctx, eh.Res.TgBotAPI, usecases.NewErrorTgMessageParams(eh.Res, tc.TgID, lang)); err != nil {
 				eh.Res.Logger.Error("failed to send error message", "error", err)
 			}
 		}
@@ -293,7 +293,7 @@ func (eh EventHandler) handleSupportCmd(ctx context.Context, msg *tgbotapi.Messa
 	}
 	eh.Res.Logger.Debug("telegram chat mapped to inner model and saved to DB", "tgChat", tc)
 
-	if err = usecases.SendTgMessage(ctx, eh.Res.TgBotAPI, usecases.NewSupportTgMessageParams(tc.TgID, u.LangCode)); err != nil {
+	if _, err = usecases.SendTgMessage(ctx, eh.Res.TgBotAPI, usecases.NewSupportTgMessageParams(tc.TgID, u.LangCode)); err != nil {
 		return
 	}
 }
@@ -326,7 +326,7 @@ func (eh EventHandler) handlePaySupportCmd(ctx context.Context, msg *tgbotapi.Me
 				lang = common.GetDefaultLang()
 			}
 
-			if err = usecases.SendTgMessage(ctx, eh.Res.TgBotAPI, usecases.NewErrorTgMessageParams(eh.Res, tc.TgID, lang)); err != nil {
+			if _, err = usecases.SendTgMessage(ctx, eh.Res.TgBotAPI, usecases.NewErrorTgMessageParams(eh.Res, tc.TgID, lang)); err != nil {
 				eh.Res.Logger.Error("failed to send error message", "error", err)
 			}
 		}
@@ -343,21 +343,21 @@ func (eh EventHandler) handlePaySupportCmd(ctx context.Context, msg *tgbotapi.Me
 	eh.Res.Logger.Debug("telegram chat mapped to inner model and saved to DB", "tgChat", tc)
 
 	var ticket *stPkg.Ticket
-	if ticket, err = eh.Res.STRepo.GetActiveByUserIDAndStatuses(u.ID, stPkg.TicketStatusAll); err != nil && !errors.Is(err, apperrors.ErrNotFound) {
+	if ticket, err = eh.Res.STRepo.GetActiveByUserIDAndStatuses(u.ID, []stPkg.TicketStatus{stPkg.TicketStatusNew}); err != nil && !errors.Is(err, apperrors.ErrNotFound) {
 		return
 	}
 
 	err = nil
 
 	if ticket != nil {
-		err = usecases.SendTgMessage(ctx, eh.Res.TgBotAPI, usecases.NewAlreadyOpenTicketTgMessageParams(tc.TgID, ticket.UUID, u.LangCode))
+		_, err = usecases.SendTgMessage(ctx, eh.Res.TgBotAPI, usecases.NewAlreadyOpenTicketTgMessageParams(tc.TgID, ticket.UUID, u.LangCode))
 		return
 	}
 
 	ticketMessage := getStringAfterCmd(msg)
 
 	if ticketMessage == "" {
-		err = usecases.SendTgMessage(ctx, eh.Res.TgBotAPI, usecases.NewPaySupportTgMessageParams(tc.TgID, u.LangCode))
+		_, err = usecases.SendTgMessage(ctx, eh.Res.TgBotAPI, usecases.NewPaySupportTgMessageParams(tc.TgID, u.LangCode))
 		return
 	}
 
@@ -373,7 +373,7 @@ func (eh EventHandler) handlePaySupportCmd(ctx context.Context, msg *tgbotapi.Me
 		return
 	}
 
-	err = usecases.SendTgMessage(ctx, eh.Res.TgBotAPI, usecases.NewPaySupportTicketCreatedTgMessageParams(tc.TgID, ticket.UUID, u.LangCode))
+	_, err = usecases.SendTgMessage(ctx, eh.Res.TgBotAPI, usecases.NewPaySupportTicketCreatedTgMessageParams(tc.TgID, ticket.UUID, u.LangCode))
 }
 
 func (eh EventHandler) handleMessage(ctx context.Context, msg *tgbotapi.Message) {
@@ -404,7 +404,7 @@ func (eh EventHandler) handleMessage(ctx context.Context, msg *tgbotapi.Message)
 				lang = common.GetDefaultLang()
 			}
 
-			if err = usecases.SendTgMessage(ctx, eh.Res.TgBotAPI, usecases.NewErrorTgMessageParams(eh.Res, tc.TgID, lang)); err != nil {
+			if _, err = usecases.SendTgMessage(ctx, eh.Res.TgBotAPI, usecases.NewErrorTgMessageParams(eh.Res, tc.TgID, lang)); err != nil {
 				eh.Res.Logger.Error("failed to send error message", "error", err)
 			}
 		}
@@ -420,7 +420,7 @@ func (eh EventHandler) handleMessage(ctx context.Context, msg *tgbotapi.Message)
 	}
 	eh.Res.Logger.Debug("telegram chat mapped to inner model and saved to DB", "tgChat", tc)
 
-	if err = usecases.SendTgMessage(ctx, eh.Res.TgBotAPI, usecases.NewDefaultSuccessTgMessageParams(eh.Res, tc.TgID, u.TgFirstName, u.LangCode)); err != nil {
+	if _, err = usecases.SendTgMessage(ctx, eh.Res.TgBotAPI, usecases.NewDefaultSuccessTgMessageParams(eh.Res, tc.TgID, u.TgFirstName, u.LangCode)); err != nil {
 		return
 	}
 }

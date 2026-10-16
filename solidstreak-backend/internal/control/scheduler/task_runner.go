@@ -91,7 +91,7 @@ func (tr TaskRunner) processExpiredInvoice(ctx context.Context, task invPkg.Proc
 		lang = common.GetDefaultLang()
 	}
 
-	if err = usecases.SendTgMessage(ctx, tr.Res.TgBotAPI, usecases.NewExpiredInvoiceTgMessageParams(i.TgChatID, lang)); err != nil {
+	if _, err = usecases.SendTgMessage(ctx, tr.Res.TgBotAPI, usecases.NewExpiredInvoiceTgMessageParams(i.TgChatID, lang)); err != nil {
 		return err
 	}
 
