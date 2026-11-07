@@ -44,9 +44,10 @@ const termsPageTemplate = `<!doctype html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
 <title>%s</title>
 <style>
-body{font-family: system-ui, sans-serif;flex: 1 0 auto;margin: 0 auto;width: 100%%;max-width: 32rem;padding: 0 0.5rem;}
+body{background-color: #ffffff !important;color: #000000 !important;font-family: system-ui, sans-serif;flex: 1 0 auto;margin: 0 auto;width: 100%%;max-width: 32rem;padding: 0 0.5rem;box-sizing: border-box;}
 </style>
 </head>
 <body>

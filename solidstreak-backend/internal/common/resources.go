@@ -16,6 +16,7 @@ import (
 
 type Resources struct {
 	WebAppURL string
+	TermsPath string
 	Logger    *slog.Logger
 	TgBotAPI  *tgbotapi.Bot
 	UsrRepo   usr.Repo

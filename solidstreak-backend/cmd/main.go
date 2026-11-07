@@ -92,6 +92,7 @@ func main() {
 
 	resources := common.Resources{
 		WebAppURL: os.Getenv("WEB_APP_URL"),
+		TermsPath: os.Getenv("TERMS_PATH"),
 		Logger:    logger,
 		TgBotAPI:  tgBotAPI,
 		UsrRepo:   usrRepo.Init(mainCtx, pgPool),
@@ -195,20 +196,23 @@ func validateConfigParams() error {
 }
 
 func validateEnvParams() error {
+	if os.Getenv("ENV") != "prod" && os.Getenv("ENV") != "dev" {
+		return errors.New("ENV env variable should be either 'prod' or 'dev'")
+	}
+	if os.Getenv("WEB_APP_URL") == "" {
+		return errors.New("WEB_APP_URL env variable is not set")
+	}
+	if os.Getenv("SERVER_ADDR") == "" {
+		return errors.New("SERVER_ADDR env variable is not set")
+	}
+	if os.Getenv("TERMS_PATH") == "" {
+		return errors.New("TERMS_PATH env variable is not set")
+	}
 	if os.Getenv("POSTGRES_CONN_STRING") == "" {
 		return errors.New("POSTGRES_CONN_STRING env variable is not set")
 	}
 	if os.Getenv("TG_BOT_API_TOKEN") == "" {
 		return errors.New("TG_BOT_API_TOKEN env variable is not set")
-	}
-	if os.Getenv("WEB_APP_URL") == "" {
-		return errors.New("WEB_APP_URL env variable is not set")
-	}
-	if os.Getenv("ENV") != "prod" && os.Getenv("ENV") != "dev" {
-		return errors.New("ENV env variable should be either 'prod' or 'dev'")
-	}
-	if os.Getenv("SERVER_ADDR") == "" {
-		return errors.New("SERVER_ADDR env variable is not set")
 	}
 
 	return nil

@@ -78,6 +78,8 @@ var MESSAGES = map[string]map[string]string{
 		"supportTicketStatusClosed":  "closed",
 		"refundMsg":                  "Refund of %d %s has been processed for invoice <code>%s</code>",
 		"termsOfService":             "Solid Streak Terms of Service",
+		"termsCmdMsg":                "Solid Streak Terms of Service are available via the button below",
+		"openTerms":                  "Open Terms",
 	},
 	"ru": {
 		"smthWrongMsg":               "Что-то пошло не так\nПожалуйста, попробуйте позже или обратитесь в поддержку (@solidstreak_chat, @avasin_dev)",
@@ -104,6 +106,8 @@ var MESSAGES = map[string]map[string]string{
 		"supportTicketAnswerMsg":     "Команда поддержки ответила на ваше обращение <code>%s</code>:\n\n<b>%s</b>\n\nСтатус обращения: <b>%s</b>\n\nЕсли проблема не решена или у вас остались вопросы, создайте новое обращение командой <code>/paysupport</code>.",
 		"supportTicketStatusClosed":  "закрыто",
 		"termsOfService":             "Пользовательское соглашение Solid Streak",
+		"termsCmdMsg":                "Пользовательское соглашение Solid Streak доступно по кнопке ниже",
+		"openTerms":                  "Открыть соглашение",
 	},
 }
 

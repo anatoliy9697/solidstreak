@@ -248,6 +248,23 @@ func NewRefundTgMessageParams(tcTgID int64, invoice *invPkg.Invoice, lang string
 	return msgParams
 }
 
+func NewTermsTgMessageParams(r common.Resources, tcTgID int64, lang string) *tgbotapi.SendMessageParams {
+	if lang == "" {
+		lang = i18n.GetDefaultLang()
+	}
+
+	msgParams := tu.Message(
+		tu.ID(tcTgID),
+		i18n.MESSAGES[lang]["termsCmdMsg"],
+	).WithReplyMarkup(tu.InlineKeyboard(
+		tu.InlineKeyboardRow(
+			tu.InlineKeyboardButton(i18n.MESSAGES[lang]["openTerms"]).WithWebApp(tu.WebAppInfo(r.WebAppURL + r.TermsPath + "/" + lang)),
+		),
+	))
+
+	return msgParams
+}
+
 func NewSupportTicketAnswerTgMessageParams(tcTgID int64, ticketUUID string, ticketAnswer string, ticketStatusStr string, lang string) *tgbotapi.SendMessageParams {
 	if lang == "" {
 		lang = i18n.GetDefaultLang()
