@@ -4,6 +4,7 @@ import (
 	tgbotapi "github.com/mymmrac/telego"
 
 	"github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/common"
+	"github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/common/i18n"
 	usrPkg "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/user"
 )
 
@@ -14,7 +15,7 @@ func mapUserToInner(u *tgbotapi.User) *usrPkg.User {
 		u.FirstName,
 		u.LastName,
 		u.LanguageCode,
-		common.ToLocalLang(u.LanguageCode),
+		i18n.ToLocalLang(u.LanguageCode),
 		u.IsBot,
 	)
 }

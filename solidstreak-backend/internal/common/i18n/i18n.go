@@ -1,4 +1,4 @@
-package common
+package i18n
 
 const supportMsgEn = `If you have any questions or issues with the application, please describe your question or issue in the support chat (@solidstreak_chat) or directly to the developer (@avasin_dev)
 
@@ -77,6 +77,7 @@ var MESSAGES = map[string]map[string]string{
 		"supportTicketAnswerMsg":     "Our support team has replied to your ticket <code>%s</code>:\n\n<b>%s</b>\n\nTicket status: <b>%s</b>\n\nIf your issue is still unresolved or you have any questions, create a new ticket using the <code>/paysupport</code> command.",
 		"supportTicketStatusClosed":  "closed",
 		"refundMsg":                  "Refund of %d %s has been processed for invoice <code>%s</code>",
+		"termsOfService":             "Solid Streak Terms of Service",
 	},
 	"ru": {
 		"smthWrongMsg":               "Что-то пошло не так\nПожалуйста, попробуйте позже или обратитесь в поддержку (@solidstreak_chat, @avasin_dev)",
@@ -102,6 +103,7 @@ var MESSAGES = map[string]map[string]string{
 		"refundMsg":                  "Выполнен возврат в размере %d %s по счёту <code>%s</code>",
 		"supportTicketAnswerMsg":     "Команда поддержки ответила на ваше обращение <code>%s</code>:\n\n<b>%s</b>\n\nСтатус обращения: <b>%s</b>\n\nЕсли проблема не решена или у вас остались вопросы, создайте новое обращение командой <code>/paysupport</code>.",
 		"supportTicketStatusClosed":  "закрыто",
+		"termsOfService":             "Пользовательское соглашение Solid Streak",
 	},
 }
 

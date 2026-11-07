@@ -27,6 +27,7 @@ import (
 	subPkg "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/subscription"
 	subRepo "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/subscription/repo"
 	stRepo "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/supportticket/repo"
+	trRepo "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/terms/repo"
 	tcRepo "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/tgchat/repo"
 	usrRepo "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/user/repo"
 )
@@ -82,6 +83,13 @@ func main() {
 	}
 
 	invRepoInstance := invRepo.Init(mainCtx, pgPool)
+
+	var termsRepoInstance trRepo.Repo
+	termsRepoInstance, err = trRepo.Init()
+	if err != nil {
+		return
+	}
+
 	resources := common.Resources{
 		WebAppURL: os.Getenv("WEB_APP_URL"),
 		Logger:    logger,
@@ -103,6 +111,7 @@ func main() {
 		HabitRepo: hRepo.Init(mainCtx, pgPool),
 		InvRepo:   invRepoInstance,
 		STRepo:    stRepo.Init(mainCtx, pgPool),
+		TermsRepo: termsRepoInstance,
 	}
 
 	goroutineDoneCh := make(chan struct{}, 2)

@@ -11,6 +11,7 @@ import (
 	tgbotapi "github.com/mymmrac/telego"
 
 	"github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/common"
+	"github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/common/i18n"
 	apperrors "github.com/anatoliy9697/solidstreak/solidstreak-backend/pkg/errors"
 
 	invPkg "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/invoice"
@@ -79,7 +80,7 @@ func (eh EventHandler) handlePreCheckoutQuery(ctx context.Context, pcq *tgbotapi
 		if u != nil {
 			lang = u.LangCode
 		} else {
-			lang = common.GetDefaultLang()
+			lang = i18n.GetDefaultLang()
 		}
 
 		tgAnswerPCQParams := usecases.NewTgAnswerPreCheckoutQuery(pcq.ID, success, lang)
@@ -178,7 +179,7 @@ func (eh EventHandler) handleSuccessfulPayment(ctx context.Context, pmt *tgbotap
 				if u != nil {
 					lang = u.LangCode
 				} else {
-					lang = common.GetDefaultLang()
+					lang = i18n.GetDefaultLang()
 				}
 
 				if _, err = usecases.SendTgMessage(ctx, eh.Res.TgBotAPI, usecases.NewErrorTgMessageParams(eh.Res, tc.TgID, lang)); err != nil {
@@ -274,7 +275,7 @@ func (eh EventHandler) handleSupportCmd(ctx context.Context, msg *tgbotapi.Messa
 			if u != nil {
 				lang = u.LangCode
 			} else {
-				lang = common.GetDefaultLang()
+				lang = i18n.GetDefaultLang()
 			}
 
 			if _, err = usecases.SendTgMessage(ctx, eh.Res.TgBotAPI, usecases.NewErrorTgMessageParams(eh.Res, tc.TgID, lang)); err != nil {
@@ -323,7 +324,7 @@ func (eh EventHandler) handlePaySupportCmd(ctx context.Context, msg *tgbotapi.Me
 			if u != nil {
 				lang = u.LangCode
 			} else {
-				lang = common.GetDefaultLang()
+				lang = i18n.GetDefaultLang()
 			}
 
 			if _, err = usecases.SendTgMessage(ctx, eh.Res.TgBotAPI, usecases.NewErrorTgMessageParams(eh.Res, tc.TgID, lang)); err != nil {
@@ -401,7 +402,7 @@ func (eh EventHandler) handleMessage(ctx context.Context, msg *tgbotapi.Message)
 			if u != nil {
 				lang = u.LangCode
 			} else {
-				lang = common.GetDefaultLang()
+				lang = i18n.GetDefaultLang()
 			}
 
 			if _, err = usecases.SendTgMessage(ctx, eh.Res.TgBotAPI, usecases.NewErrorTgMessageParams(eh.Res, tc.TgID, lang)); err != nil {

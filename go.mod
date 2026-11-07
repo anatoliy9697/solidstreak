@@ -12,6 +12,8 @@ require (
 	github.com/spf13/viper v1.21.0
 )
 
+require github.com/yuin/goldmark v1.8.7
+
 require (
 	github.com/andybalholm/brotli v1.2.1 // indirect
 	github.com/bytedance/gopkg v0.1.3 // indirect

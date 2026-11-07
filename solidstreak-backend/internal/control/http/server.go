@@ -8,10 +8,12 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+
 	"github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/common"
 	"github.com/anatoliy9697/solidstreak/solidstreak-backend/pkg/date"
 	apperrors "github.com/anatoliy9697/solidstreak/solidstreak-backend/pkg/errors"
-	"github.com/go-chi/chi/v5"
 )
 
 type Server struct {
@@ -31,6 +33,8 @@ func (s Server) Run(mainCtx context.Context, doneCh chan struct{}) {
 	s.Res.Logger.Info("web server initialization...")
 
 	router := chi.NewRouter()
+
+	router.Use(middleware.RedirectSlashes)
 
 	api := chi.NewRouter()
 
@@ -59,11 +63,21 @@ func (s Server) Run(mainCtx context.Context, doneCh chan struct{}) {
 
 	api.Route("/admin", func(admin chi.Router) {
 		admin.Use(s.RequireAdmin)
+
 		admin.Post("/users/{userID}/invoices/{invoiceUUID}/refund", s.postInvoiceRefund)
 		admin.Post("/support-tickets/{ticketUUID}/action", s.postSupportTicketAction)
 	})
 
 	router.Mount("/api/v1", api)
+
+	router.Group(func(terms chi.Router) {
+		terms.Use(s.Recovery())
+		terms.Use(s.Logger())
+
+		terms.Get("/terms", s.getTerms)
+		terms.Get("/terms/{lang}", s.getTerms)
+		terms.Get("/terms/{lang}/{version}", s.getTerms)
+	})
 
 	router.HandleFunc("/*", func(w http.ResponseWriter, r *http.Request) {
 		staticPath := filepath.Join("static", r.URL.Path)

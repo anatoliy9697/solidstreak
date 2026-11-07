@@ -7,7 +7,7 @@ import (
 
 	apperrors "github.com/anatoliy9697/solidstreak/solidstreak-backend/pkg/errors"
 
-	"github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/common"
+	"github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/common/i18n"
 	tcPkg "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/tgchat"
 	usrPkg "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/user"
 	"github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/usecases"
@@ -132,7 +132,7 @@ func (s Server) postUserInfo(w http.ResponseWriter, r *http.Request) {
 		inputUser.TgFirstName,
 		inputUser.TgLastName,
 		inputUser.TgLangCode,
-		common.ToLocalLang(inputUser.TgLangCode),
+		i18n.ToLocalLang(inputUser.TgLangCode),
 		inputUser.TgIsBot,
 	)
 
@@ -305,7 +305,7 @@ func (s Server) patchUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if req.Data.LangCode != nil {
-		if !common.IsSupportedLang(*req.Data.LangCode) {
+		if !i18n.IsSupportedLang(*req.Data.LangCode) {
 			err = apperrors.NewBadRequestErr("unsupported language")
 			return
 		}

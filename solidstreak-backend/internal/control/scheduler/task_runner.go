@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/common"
+	"github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/common/i18n"
 
 	invPkg "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/invoice"
 	st "github.com/anatoliy9697/solidstreak/solidstreak-backend/internal/domain/schedulertask"
@@ -88,7 +89,7 @@ func (tr TaskRunner) processExpiredInvoice(ctx context.Context, task invPkg.Proc
 	if u != nil {
 		lang = u.LangCode
 	} else {
-		lang = common.GetDefaultLang()
+		lang = i18n.GetDefaultLang()
 	}
 
 	if _, err = usecases.SendTgMessage(ctx, tr.Res.TgBotAPI, usecases.NewExpiredInvoiceTgMessageParams(i.TgChatID, lang)); err != nil {

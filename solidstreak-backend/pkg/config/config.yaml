@@ -7,7 +7,7 @@ basic_subscription:
     tg_stars_per_month:       0
     tg_stars_per_year:        0
     tg_stars_lifetime:        0
-  active_habits_limit:        5
+  active_habits_limit:        10
   show_ads:                   true
 
 premium_subscription:
