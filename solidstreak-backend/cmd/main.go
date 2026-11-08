@@ -205,6 +205,9 @@ func validateEnvParams() error {
 	if os.Getenv("SERVER_ADDR") == "" {
 		return errors.New("SERVER_ADDR env variable is not set")
 	}
+	if os.Getenv("ADMIN_LOGIN") == "" {
+		return errors.New("ADMIN_LOGIN env variable is not set")
+	}
 	if os.Getenv("TERMS_PATH") == "" {
 		return errors.New("TERMS_PATH env variable is not set")
 	}

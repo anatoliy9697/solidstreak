@@ -35,6 +35,12 @@ const subscriptionStore = useSubscriptionStore()
 const userStore = useUserStore()
 const habitStore = useHabitStore()
 const invoiceStore = useInvoiceStore()
+
+const webAppURL = import.meta.env.VITE_WEB_APP_URL
+const adminLogin = import.meta.env.VITE_ADMIN_LOGIN
+const termsPath = import.meta.env.VITE_TERMS_PATH
+const appVersion = import.meta.env.VITE_APP_VERSION
+
 const init = ref<boolean>(true)
 const initErrorMsg = ref<string | null>(null)
 const view = ref<'active' | 'archived'>('active')
@@ -350,9 +356,11 @@ onUnmounted(() => {
       id="footer"
       class="mb-2 w-full text-center text-xs text-gray-500 opacity-50 dark:text-gray-400"
     >
-      <span
-        >{{ t('app.madeBy', 'Made by') }} <a href="https://t.me/avasin_dev">@avasin_dev</a></span
-      >
+      <span><a :href="webAppURL + termsPath + '/' + userStore.lang" target="_blank">{{ t('app.terms', 'Terms of Service') }}</a></span>
+      <span> | </span>
+      <span>v{{ appVersion }}</span>
+      <span> | </span>
+      <span>{{ t('app.madeBy', 'Made by') }} <a :href="'https://t.me/' + adminLogin">@{{ adminLogin }}</a></span>
     </div>
   </template>
 
